@@ -118,6 +118,19 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(26px);
 }
+
+input[type="text"] {
+      width: 65% !important; 
+      padding: 10px;
+      margin-bottom: 5px;
+    }
+    button {
+      padding: 10px 15px;
+      touch-action: manipulation; 
+      cursor: pointer;
+    }
+
+
   </style>
 <script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/common.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/util.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/map.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/directions.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/infowindow.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/marker.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/log.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/onion.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/controls.js.ダウンロード"></script></head>
 <body>
@@ -928,6 +941,12 @@ function renderWaypointsList() {
     container.appendChild(item);
   });
 }
+
+document.querySelectorAll('input[type="text"]').forEach(input => {
+    input.addEventListener('focus', () => {
+      document.getElementById("mapControls").style.height = "70vh";
+    });
+  });
 
   </script>
 
