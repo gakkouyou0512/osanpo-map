@@ -261,31 +261,30 @@ input[type="text"] {
       { name: "注意", icon: defaultIcons[2] }
     ];
 
-
-    function initMap() {
+function initMap() {
+      // 入力欄をタップした時、予測変換が隠れないようにパネルを自動で半分に広げる
       document.querySelectorAll('input[type="text"]').forEach(input => {
-    input.addEventListener('focus', () => {
-      document.getElementById("mapControls").style.height = "50vh";
-    });
-  });
-  // 入力欄から指が離れたら、パネルを元の高さ（200px）に自動で戻す設定も追加！
+        input.addEventListener('focus', () => {
+          document.getElementById("mapControls").style.height = "50vh"; 
+        });
+        // 入力欄から指が離れたら、パネルを元の高さ（200px）に自動で戻す
         input.addEventListener('blur', () => {
           document.getElementById("mapControls").style.height = "200px";
         });
       });
-      
-      // 予測変換を地図の表示範囲（福井周辺）に連動させる
-      const originAuto = new google.maps.places.Autocomplete(document.getElementById("originInput"));
-      originAuto.bindTo("bounds", map);
-      const destAuto = new google.maps.places.Autocomplete(document.getElementById("destinationInput"));
-      destAuto.bindTo("bounds", map);
 
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 },
         zoom: 15,
         mapTypeId: "roadmap"
       });
-      
+
+      // 予測変換を地図の範囲に優先的に連動させる
+      const originAuto = new google.maps.places.Autocomplete(document.getElementById("originInput"));
+      originAuto.bindTo("bounds", map);
+      const destAuto = new google.maps.places.Autocomplete(document.getElementById("destinationInput"));
+      destAuto.bindTo("bounds", map);
+
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer();
       directionsRenderer.setMap(map);
@@ -302,69 +301,65 @@ input[type="text"] {
         const infoWindow = new google.maps.InfoWindow();
         showInputForm(point, infoWindow, marker, true);
       });
-        
-        let editBtn = document.getElementById("editCategoryBtn");
-          if (editBtn) { editBtn.onclick = () => showCategoryEditor(); }
 
-    // 経由地点追加ボタン
-document.getElementById("addWaypointBtn").addEventListener("click", () => {
-  renderWaypointsList();
-  document.getElementById("waypointModal").style.display = "block";
-});
+      let editBtn = document.getElementById("editCategoryBtn");
+      if (editBtn) { 
+        editBtn.onclick = () => showCategoryEditor();
+      }
 
-// 検索処理（GeocoderAPIを利用）
-document.getElementById("searchBtn").addEventListener("click", () => {
-  const query = document.getElementById("searchSpot").value;
-  if (!query) return;
-
-  const geocoder = new google.maps.Geocoder();
-  geocoder.geocode({ address: query, bounds: map.getBounds() }, (results, status) => {
-    if (status === "OK") {
-      const container = document.getElementById("searchResults");
-      container.innerHTML = "<strong>検索結果:</strong><br>";
-      // 最大5件まで表示してチェックボックスを作る
-      results.slice(0, 5).forEach(place => {
-        container.innerHTML += `<label><input type="checkbox" class="searchWaypoint" data-place-id="${place.place_id}"> ${place.formatted_address}</label><br>`;
+      // 経由地点追加ボタン
+      document.getElementById("addWaypointBtn").addEventListener("click", () => {
+        renderWaypointsList();
+        document.getElementById("waypointModal").style.display = "block";
       });
-    } else {
-      alert("検索に失敗しました: " + status);
+
+      // 検索処理（GeocoderAPIを利用）
+      document.getElementById("searchBtn").addEventListener("click", () => {
+        const query = document.getElementById("searchSpot").value;
+        if (!query) return;
+
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: query, bounds: map.getBounds() }, (results, status) => {
+          if (status === "OK") {
+            const container = document.getElementById("searchResults");
+            container.innerHTML = "<strong>検索結果:</strong><br>";
+            results.slice(0, 5).forEach(place => {
+              container.innerHTML += `<label><input type="checkbox" class="searchWaypoint" data-place-id="${place.place_id}"> ${place.formatted_address}</label><br>`;
+            });
+          } else {
+            alert("検索に失敗しました: " + status);
+          }
+        });
+      });
+
+      // 経由地点確定
+      document.getElementById("confirmWaypoint").addEventListener("click", () => {
+        const selectedMemo = document.querySelectorAll("#waypointMemoList input:checked");
+        const selectedSearch = document.querySelectorAll("#searchResults input:checked");
+
+        const waypoints = [];
+
+        selectedMemo.forEach(cb => {
+          waypoints.push({
+            location: new google.maps.LatLng(
+              parseFloat(cb.dataset.lat),
+              parseFloat(cb.dataset.lng)
+            ),
+            stopover: true
+          });
+        });
+
+        selectedSearch.forEach(cb => {
+          waypoints.push({
+            location: { placeId: cb.dataset.placeId }, 
+            stopover: true
+          });
+        });
+
+        searchRoute(waypoints);
+        document.getElementById("waypointModal").style.display = "none";
+      });
     }
-  });
-});
-
-// 経由地点確定
-document.getElementById("confirmWaypoint").addEventListener("click", () => {
-  // ★メモ一覧の正しいID（waypointMemoList）から取得するように修正
-  const selectedMemo = document.querySelectorAll("#waypointMemoList input:checked");
-  const selectedSearch = document.querySelectorAll("#searchResults input:checked");
-
-  const waypoints = [];
-
-  // メモから選択（緯度経度を使用）
-  selectedMemo.forEach(cb => {
-    waypoints.push({
-      location: new google.maps.LatLng(
-        parseFloat(cb.dataset.lat),
-        parseFloat(cb.dataset.lng)
-      ),
-      stopover: true
-    });
-  });
-
-  // 検索結果から選択（★文字列ではなく { placeId: ... } の形式にする必要がある）
-  selectedSearch.forEach(cb => {
-    waypoints.push({
-      location: { placeId: cb.dataset.placeId }, 
-      stopover: true
-    });
-  });
-
-  // ルート検索に渡す
-  searchRoute(waypoints);
-  document.getElementById("waypointModal").style.display = "none";
-});
-
-}
 
 function showCategoryEditor() {
     const newName = prompt("新しいカテゴリ名を入力してください");
