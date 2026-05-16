@@ -263,6 +263,17 @@ input[type="text"] {
 
 
     function initMap() {
+      document.querySelectorAll('input[type="text"]').forEach(input => {
+    input.addEventListener('focus', () => {
+      document.getElementById("mapControls").style.height = "50vh";
+    });
+  });
+  // 入力欄から指が離れたら、パネルを元の高さ（200px）に自動で戻す設定も追加！
+        input.addEventListener('blur', () => {
+          document.getElementById("mapControls").style.height = "200px";
+        });
+      });
+      
       // 予測変換を地図の表示範囲（福井周辺）に連動させる
       const originAuto = new google.maps.places.Autocomplete(document.getElementById("originInput"));
       originAuto.bindTo("bounds", map);
@@ -941,12 +952,6 @@ function renderWaypointsList() {
     container.appendChild(item);
   });
 }
-
-document.querySelectorAll('input[type="text"]').forEach(input => {
-    input.addEventListener('focus', () => {
-      document.getElementById("mapControls").style.height = "70vh";
-    });
-  });
 
   </script>
 
