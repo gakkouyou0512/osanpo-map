@@ -15,16 +15,8 @@
       height: 100%;
       margin: 0;
       padding: 0;
-    }
-
-    /* スマホで勝手にズームされるのを防ぐ */
-    input, select, textarea {
-      font-size: 16px !important;
-    }
-
-    /* 予測変換のリストを一番手前に持ってくる */
-    .pac-container {
-      z-index: 9999 !important;
+      /* ▼ スマホでの変な引っ張りスクロールを禁止して地図を動きやすくする */
+      overscroll-behavior-y: none;
     }
 
     #map {
@@ -42,8 +34,17 @@
       transition: height 0.2s ease;
       overflow-y: auto;
       z-index: 999;
+      /* ▼ スマホ対策のCSSをここに追加 */
+      max-height: 80vh; 
+      overscroll-behavior: contain; 
+      -webkit-overflow-scrolling: touch; 
     }
 
+    /* ▼ 予測変換のリストを一番手前に強制表示する設定もここに追加 */
+    .pac-container {
+      z-index: 99999 !important; 
+    }
+    
     #dragHandle {
       height: 10px;
       background: #ccc;
@@ -214,10 +215,6 @@ input:checked + .slider:before {
         const newHeight = window.innerHeight - touch.clientY;
         controls.style.height = newHeight + "px";
       }
-    });
-
-    document.getElementById("mapControls").addEventListener("touchmove", (e) => {
-      e.stopPropagation();
     });
 
   </script>
