@@ -239,9 +239,12 @@ input:checked + .slider:before {
 
 
     function initMap() {
-      // 出発地と目的地の入力欄をオートコンプリート（予測変換）化する
-      new google.maps.places.Autocomplete(document.getElementById("originInput"));
-      new google.maps.places.Autocomplete(document.getElementById("destinationInput"));
+      // 予測変換を地図の表示範囲（福井周辺）に連動させる
+      const originAuto = new google.maps.places.Autocomplete(document.getElementById("originInput"));
+      originAuto.bindTo("bounds", map);
+      const destAuto = new google.maps.places.Autocomplete(document.getElementById("destinationInput"));
+      destAuto.bindTo("bounds", map);
+      
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 },
         zoom: 15,
