@@ -277,7 +277,7 @@ document.getElementById("searchBtn").addEventListener("click", () => {
   if (!query) return;
 
   const geocoder = new google.maps.Geocoder();
-  geocoder.geocode({ address: query }, (results, status) => {
+  geocoder.geocode({ address: query, bounds: map.getBounds() }, (results, status) => {
     if (status === "OK") {
       const container = document.getElementById("searchResults");
       container.innerHTML = "<strong>検索結果:</strong><br>";
@@ -836,7 +836,7 @@ function showCategoryEditor() {
       }
 
       const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ address: query }, (results, status) => {
+      geocoder.geocode({ address: query, bounds: map.getBounds() }, (results, status) => {
         if (status === "OK") {
           map.setCenter(results[0].geometry.location);
           searchMarker = new google.maps.Marker({
