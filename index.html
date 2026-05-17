@@ -262,15 +262,27 @@ function initMap() {
         mapTypeId: "roadmap"
       });
 
-      // 予測変換を地図の範囲に優先的に連動させる
-      const originAuto = new google.maps.places.Autocomplete(document.getElementById("originInput"));
-      originAuto.bindTo("bounds", map);
-      const destAuto = new google.maps.places.Autocomplete(document.getElementById("destinationInput"));
-      destAuto.bindTo("bounds", map);
-      
-      // ▼▼▼ これを追加！一番上の「普通の検索」にも候補リストを出す ▼▼▼
-      const placeAuto = new google.maps.places.Autocomplete(document.getElementById("placeInput"));
-      placeAuto.bindTo("bounds", map);
+      // ▼▼▼ 予測変換の処理を「スッキリ版」に書き換え ▼▼▼
+      // 候補を選んだ時に、長い住所ではなく「場所の名前」だけを入力欄に残す共通の仕組み
+      function setupCleanAutocomplete(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const auto = new google.maps.places.Autocomplete(input);
+        auto.bindTo("bounds", map);
+        
+        // 候補が選ばれた瞬間に発動する魔法
+        auto.addListener("place_changed", () => {
+          const place = auto.getPlace();
+          if (place && place.name) {
+            input.value = place.name; // 長い住所を、短い名前に強制的に上書き！
+          }
+        });
+      }
+
+      setupCleanAutocomplete("originInput");      // 出発地の枠に適用
+      setupCleanAutocomplete("destinationInput"); // 目的地の枠に適用
+      setupCleanAutocomplete("searchSpot");       // 通常の検索枠に適用
+      // ▲▲▲ ここまで ▲▲▲
 
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer();
