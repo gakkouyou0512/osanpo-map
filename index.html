@@ -455,37 +455,41 @@
       });
     }
 
-    // 記憶したルートに名前を付けて保存する仕組み（一覧への即時反映版）
+    // 記憶したルートに名前を付けて保存する仕組み（説明は任意版）
     function saveSearchedRoute() {
       if (!lastSearchedRoutePoints) return;
+      
+      // 1. まず名前を聞く
       const name = prompt("検索したルートの名前を入力してください（例：春の遠足ルート案）");
-      if (!name) return; // キャンセルされたら終了
-      const description = prompt("ルートの説明を入力してください");
+      if (!name) return; // 名前が未入力、またはキャンセルされた場合はここで終了する
+      
+      // 2. 次に説明を聞く（※ここは空欄のままOKボタンを押しても進めるようにします）
+      const description = prompt("ルートの説明を入力してください（空欄でもOK）");
       
       try {
-        // 既存の保存システム（LocalStorage）の形式に完全に合わせる
         const newRoute = {
           name: name,
-          description: description || "",
+          description: description || "", // ★もし空欄（nullや空文字）なら、自動的に「なし」として扱う優しい処理
           points: lastSearchedRoutePoints,
           timestamp: new Date().toISOString()
         };
         
-        // すでに保存されているルートたちを呼び出す
+        // 既存のルート一覧用データ（LocalStorageのwalkRoutes）に保存
         let routes = JSON.parse(localStorage.getItem("walkRoutes") || "[]");
         routes.push(newRoute);
-        
-        // 上書き保存する
         localStorage.setItem("walkRoutes", JSON.stringify(routes));
         
         alert("検索ルートを保存しました！「ルート一覧」からいつでも呼び出せます。");
         
-        // ▼ ここが重要：画面のルート一覧リストを最新状態に更新する！
+        // 画面のルート一覧リストを最新状態に更新
         if (typeof renderRoutes === "function") {
           renderRoutes();
+        } else if (typeof updateRouteList === "function") {
+          // ※もし古い関数名（updateRouteList）が残っていた場合の安全対策
+          updateRouteList();
         }
         
-        // ボタンを隠して、一時記憶をリセット
+        // UIのリセット
         document.getElementById("saveSearchedRouteBtn").style.display = "none"; 
         lastSearchedRoutePoints = null;
         
