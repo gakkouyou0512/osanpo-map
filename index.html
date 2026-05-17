@@ -263,26 +263,24 @@ function initMap() {
         });
       });
 
+      // 地図の初期化
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 },
         zoom: 15,
-        mapTypeId: "roadmap"
-        gestureHandling: "greedy"
+        mapTypeId: "roadmap",
+        gestureHandling: "greedy" // ★スマホで一本指でスイスイ移動できる設定
       });
 
-      // ▼▼▼ 予測変換の処理を「スッキリ版」に書き換え ▼▼▼
-      // 候補を選んだ時に、長い住所ではなく「場所の名前」だけを入力欄に残す共通の仕組み
+      // 予測変換の処理（短い名前に自動上書きする共通の仕組み）
       function setupCleanAutocomplete(inputId) {
         const input = document.getElementById(inputId);
         if (!input) return;
         const auto = new google.maps.places.Autocomplete(input);
         auto.bindTo("bounds", map);
         
-        // 候補が選ばれた瞬間に発動する魔法
         auto.addListener("place_changed", () => {
           const place = auto.getPlace();
           if (place && place.name) {
-            // ▼ 0.01秒（10ミリ秒）だけ待って、Googleが長い住所を書き終わった「直後」に短い名前に上書きし返す！
             setTimeout(() => {
               input.value = place.name;
             }, 10);
@@ -290,10 +288,10 @@ function initMap() {
         });
       }
 
-      setupCleanAutocomplete("originInput");      // 出発地の枠に適用
-      setupCleanAutocomplete("destinationInput"); // 目的地の枠に適用
-      setupCleanAutocomplete("searchSpot");       // 通常の検索枠に適用
-      setupCleanAutocomplete("placeInput");
+      setupCleanAutocomplete("originInput");      // 出発地
+      setupCleanAutocomplete("destinationInput"); // 目的地
+      setupCleanAutocomplete("searchSpot");       // 通常検索（予備）
+      setupCleanAutocomplete("placeInput");       // 通常検索の本当のID
 
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer();
@@ -303,12 +301,14 @@ function initMap() {
       loadSpotMemos();
       updateRouteList();
 
+      // ★仮のピンを覚えておく変数（ここに置くことで1本だけに制御します）
       let tempMarker = null; 
 
+      // 地図をクリックした時の処理
       map.addListener("click", (e) => {
         if (currentMode !== "edit") return;
 
-        // すでに仮のピンが立っていたら、古いものを消して1本だけにする
+        // すでに仮のピンが立っていたら、古いものを画面から消す
         if (tempMarker) {
           tempMarker.setMap(null);
         }
@@ -318,7 +318,7 @@ function initMap() {
         tempMarker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map });
         const infoWindow = new google.maps.InfoWindow();
 
-        // 吹き出しの「×」を押して閉じた時、仮のピンも一緒に消してあげる設定
+        // 吹き出しの「×」を押して閉じた時、仮のピンも一緒に消す
         infoWindow.addListener("closeclick", () => {
           if (tempMarker) {
             tempMarker.setMap(null);
@@ -340,7 +340,7 @@ function initMap() {
         document.getElementById("waypointModal").style.display = "block";
       });
 
-      // 検索処理（GeocoderAPIを利用）
+      // 検索処理
       document.getElementById("searchBtn").addEventListener("click", () => {
         const query = document.getElementById("searchSpot").value;
         if (!query) return;
