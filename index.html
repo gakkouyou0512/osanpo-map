@@ -267,6 +267,7 @@ function initMap() {
         center: { lat: 35.946, lng: 136.184 },
         zoom: 15,
         mapTypeId: "roadmap"
+        gestureHandling: "greedy"
       });
 
       // ▼▼▼ 予測変換の処理を「スッキリ版」に書き換え ▼▼▼
@@ -302,23 +303,30 @@ function initMap() {
       loadSpotMemos();
       updateRouteList();
 
-      map.addListener("click", (e) => {
-        // ▼ テスト1：地図のタップが認識されているか、モードが何になっているかを表示
-        alert("地図がタップされました！ 現在のモード: " + currentMode);
+      let tempMarker = null; 
 
+      map.addListener("click", (e) => {
         if (currentMode !== "edit") return;
 
-        try {
-          // ▼ テスト2：プログラムが途中で壊れていないか監視する
-          const latLng = e.latLng;
-          const point = { lat: latLng.lat(), lng: latLng.lng(), memo: "", image: "", category: "" };
-          const marker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map });
-          const infoWindow = new google.maps.InfoWindow();
-          showInputForm(point, infoWindow, marker, true);
-        } catch (error) {
-          // もし `showInputForm` 等でエラーが起きたら、スマホ画面にエラーの理由を表示する
-          alert("エラー大爆発: " + error.message);
+        // すでに仮のピンが立っていたら、古いものを消して1本だけにする
+        if (tempMarker) {
+          tempMarker.setMap(null);
         }
+
+        const latLng = e.latLng;
+        const point = { lat: latLng.lat(), lng: latLng.lng(), memo: "", image: "", category: "" };
+        tempMarker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map });
+        const infoWindow = new google.maps.InfoWindow();
+
+        // 吹き出しの「×」を押して閉じた時、仮のピンも一緒に消してあげる設定
+        infoWindow.addListener("closeclick", () => {
+          if (tempMarker) {
+            tempMarker.setMap(null);
+            tempMarker = null;
+          }
+        });
+
+        showInputForm(point, infoWindow, tempMarker, true);
       });
 
       let editBtn = document.getElementById("editCategoryBtn");
