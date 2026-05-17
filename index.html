@@ -416,7 +416,7 @@
       });
     }
 
-    // ▼ 追加：検索した道の座標を一時的に覚えておく変数（エラー防止のためここに配置！）
+    // ▼ 追加：検索した道の座標を一時的に覚えておく変数
     let lastSearchedRoutePoints = null;
 
     function searchRoute(waypoints = []) {
@@ -428,7 +428,6 @@
         document.querySelectorAll(".waypointCheckbox:checked").forEach(cb => {
           waypoints.push({ location: new google.maps.LatLng(parseFloat(cb.dataset.lat), parseFloat(cb.dataset.lng)), stopover: true });
         });
-        // （※通常検索のチェックボックスも拾うように追加）
         document.querySelectorAll(".searchWaypoint:checked").forEach(cb => {
           waypoints.push({ location: { placeId: cb.dataset.placeId }, stopover: true });
         });
@@ -438,16 +437,22 @@
         if (status === "OK") { 
           directionsRenderer.setDirections(result); 
           
-          // 検索結果の「道順の座標データ（青い線）」を抽出して記憶
-          lastSearchedRoutePoints = result.routes[0].overview_path.map(p => ({lat: p.lat(), lng: p.lng()}));
-          
-          // 保存ボタンを表示する
-          const saveBtn = document.getElementById("saveSearchedRouteBtn");
-          if (saveBtn) {
-            saveBtn.style.display = "inline-block";
-          } else {
-            alert("ボタンのHTMLが見つかりません！");
+          // ▼ エラーの犯人をあぶり出すテストコード ▼
+          try {
+            // ルート座標を記憶
+            lastSearchedRoutePoints = result.routes[0].overview_path.map(p => ({lat: p.lat(), lng: p.lng()}));
+            
+            // ボタンを表示
+            const saveBtn = document.getElementById("saveSearchedRouteBtn");
+            if (saveBtn) {
+              saveBtn.style.display = "inline-block";
+            } else {
+              alert("【エラー発見】HTMLにボタンが見つかりません！コードを貼る場所がズレているかも？");
+            }
+          } catch (error) {
+            alert("【エラー大爆発】データ処理で問題が起きました: " + error.message);
           }
+          
         } else { 
           alert("ルート検索に失敗しました: " + status); 
         }
