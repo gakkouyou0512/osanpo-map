@@ -285,7 +285,7 @@ function initMap() {
       setupCleanAutocomplete("originInput");      // 出発地の枠に適用
       setupCleanAutocomplete("destinationInput"); // 目的地の枠に適用
       setupCleanAutocomplete("searchSpot");       // 通常の検索枠に適用
-      // ▲▲▲ ここまで ▲▲▲
+      setupCleanAutocomplete("placeInput");
 
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer();
