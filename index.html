@@ -455,16 +455,42 @@
       });
     }
 
-    // 記憶したルートに名前を付けて保存する仕組み
+    // 記憶したルートに名前を付けて保存する仕組み（一覧への即時反映版）
     function saveSearchedRoute() {
       if (!lastSearchedRoutePoints) return;
       const name = prompt("検索したルートの名前を入力してください（例：春の遠足ルート案）");
+      if (!name) return; // キャンセルされたら終了
       const description = prompt("ルートの説明を入力してください");
-      if (name && description) {
-        saveRoute(name, description, lastSearchedRoutePoints); 
+      
+      try {
+        // 既存の保存システム（LocalStorage）の形式に完全に合わせる
+        const newRoute = {
+          name: name,
+          description: description || "",
+          points: lastSearchedRoutePoints,
+          timestamp: new Date().toISOString()
+        };
+        
+        // すでに保存されているルートたちを呼び出す
+        let routes = JSON.parse(localStorage.getItem("walkRoutes") || "[]");
+        routes.push(newRoute);
+        
+        // 上書き保存する
+        localStorage.setItem("walkRoutes", JSON.stringify(routes));
+        
         alert("検索ルートを保存しました！「ルート一覧」からいつでも呼び出せます。");
+        
+        // ▼ ここが重要：画面のルート一覧リストを最新状態に更新する！
+        if (typeof renderRoutes === "function") {
+          renderRoutes();
+        }
+        
+        // ボタンを隠して、一時記憶をリセット
         document.getElementById("saveSearchedRouteBtn").style.display = "none"; 
         lastSearchedRoutePoints = null;
+        
+      } catch (error) {
+        alert("ルートの保存中にエラーが発生しました: " + error.message);
       }
     }
 
