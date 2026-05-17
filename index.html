@@ -296,8 +296,14 @@
 
     function finalizeSpotMemo(point, marker) {
       const existing = spotMemos.find(p => Math.abs(p.point.lat - point.lat) < 0.000001 && Math.abs(p.point.lng - point.lng) < 0.000001);
-      if (existing) { existing.point = point; existing.marker = marker; } 
-      else { spotMemos.push({ point, marker }); }
+      if (existing) { 
+        existing.point = point; existing.marker = marker; 
+      } else { 
+        // ▼▼ 新しく立てたピンにも「タップで詳細画面を開く」魔法を追加 ▼▼
+        const infoWindow = new google.maps.InfoWindow();
+        marker.addListener("click", () => showInputForm(point, infoWindow, marker, false));
+        spotMemos.push({ point, marker }); 
+      }
       saveSpotMemos();
       alert("保存しました");
     }
