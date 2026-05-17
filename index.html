@@ -94,6 +94,7 @@
     <input id="destinationInput" type="text" placeholder="目的地">
     <button onclick="searchRoute()">ルート検索</button>
     <button id="addWaypointBtn">経由地点を追加</button>
+    <button id="saveSearchedRouteBtn" onclick="saveSearchedRoute()" style="display:none; background-color: #4CAF50; color: white;">検索ルートを保存</button>
     
     <div id="waypointsContainer"></div> 
 
@@ -138,6 +139,7 @@
     let directionsRenderer;
     let searchMarker = null;
     let tempMarker = null; // 仮ピン用変数
+    let lastSearchedRoutePoints = null;
 
     const defaultIcons = [
       "http://maps.google.com/mapfiles/ms/icons/red-dot.png", "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
@@ -427,6 +429,18 @@
         if (status === "OK") { directionsRenderer.setDirections(result); } 
         else { alert("ルート検索に失敗しました: " + status); }
       });
+    }
+
+    function saveSearchedRoute() {
+      if (!lastSearchedRoutePoints) return;
+      const name = prompt("検索したルートの名前を入力してください（例：春の遠足ルート案）");
+      const description = prompt("ルートの説明を入力してください");
+      if (name && description) {
+        saveRoute(name, description, lastSearchedRoutePoints); // 既存の保存システムを再利用！
+        alert("検索ルートを保存しました！「ルート一覧」からいつでも呼び出せます。");
+        document.getElementById("saveSearchedRouteBtn").style.display = "none"; // 保存後はボタンを隠す
+        lastSearchedRoutePoints = null;
+      }
     }
 
     function renderWaypointsList() {
