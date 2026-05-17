@@ -416,9 +416,6 @@
       });
     }
 
-    // ▼ 追加：検索した道の座標を一時的に覚えておく変数
-    let lastSearchedRoutePoints = null;
-
     function searchRoute(waypoints = []) {
       const origin = document.getElementById("originInput").value;
       const destination = document.getElementById("destinationInput").value;
@@ -437,9 +434,8 @@
         if (status === "OK") { 
           directionsRenderer.setDirections(result); 
           
-          // ▼ エラーの犯人をあぶり出すテストコード ▼
           try {
-            // ルート座標を記憶
+            // ルート座標を上の変数（すでに宣言済みのもの）に記憶
             lastSearchedRoutePoints = result.routes[0].overview_path.map(p => ({lat: p.lat(), lng: p.lng()}));
             
             // ボタンを表示
@@ -447,10 +443,10 @@
             if (saveBtn) {
               saveBtn.style.display = "inline-block";
             } else {
-              alert("【エラー発見】HTMLにボタンが見つかりません！コードを貼る場所がズレているかも？");
+              alert("HTMLにボタンが見つかりません。");
             }
           } catch (error) {
-            alert("【エラー大爆発】データ処理で問題が起きました: " + error.message);
+            alert("データ処理エラー: " + error.message);
           }
           
         } else { 
@@ -459,7 +455,7 @@
       });
     }
 
-    // ▼ 追加：記憶したルートに名前を付けて保存する仕組み
+    // 記憶したルートに名前を付けて保存する仕組み
     function saveSearchedRoute() {
       if (!lastSearchedRoutePoints) return;
       const name = prompt("検索したルートの名前を入力してください（例：春の遠足ルート案）");
