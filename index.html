@@ -71,7 +71,7 @@
         <input type="checkbox" id="modeToggle">
         <span class="slider"></span>
       </label>
-      <span id="modeLabel">閲覧モード（タップで詳細）</span>
+      <span id="modeLabel">🔍 地図を見る</span>
     </div>
 
     <button onclick="showRouteList()">ルート一覧</button>
@@ -262,9 +262,11 @@
     const modeLabel = document.getElementById("modeLabel");
     modeToggle.addEventListener("change", () => {
       if (modeToggle.checked) {
-        currentMode = "edit"; modeLabel.textContent = "編集モード（タップで作成）";
+        currentMode = "edit"; 
+        modeLabel.textContent = "📌 ピンを置く"; // ← スッキリ！
       } else {
-        currentMode = "view"; modeLabel.textContent = "閲覧モード（タップで詳細）";
+        currentMode = "view"; 
+        modeLabel.textContent = "🔍 地図を見る"; // ← スッキリ！
         if (tempMarker) { tempMarker.setMap(null); tempMarker = null; }
       }
     });
