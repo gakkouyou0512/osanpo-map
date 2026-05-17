@@ -274,7 +274,10 @@ function initMap() {
         auto.addListener("place_changed", () => {
           const place = auto.getPlace();
           if (place && place.name) {
-            input.value = place.name; // 長い住所を、短い名前に強制的に上書き！
+            // ▼ 0.01秒（10ミリ秒）だけ待って、Googleが長い住所を書き終わった「直後」に短い名前に上書きし返す！
+            setTimeout(() => {
+              input.value = place.name;
+            }, 10);
           }
         });
       }
