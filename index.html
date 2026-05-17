@@ -15,7 +15,6 @@
       height: 100%;
       margin: 0;
       padding: 0;
-      /* ▼ スマホでの変な引っ張りスクロールを禁止して地図を動きやすくする */
       overscroll-behavior-y: none;
     }
 
@@ -34,21 +33,62 @@
       transition: height 0.2s ease;
       overflow-y: auto;
       z-index: 999;
-      /* ▼ スマホ対策のCSSをここに追加 */
       max-height: 80vh; 
       overscroll-behavior: contain; 
       -webkit-overflow-scrolling: touch; 
+      padding: 10px; /* パネルの内側に少し余白を作る */
+      box-sizing: border-box;
     }
 
-    /* ▼ 予測変換のリストを一番手前に強制表示する設定もここに追加 */
-    .pac-container {
-      z-index: 99999 !important; 
-    }
-    
     #dragHandle {
       height: 10px;
       background: #ccc;
       cursor: ns-resize;
+      margin-bottom: 10px;
+    }
+
+    /* ▼▼▼ スマホ向けのボタン・入力欄・文字サイズの一括綺麗設定 ▼▼▼ */
+    input[type="text"], select {
+      width: 70% !important; 
+      padding: 8px;
+      margin: 4px 0;
+      font-size: 14px !important; /* 入力文字のサイズを統一 */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    button {
+      padding: 8px 12px;
+      margin: 4px 2px;
+      font-size: 13px !important; /* ボタンの文字を少し小さくして横並びしやすく */
+      touch-action: manipulation; 
+      cursor: pointer;
+      border: none;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* モード切替の文字や見出しのサイズを統一 */
+    #mapControls h3, #mapControls h4, #modeLabel {
+      font-size: 14px !important;
+      font-family: sans-serif;
+      margin: 10px 0 5px 0;
+    }
+
+    .switch {
+      transform: scale(0.8);
+      transform-origin: top left;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* 予測変換のリストを一番手前に強制表示 */
+    .pac-container {
+      z-index: 99999 !important; 
     }
 
     #memoList, #routeList {
@@ -62,75 +102,6 @@
       margin-bottom: 5px;
       cursor: pointer;
     }
-
-    #previewImage {
-      max-width: 200px;
-      display: none;
-      margin-top: 5px;
-    }
-
-    #memoTitle, #routeTitle {
-      margin-top: 15px;
-      font-size: 1.2em;
-    }
-
-    #editCategoryBtn {
-      margin-top: 10px;
-    }
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-  margin-right: 10px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 34px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px; width: 26px;
-  left: 4px; bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #4CAF50;
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
-
-input[type="text"] {
-      width: 65% !important; 
-      padding: 10px;
-      margin-bottom: 5px;
-    }
-    button {
-      padding: 10px 15px;
-      touch-action: manipulation; 
-      cursor: pointer;
-    }
-
-
   </style>
 <script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/common.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/util.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/map.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/directions.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/infowindow.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/marker.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/log.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/onion.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/controls.js.ダウンロード"></script></head>
 <body>
