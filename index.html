@@ -113,7 +113,7 @@
       margin: 10px 0 5px 0;
       font-weight: bold;
     }
-    
+
   </style>
 <script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/common.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/util.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/map.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/directions.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/infowindow.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/marker.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/log.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/onion.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/controls.js.ダウンロード"></script></head>
 <body>
@@ -267,6 +267,10 @@ function initMap() {
       originAuto.bindTo("bounds", map);
       const destAuto = new google.maps.places.Autocomplete(document.getElementById("destinationInput"));
       destAuto.bindTo("bounds", map);
+      
+      // ▼▼▼ これを追加！一番上の「普通の検索」にも候補リストを出す ▼▼▼
+      const placeAuto = new google.maps.places.Autocomplete(document.getElementById("placeInput"));
+      placeAuto.bindTo("bounds", map);
 
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer();
