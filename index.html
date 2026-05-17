@@ -1,134 +1,63 @@
 <!DOCTYPE html>
-<!-- saved from url=(0027)http://localhost/map29.html -->
-<html lang="ja"><head>
+<html lang="ja">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style>.ssQIHO-checkbox-menu-item>span>span{background-color:#000;display:inline-block}@media (forced-colors:active),(prefers-contrast:more){.ssQIHO-checkbox-menu-item>span>span{background-color:ButtonText}}
-</style><style>.gm-style .gm-style-mtc div,.gm-style .gm-style-mtc label{font-weight:400}.gm-style .gm-style-mtc li,.gm-style .gm-style-mtc ul{-webkit-box-sizing:border-box;box-sizing:border-box}.gm-style-mtc-bbw{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap}.gm-style-mtc-bbw .gm-style-mtc:first-of-type>button{border-start-start-radius:2px;border-end-start-radius:2px}.gm-style-mtc-bbw .gm-style-mtc:last-of-type>button{border-start-end-radius:2px;border-end-end-radius:2px}sentinel{}
-</style><style>.LGLeeN-keyboard-shortcuts-view{display:-webkit-box;display:-webkit-flex;display:-moz-box;display:-ms-flexbox;display:flex}.LGLeeN-keyboard-shortcuts-view table,.LGLeeN-keyboard-shortcuts-view tbody,.LGLeeN-keyboard-shortcuts-view td,.LGLeeN-keyboard-shortcuts-view tr{background:inherit;border:none;margin:0;padding:0}.LGLeeN-keyboard-shortcuts-view table{display:table}.LGLeeN-keyboard-shortcuts-view tr{display:table-row}.LGLeeN-keyboard-shortcuts-view td{-moz-box-sizing:border-box;box-sizing:border-box;display:table-cell;color:light-dark(#000,#fff);padding:6px;vertical-align:middle;white-space:nowrap}.LGLeeN-keyboard-shortcuts-view td:first-child{text-align:end}.LGLeeN-keyboard-shortcuts-view td kbd{background-color:light-dark(#e8eaed,#3c4043);border-radius:2px;border:none;-moz-box-sizing:border-box;box-sizing:border-box;color:inherit;display:inline-block;font-family:Google Sans Text,Roboto,Arial,sans-serif;line-height:16px;margin:0 2px;min-height:20px;min-width:20px;padding:2px 4px;position:relative;text-align:center}
-</style><style>.gm-control-active>img{-webkit-box-sizing:content-box;box-sizing:content-box;display:none;left:50%;pointer-events:none;position:absolute;top:50%;-webkit-transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%);transform:translate(-50%,-50%)}.gm-control-active>img:first-child{display:block}.gm-control-active:active>img:first-child,.gm-control-active:disabled>img:first-child,.gm-control-active:focus>img:first-child,.gm-control-active:hover>img:first-child{display:none}.gm-control-active:focus>img:nth-child(2),.gm-control-active:hover>img:nth-child(2){display:block}.gm-control-active:active>img:nth-child(3){display:block}.gm-control-active:disabled>img:nth-child(4){display:block}sentinel{}
-</style><style>.gm-style .gm-style-cc a,.gm-style .gm-style-cc button,.gm-style .gm-style-cc span,.gm-style .gm-style-mtc div{font-size:10px;-webkit-box-sizing:border-box;box-sizing:border-box}.gm-style .gm-style-cc a,.gm-style .gm-style-cc button,.gm-style .gm-style-cc span{outline-offset:3px}sentinel{}
-</style><style>@media print {  .gm-style .gmnoprint, .gmnoprint {    display:none  }}@media screen {  .gm-style .gmnoscreen, .gmnoscreen {    display:none  }}</style><link type="text/css" rel="stylesheet" href="./map32_perfect 2026.05.03_files/css"><link type="text/css" rel="stylesheet" href="./map32_perfect 2026.05.03_files/css(1)"><style>.gm-style-moc{background-color:rgba(0,0,0,.59);pointer-events:none;text-align:center;-webkit-transition:opacity ease-in-out;transition:opacity ease-in-out}.gm-style-mot{color:white;font-family:Roboto,Arial,sans-serif;font-size:22px;margin:0;position:relative;top:50%;transform:translateY(-50%);-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%)}sentinel{}
-</style><style>.gm-style img{max-width: none;}.gm-style {font: 400 11px Roboto, Arial, sans-serif; text-decoration: none;}</style>
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>地図アプリ</title>
+  <title>お散歩マップ</title>
   <style>
     html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overscroll-behavior-y: none;
+      height: 100%; margin: 0; padding: 0; overscroll-behavior-y: none;
     }
-
-    #map {
-      width: 100%;
-      height: 100vh;
-    }
-
+    #map { width: 100%; height: 100vh; }
     #mapControls {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 200px;
-      background: #f9f9f9;
-      transition: height 0.2s ease;
-      overflow-y: auto;
-      z-index: 999;
-      max-height: 80vh; 
-      overscroll-behavior: contain; 
-      -webkit-overflow-scrolling: touch; 
-      padding: 10px; /* パネルの内側に少し余白を作る */
-      box-sizing: border-box;
+      position: fixed; bottom: 0; left: 0; width: 100%; height: 200px;
+      background: #f9f9f9; transition: height 0.2s ease; overflow-y: auto;
+      z-index: 999; max-height: 80vh; overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch; padding: 10px; box-sizing: border-box;
     }
-
     #dragHandle {
-      height: 10px;
-      background: #ccc;
-      cursor: ns-resize;
-      margin-bottom: 10px;
+      height: 10px; background: #ccc; cursor: ns-resize; margin-bottom: 10px; border-radius: 5px;
     }
-
-    /* ▼▼▼ スマホ向けのボタン・入力欄・文字サイズの一括綺麗設定 ▼▼▼ */
     input[type="text"], select {
-      width: 70% !important; 
-      padding: 8px;
-      margin: 4px 0;
-      font-size: 14px !important; /* 入力文字のサイズを統一 */
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      display: inline-block;
-      vertical-align: middle;
+      width: 70% !important; padding: 8px; margin: 4px 0; font-size: 14px !important;
+      border: 1px solid #ccc; border-radius: 4px; display: inline-block; vertical-align: middle;
     }
-
     button {
-      padding: 8px 12px;
-      margin: 4px 2px;
-      font-size: 13px !important; /* ボタンの文字を少し小さくして横並びしやすく */
-      touch-action: manipulation; 
-      cursor: pointer;
-      border: none;
-      background-color: #e0e0e0;
-      border-radius: 4px;
-      display: inline-block;
-      vertical-align: middle;
+      padding: 8px 12px; margin: 4px 2px; font-size: 13px !important; touch-action: manipulation;
+      cursor: pointer; border: none; background-color: #e0e0e0; border-radius: 4px; display: inline-block;
     }
-
-    /* モード切替の文字や見出しのサイズを統一 */
     #mapControls h3, #mapControls h4, #modeLabel {
-      font-size: 14px !important;
-      font-family: sans-serif;
-      margin: 10px 0 5px 0;
+      font-size: 14px !important; font-family: sans-serif; margin: 10px 0 5px 0;
     }
-
     .switch {
-      transform: scale(0.8);
-      transform-origin: top left;
-      display: inline-block;
-      vertical-align: middle;
+      transform: scale(0.8); transform-origin: top left; display: inline-block; vertical-align: middle;
+      width: 60px; height: 34px; position: relative; margin-right: 10px;
     }
-
-    /* 予測変換のリストを一番手前に強制表示 */
-    .pac-container {
-      z-index: 99999 !important; 
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc; transition: .4s; border-radius: 34px;
     }
-
-    #memoList, #routeList {
-      margin-top: 10px;
-      display: none;
+    .slider:before {
+      position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px;
+      background-color: white; transition: .4s; border-radius: 50%;
     }
-
-    .memoItem {
-      border: 1px solid #ccc;
-      padding: 5px;
-      margin-bottom: 5px;
-      cursor: pointer;
-    }
-
-    /* ▼ 経由地パネルや検索結果の文字サイズを綺麗に統一 ▼ */
-    #waypointModal, #searchResults, #waypointMemoList {
-      font-size: 14px !important;
-      line-height: 1.6;
-    }
-    #waypointModal h3 {
-      font-size: 15px !important;
-      margin: 10px 0 5px 0;
-      font-weight: bold;
-    }
-
+    input:checked + .slider { background-color: #4CAF50; }
+    input:checked + .slider:before { transform: translateX(26px); }
+    .pac-container { z-index: 99999 !important; }
+    #routeList { margin-top: 10px; display: none; }
+    .memoItem { border: 1px solid #ccc; padding: 5px; margin-bottom: 5px; cursor: pointer; }
+    #previewImage { max-width: 200px; display: none; margin-top: 5px; }
+    #waypointModal, #searchResults, #waypointMemoList { font-size: 14px !important; line-height: 1.6; }
   </style>
-<script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/common.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/util.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/map.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/directions.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/infowindow.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/marker.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/log.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/onion.js.ダウンロード"></script><script type="text/javascript" charset="UTF-8" src="./map32_perfect 2026.05.03_files/controls.js.ダウンロード"></script></head>
+</head>
 <body>
-  <div id="map" style="position: relative; overflow: hidden;"><div style="height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; background-color: rgb(229, 227, 223);"><div><button draggable="false" aria-label="キーボード ショートカット" title="キーボード ショートカット" type="button" style="background: none transparent; display: block; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; z-index: 1000002; outline-offset: 3px; right: 0px; bottom: 0px; transform: translateX(100%);"></button></div><div tabindex="0" aria-label="マップ" aria-roledescription="地図" role="region" aria-describedby="79B30F6A-D684-4E65-B6E5-4BBF852824B7" style="position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px;"><div id="79B30F6A-D684-4E65-B6E5-4BBF852824B7" style="display: none;"><div class="LGLeeN-keyboard-shortcuts-view"><table><tbody><tr><td><kbd aria-label="左矢印">←</kbd></td><td aria-label="左へ移動.">左へ移動</td></tr><tr><td><kbd aria-label="右矢印">→</kbd></td><td aria-label="右へ移動.">右へ移動</td></tr><tr><td><kbd aria-label="上矢印">↑</kbd></td><td aria-label="上へ移動.">上へ移動</td></tr><tr><td><kbd aria-label="下矢印">↓</kbd></td><td aria-label="下へ移動.">下へ移動</td></tr><tr><td><kbd>+</kbd></td><td aria-label="ズームイン.">ズームイン</td></tr><tr><td><kbd>-</kbd></td><td aria-label="ズームアウト.">ズームアウト</td></tr><tr><td><kbd>Home</kbd></td><td aria-label="ビューを 75% 左へ移動.">ビューを 75% 左へ移動</td></tr><tr><td><kbd>End</kbd></td><td aria-label="ビューを 75% 右へ移動.">ビューを 75% 右へ移動</td></tr><tr><td><kbd>Page Up</kbd></td><td aria-label="ビューを 75% 上へ移動.">ビューを 75% 上へ移動</td></tr><tr><td><kbd>Page Down</kbd></td><td aria-label="ビューを 75% 下へ移動.">ビューを 75% 下へ移動</td></tr></tbody></table></div></div></div><div class="gm-style" style="position: absolute; z-index: 0; left: 0px; top: 0px; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px;"><div style="position: absolute; z-index: 0; left: 0px; top: 0px; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; cursor: url(&quot;https://maps.gstatic.com/mapfiles/openhand_8_8.cur&quot;), default; touch-action: none;"><div style="z-index: 1; position: absolute; left: 50%; top: 50%; width: 100%; will-change: transform; transform: translate(0px, 0px);"><div style="position: absolute; left: 0px; top: 0px; z-index: 100; width: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div style="position: absolute; z-index: 985; transform: matrix(1, 0, 0, 1, -197, -153);"><div style="position: absolute; left: 256px; top: 0px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 0px; top: -256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 256px; top: -256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 256px; top: 256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 0px; top: 256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 512px; top: -256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 512px; top: 0px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 512px; top: 256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -256px; top: 256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -256px; top: 0px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -256px; top: -256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -512px; top: 256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -512px; top: 0px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -512px; top: -256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -768px; top: 256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -768px; top: 0px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: -768px; top: -256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 768px; top: -256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 768px; top: 0px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div><div style="position: absolute; left: 768px; top: 256px; width: 256px; height: 256px;"><div style="width: 256px; height: 256px;"></div></div></div></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 101; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 102; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 103; width: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: -1;"><div style="position: absolute; z-index: 985; transform: matrix(1, 0, 0, 1, -197, -153);"><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 256px; top: 0px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 0px; top: 0px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 0px; top: -256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 256px; top: -256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 256px; top: 256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 0px; top: 256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 512px; top: -256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 512px; top: 0px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 512px; top: 256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -256px; top: 256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -256px; top: 0px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -256px; top: -256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -512px; top: 256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -512px; top: 0px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -512px; top: -256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -768px; top: 256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -768px; top: 0px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -768px; top: -256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 768px; top: -256px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 768px; top: 0px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 768px; top: 256px;"></div></div></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div style="position: absolute; z-index: 985; transform: matrix(1, 0, 0, 1, -197, -153);"><div style="position: absolute; left: 256px; top: 0px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 0px; top: 0px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(1)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 256px; top: -256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(2)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 0px; top: -256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(3)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 256px; top: 256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(4)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 0px; top: 256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(5)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 512px; top: -256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(6)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 512px; top: 0px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(7)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 512px; top: 256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(8)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -256px; top: 256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(9)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -256px; top: 0px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(10)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -256px; top: -256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(11)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -512px; top: 256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(12)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -512px; top: 0px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(13)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -512px; top: -256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(14)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -768px; top: 256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(15)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -768px; top: 0px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(16)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -768px; top: -256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(17)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 768px; top: -256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(18)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 768px; top: 0px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(19)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 768px; top: 256px; width: 256px; height: 256px; transition: opacity 200ms linear;"><img draggable="false" alt="" role="presentation" src="./map32_perfect 2026.05.03_files/vt(20)" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div></div><div style="z-index: 3; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px; touch-action: pan-x pan-y;"><div style="z-index: 4; position: absolute; left: 50%; top: 50%; width: 100%; will-change: transform; transform: translate(0px, 0px);"><div style="position: absolute; left: 0px; top: 0px; z-index: 104; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 105; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 106; width: 100%;"><slot></slot><span id="895B7E3E-A453-4488-BBDC-AB56F239556B" aria-live="polite" style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0px; overflow: hidden; clip-path: inset(100%); white-space: nowrap; border: 0px;"></span></div><div style="position: absolute; left: 0px; top: 0px; z-index: 107; width: 100%;"></div></div></div><div class="gm-style-moc" style="z-index: 4; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px; transition-property: opacity, display; transition-behavior: allow-discrete; opacity: 0; display: none;"><p class="gm-style-mot"></p></div></div><iframe aria-hidden="true" frameborder="0" tabindex="-1" style="z-index: -1; position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; opacity: 0;" src="./map32_perfect 2026.05.03_files/saved_resource.html"></iframe><div style="pointer-events: none; width: 100%; height: 100%; box-sizing: border-box; position: absolute; z-index: 1000002; opacity: 0; border: 2px solid rgb(26, 115, 232);"></div><div><div class="gmnoprint gm-style-mtc-bbw" role="menubar" style="margin: 10px; z-index: 0; position: absolute; cursor: pointer; left: 0px; top: 0px;"><div class="gm-style-mtc" style="float: left; position: relative;"><button draggable="false" aria-label="市街地図を見る" title="市街地図を見る" type="button" role="menuitemradio" aria-checked="true" aria-haspopup="true" style="background: none padding-box rgb(255, 255, 255); display: table-cell; border: 0px; margin: 0px; padding: 0px 17px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; overflow: hidden; text-align: center; height: 40px; vertical-align: middle; color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; font-size: 18px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; min-width: 36px; font-weight: 500;" id="EEE693DE-2508-4C45-B804-B8F424FBE097">地図</button><ul role="menu" aria-labelledby="EEE693DE-2508-4C45-B804-B8F424FBE097" style="background-color: rgb(255, 255, 255); list-style: none; padding: 2px; margin: 0px; z-index: -1; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; position: absolute; left: 0px; top: 40px; text-align: left; display: none;"><li tabindex="-1" role="menuitemcheckbox" aria-label="地形" draggable="false" title="地形を見る" aria-checked="false" class="ssQIHO-checkbox-menu-item" style="color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 18px; background-color: rgb(255, 255, 255); padding: 5px 8px 5px 5px; direction: ltr; text-align: left; white-space: nowrap;"><span><span style="mask-image: url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3Cpath%20d%3D%22M19%203H5c-1.11%200-2%20.9-2%202v14c0%201.1.89%202%202%202h14c1.11%200%202-.9%202-2V5c0-1.1-.89-2-2-2m-9%2014-5-5%201.41-1.41L10%2014.17l7.59-7.59L19%208z%22/%3E%3C/svg%3E&quot;); height: 1em; width: 1em; transform: translateY(0.15em); display: none;"></span><span style="mask-image: url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M19%205v14H5V5zm0-2H5c-1.1%200-2%20.9-2%202v14c0%201.1.9%202%202%202h14c1.1%200%202-.9%202-2V5c0-1.1-.9-2-2-2%22/%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3C/svg%3E&quot;); height: 1em; width: 1em; transform: translateY(0.15em);"></span></span><label style="cursor: inherit;">地形</label></li></ul></div><div class="gm-style-mtc" style="float: left; position: relative;"><button draggable="false" aria-label="航空写真を見る" title="航空写真を見る" type="button" role="menuitemradio" aria-checked="false" aria-haspopup="true" style="background: none padding-box rgb(255, 255, 255); display: table-cell; border: 0px; margin: 0px; padding: 0px 17px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; overflow: hidden; text-align: center; height: 40px; vertical-align: middle; color: rgb(86, 86, 86); font-family: Roboto, Arial, sans-serif; font-size: 18px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; min-width: 72px;" id="103F6155-A2ED-4A0B-B6E4-3AA892C6548D">航空写真</button><ul role="menu" aria-labelledby="103F6155-A2ED-4A0B-B6E4-3AA892C6548D" style="background-color: rgb(255, 255, 255); list-style: none; padding: 2px; margin: 0px; z-index: -1; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; position: absolute; right: 0px; top: 40px; text-align: left; display: none;"><li tabindex="-1" role="menuitemcheckbox" aria-label="ラベル" draggable="false" title="航空写真に道路名を表示" aria-checked="true" class="ssQIHO-checkbox-menu-item" style="color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 18px; background-color: rgb(255, 255, 255); padding: 5px 8px 5px 5px; direction: ltr; text-align: left; white-space: nowrap;"><span><span style="mask-image: url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3Cpath%20d%3D%22M19%203H5c-1.11%200-2%20.9-2%202v14c0%201.1.89%202%202%202h14c1.11%200%202-.9%202-2V5c0-1.1-.89-2-2-2m-9%2014-5-5%201.41-1.41L10%2014.17l7.59-7.59L19%208z%22/%3E%3C/svg%3E&quot;); height: 1em; width: 1em; transform: translateY(0.15em);"></span><span style="mask-image: url(&quot;data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M19%205v14H5V5zm0-2H5c-1.1%200-2%20.9-2%202v14c0%201.1.9%202%202%202h14c1.1%200%202-.9%202-2V5c0-1.1-.9-2-2-2%22/%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3C/svg%3E&quot;); height: 1em; width: 1em; transform: translateY(0.15em); display: none;"></span></span><label style="cursor: inherit;">ラベル</label></li></ul></div></div></div><div></div><div></div><div></div><div><button draggable="false" aria-label="全画面ビューを切り替えます" title="全画面ビューを切り替えます" type="button" aria-pressed="false" class="gm-control-active gm-fullscreen-control" style="background: none rgb(255, 255, 255); border: 0px; margin: 10px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; border-radius: 2px; height: 40px; width: 40px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; overflow: hidden; top: 0px; right: 0px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2018%2018%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M0%200v6h2V2h4V0zm16%200h-4v2h4v4h2V0zm0%2016h-4v2h6v-6h-2zM2%2012H0v6h6v-2H2z%22/%3E%3C/svg%3E" alt="" style="height: 18px; width: 18px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2018%2018%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M0%200v6h2V2h4V0zm16%200h-4v2h4v4h2V0zm0%2016h-4v2h6v-6h-2zM2%2012H0v6h6v-2H2z%22/%3E%3C/svg%3E" alt="" style="height: 18px; width: 18px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2018%2018%22%3E%3Cpath%20fill%3D%22%23111%22%20d%3D%22M0%200v6h2V2h4V0zm16%200h-4v2h4v4h2V0zm0%2016h-4v2h6v-6h-2zM2%2012H0v6h6v-2H2z%22/%3E%3C/svg%3E" alt="" style="height: 18px; width: 18px;"></button></div><div></div><div></div><div></div><div></div><div><div class="gmnoprint gm-bundled-control gm-bundled-control-on-bottom" draggable="false" data-control-width="40" data-control-height="112" style="margin: 10px; user-select: none; position: absolute; bottom: 126px; right: 40px;"><div class="gmnoprint" data-control-width="40" data-control-height="40" style="display: none; position: absolute;"><div style="background-color: rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; border-radius: 2px; width: 40px; height: 40px;"><button draggable="false" aria-label="地図を時計回りに回転する" title="地図を時計回りに回転する" type="button" class="gm-control-active" style="background: none; display: none; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; left: 0px; top: 0px; overflow: hidden; width: 40px; height: 40px;"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12.06%209.06%204-4-4-4-1.41%201.41%201.59%201.59h-.18c-2.3%200-4.6.88-6.35%202.64-3.52%203.51-3.52%209.21%200%2012.72%201.5%201.5%203.4%202.36%205.36%202.58v-2.02c-1.44-.21-2.84-.86-3.95-1.97-2.73-2.73-2.73-7.17%200-9.9%201.37-1.37%203.16-2.05%204.95-2.05h.17l-1.59%201.59zm8.94%203c-.19-1.74-.88-3.32-1.91-4.61l-1.43%201.43c.69.92%201.15%202%201.32%203.18zm-7.94%207.92V22c1.74-.19%203.32-.88%204.61-1.91l-1.43-1.43c-.91.68-2%201.15-3.18%201.32m4.6-2.74%201.43%201.43c1.04-1.29%201.72-2.88%201.91-4.61h-2.02c-.17%201.18-.64%202.27-1.32%203.18%22/%3E%3C/svg%3E" style="width: 20px; height: 20px;"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22m12.06%209.06%204-4-4-4-1.41%201.41%201.59%201.59h-.18c-2.3%200-4.6.88-6.35%202.64-3.52%203.51-3.52%209.21%200%2012.72%201.5%201.5%203.4%202.36%205.36%202.58v-2.02c-1.44-.21-2.84-.86-3.95-1.97-2.73-2.73-2.73-7.17%200-9.9%201.37-1.37%203.16-2.05%204.95-2.05h.17l-1.59%201.59zm8.94%203c-.19-1.74-.88-3.32-1.91-4.61l-1.43%201.43c.69.92%201.15%202%201.32%203.18zm-7.94%207.92V22c1.74-.19%203.32-.88%204.61-1.91l-1.43-1.43c-.91.68-2%201.15-3.18%201.32m4.6-2.74%201.43%201.43c1.04-1.29%201.72-2.88%201.91-4.61h-2.02c-.17%201.18-.64%202.27-1.32%203.18%22/%3E%3C/svg%3E" style="width: 20px; height: 20px;"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3Cpath%20fill%3D%22%23111%22%20d%3D%22m12.06%209.06%204-4-4-4-1.41%201.41%201.59%201.59h-.18c-2.3%200-4.6.88-6.35%202.64-3.52%203.51-3.52%209.21%200%2012.72%201.5%201.5%203.4%202.36%205.36%202.58v-2.02c-1.44-.21-2.84-.86-3.95-1.97-2.73-2.73-2.73-7.17%200-9.9%201.37-1.37%203.16-2.05%204.95-2.05h.17l-1.59%201.59zm8.94%203c-.19-1.74-.88-3.32-1.91-4.61l-1.43%201.43c.69.92%201.15%202%201.32%203.18zm-7.94%207.92V22c1.74-.19%203.32-.88%204.61-1.91l-1.43-1.43c-.91.68-2%201.15-3.18%201.32m4.6-2.74%201.43%201.43c1.04-1.29%201.72-2.88%201.91-4.61h-2.02c-.17%201.18-.64%202.27-1.32%203.18%22/%3E%3C/svg%3E" style="width: 20px; height: 20px;"></button><div style="position: relative; overflow: hidden; width: 30px; height: 1px; margin: 0px 5px; background-color: rgb(230, 230, 230); display: none;"></div><button draggable="false" aria-label="地図を反時計回りに回転する" title="地図を反時計回りに回転する" type="button" class="gm-control-active" style="background: none; display: none; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; left: 0px; top: 0px; overflow: hidden; width: 40px; height: 40px; transform: scaleX(-1);"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12.06%209.06%204-4-4-4-1.41%201.41%201.59%201.59h-.18c-2.3%200-4.6.88-6.35%202.64-3.52%203.51-3.52%209.21%200%2012.72%201.5%201.5%203.4%202.36%205.36%202.58v-2.02c-1.44-.21-2.84-.86-3.95-1.97-2.73-2.73-2.73-7.17%200-9.9%201.37-1.37%203.16-2.05%204.95-2.05h.17l-1.59%201.59zm8.94%203c-.19-1.74-.88-3.32-1.91-4.61l-1.43%201.43c.69.92%201.15%202%201.32%203.18zm-7.94%207.92V22c1.74-.19%203.32-.88%204.61-1.91l-1.43-1.43c-.91.68-2%201.15-3.18%201.32m4.6-2.74%201.43%201.43c1.04-1.29%201.72-2.88%201.91-4.61h-2.02c-.17%201.18-.64%202.27-1.32%203.18%22/%3E%3C/svg%3E" style="width: 20px; height: 20px;"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22m12.06%209.06%204-4-4-4-1.41%201.41%201.59%201.59h-.18c-2.3%200-4.6.88-6.35%202.64-3.52%203.51-3.52%209.21%200%2012.72%201.5%201.5%203.4%202.36%205.36%202.58v-2.02c-1.44-.21-2.84-.86-3.95-1.97-2.73-2.73-2.73-7.17%200-9.9%201.37-1.37%203.16-2.05%204.95-2.05h.17l-1.59%201.59zm8.94%203c-.19-1.74-.88-3.32-1.91-4.61l-1.43%201.43c.69.92%201.15%202%201.32%203.18zm-7.94%207.92V22c1.74-.19%203.32-.88%204.61-1.91l-1.43-1.43c-.91.68-2%201.15-3.18%201.32m4.6-2.74%201.43%201.43c1.04-1.29%201.72-2.88%201.91-4.61h-2.02c-.17%201.18-.64%202.27-1.32%203.18%22/%3E%3C/svg%3E" style="width: 20px; height: 20px;"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22none%22%20d%3D%22M0%200h24v24H0z%22/%3E%3Cpath%20fill%3D%22%23111%22%20d%3D%22m12.06%209.06%204-4-4-4-1.41%201.41%201.59%201.59h-.18c-2.3%200-4.6.88-6.35%202.64-3.52%203.51-3.52%209.21%200%2012.72%201.5%201.5%203.4%202.36%205.36%202.58v-2.02c-1.44-.21-2.84-.86-3.95-1.97-2.73-2.73-2.73-7.17%200-9.9%201.37-1.37%203.16-2.05%204.95-2.05h.17l-1.59%201.59zm8.94%203c-.19-1.74-.88-3.32-1.91-4.61l-1.43%201.43c.69.92%201.15%202%201.32%203.18zm-7.94%207.92V22c1.74-.19%203.32-.88%204.61-1.91l-1.43-1.43c-.91.68-2%201.15-3.18%201.32m4.6-2.74%201.43%201.43c1.04-1.29%201.72-2.88%201.91-4.61h-2.02c-.17%201.18-.64%202.27-1.32%203.18%22/%3E%3C/svg%3E" style="width: 20px; height: 20px;"></button><div style="position: relative; overflow: hidden; width: 30px; height: 1px; margin: 0px 5px; background-color: rgb(230, 230, 230); display: none;"></div><button draggable="false" aria-label="地図を傾ける" title="地図を傾ける" type="button" class="gm-tilt gm-control-active" style="background: none; display: block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; top: 0px; left: 0px; overflow: hidden; width: 40px; height: 40px;"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2018%2016%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M0%2016h8V9H0zm10%200h8V9h-8zM0%207h8V0H0zm10-7v7h8V0z%22/%3E%3C/svg%3E" style="width: 18px;"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2018%2016%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M0%2016h8V9H0zm10%200h8V9h-8zM0%207h8V0H0zm10-7v7h8V0z%22/%3E%3C/svg%3E" style="width: 18px;"><img alt="" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2018%2016%22%3E%3Cpath%20fill%3D%22%23111%22%20d%3D%22M0%2016h8V9H0zm10%200h8V9h-8zM0%207h8V0H0zm10-7v7h8V0z%22/%3E%3C/svg%3E" style="width: 18px;"></button></div></div><gmp-internal-camera-control data-control-width="40" data-control-height="40" draggable="false" class="gmnoprint" style="position: absolute; cursor: pointer; user-select: none; left: 0px; top: 0px;"><button draggable="false" aria-label="地図のカメラ コントロール" title="地図のカメラ コントロール" type="button" class="gm-control-active" aria-expanded="false" aria-controls="E62F4143-33AA-4C79-8135-D5E977C13E75" style="background: none 6px center / 28px no-repeat rgb(255, 255, 255); display: block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; width: 40px; height: 40px; border-radius: 50%; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12%2019.175%202.125-2.125%201.425%201.4L12%2022l-3.55-3.55%201.425-1.4zM4.825%2012l2.125%202.125-1.4%201.425L2%2012l3.55-3.55%201.4%201.425zm14.35%200L17.05%209.875l1.4-1.425L22%2012l-3.55%203.55-1.4-1.425zM12%204.825%209.875%206.95%208.45%205.55%2012%202l3.55%203.55-1.425%201.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12%2019.175%202.125-2.125%201.425%201.4L12%2022l-3.55-3.55%201.425-1.4zM4.825%2012l2.125%202.125-1.4%201.425L2%2012l3.55-3.55%201.4%201.425zm14.35%200L17.05%209.875l1.4-1.425L22%2012l-3.55%203.55-1.4-1.425zM12%204.825%209.875%206.95%208.45%205.55%2012%202l3.55%203.55-1.425%201.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%231a73e8%22%20d%3D%22m12%2019.175%202.125-2.125%201.425%201.4L12%2022l-3.55-3.55%201.425-1.4zM4.825%2012l2.125%202.125-1.4%201.425L2%2012l3.55-3.55%201.4%201.425zm14.35%200L17.05%209.875l1.4-1.425L22%2012l-3.55%203.55-1.4-1.425zM12%204.825%209.875%206.95%208.45%205.55%2012%202l3.55%203.55-1.425%201.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23d1d1d1%22%20d%3D%22m12%2019.175%202.125-2.125%201.425%201.4L12%2022l-3.55-3.55%201.425-1.4zM4.825%2012l2.125%202.125-1.4%201.425L2%2012l3.55-3.55%201.4%201.425zm14.35%200L17.05%209.875l1.4-1.425L22%2012l-3.55%203.55-1.4-1.425zM12%204.825%209.875%206.95%208.45%205.55%2012%202l3.55%203.55-1.425%201.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"></button><menu id="E62F4143-33AA-4C79-8135-D5E977C13E75" style="list-style: none; padding: 0px; display: none; position: absolute; z-index: 999999; margin: 10px; width: 140px; height: 140px; right: 100%; top: -60px;"><li><button draggable="false" aria-label="上へ移動" title="上へ移動" type="button" class="gm-control-active" style="background: none 6px center / 28px no-repeat rgb(255, 255, 255); display: block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; width: 40px; height: 40px; border-radius: 50%; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; top: 0px; left: 50%; transform: translateX(-50%);"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12%2010.8-4.6%204.6L6%2014l6-6%206%206-1.4%201.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22m12%2010.8-4.6%204.6L6%2014l6-6%206%206-1.4%201.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12%2010.8-4.6%204.6L6%2014l6-6%206%206-1.4%201.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23d1d1d1%22%20d%3D%22m12%2010.8-4.6%204.6L6%2014l6-6%206%206-1.4%201.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"></button></li><li><button draggable="false" aria-label="左へ移動" title="左へ移動" type="button" class="gm-control-active" style="background: none 6px center / 28px no-repeat rgb(255, 255, 255); display: block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; width: 40px; height: 40px; border-radius: 50%; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; bottom: 50%; left: 0px; transform: translateY(50%);"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m14%2018-6-6%206-6%201.4%201.4-4.6%204.6%204.6%204.6z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22m14%2018-6-6%206-6%201.4%201.4-4.6%204.6%204.6%204.6z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m14%2018-6-6%206-6%201.4%201.4-4.6%204.6%204.6%204.6z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23d1d1d1%22%20d%3D%22m14%2018-6-6%206-6%201.4%201.4-4.6%204.6%204.6%204.6z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"></button></li><li><button draggable="false" aria-label="右へ移動" title="右へ移動" type="button" class="gm-control-active" style="background: none 6px center / 28px no-repeat rgb(255, 255, 255); display: block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; width: 40px; height: 40px; border-radius: 50%; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; bottom: 50%; right: 0px; transform: translateY(50%);"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M12.6%2012%208%207.4%209.4%206l6%206-6%206L8%2016.6z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M12.6%2012%208%207.4%209.4%206l6%206-6%206L8%2016.6z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M12.6%2012%208%207.4%209.4%206l6%206-6%206L8%2016.6z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23d1d1d1%22%20d%3D%22M12.6%2012%208%207.4%209.4%206l6%206-6%206L8%2016.6z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"></button></li><li><button draggable="false" aria-label="下へ移動" title="下へ移動" type="button" class="gm-control-active" style="background: none 6px center / 28px no-repeat rgb(255, 255, 255); display: block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; width: 40px; height: 40px; border-radius: 50%; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; bottom: 0px; left: 50%; transform: translateX(-50%);"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12%2015.4-6-6L7.4%208l4.6%204.6L16.6%208%2018%209.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22m12%2015.4-6-6L7.4%208l4.6%204.6L16.6%208%2018%209.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12%2015.4-6-6L7.4%208l4.6%204.6L16.6%208%2018%209.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22m12%2015.4-6-6L7.4%208l4.6%204.6L16.6%208%2018%209.4z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"></button></li><li><button draggable="false" aria-label="ズームイン" title="ズームイン" type="button" class="gm-control-active" style="background: none 6px center / 28px no-repeat rgb(255, 255, 255); display: block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; overflow: hidden; width: 40px; height: 40px; border-radius: 50%; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; top: 0px; right: 0px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22%23666%22%20viewBox%3D%220%20-960%20960%20960%22%3E%3Cpath%20d%3D%22M440-440H200v-80h240v-240h80v240h240v80H520v240h-80z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22%23333%22%20viewBox%3D%220%20-960%20960%20960%22%3E%3Cpath%20d%3D%22M440-440H200v-80h240v-240h80v240h240v80H520v240h-80z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22%23111%22%20viewBox%3D%220%20-960%20960%20960%22%3E%3Cpath%20d%3D%22M440-440H200v-80h240v-240h80v240h240v80H520v240h-80z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22%23d1d1d1%22%20viewBox%3D%220%20-960%20960%20960%22%3E%3Cpath%20d%3D%22M440-440H200v-80h240v-240h80v240h240v80H520v240h-80z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"></button></li><li><button draggable="false" aria-label="ズームアウト" title="ズームアウト" type="button" class="gm-control-active" style="background: none 6px center / 28px no-repeat rgb(255, 255, 255); display: block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; overflow: hidden; width: 40px; height: 40px; border-radius: 50%; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; bottom: 0px; right: 0px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22%23666%22%20viewBox%3D%220%20-960%20960%20960%22%3E%3Cpath%20d%3D%22M200-440v-80h560v80z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22%23333%22%20viewBox%3D%220%20-960%20960%20960%22%3E%3Cpath%20d%3D%22M200-440v-80h560v80z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22%23111%22%20viewBox%3D%220%20-960%20960%20960%22%3E%3Cpath%20d%3D%22M200-440v-80h560v80z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22%23d1d1d1%22%20viewBox%3D%220%20-960%20960%20960%22%3E%3Cpath%20d%3D%22M200-440v-80h560v80z%22/%3E%3C/svg%3E" alt="" style="height: 28px; width: 28px;"></button></li></menu></gmp-internal-camera-control><button draggable="false" aria-label="地図上にペグマンをドロップして、ストリートビューを開きます" title="地図上にペグマンをドロップして、ストリートビューを開きます" type="button" class="gm-svpc" dir="ltr" data-control-width="40" data-control-height="40" style="background: rgb(255, 255, 255); border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: absolute; cursor: pointer; user-select: none; --pegman-scaleX: 1; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; border-radius: 2px; width: 40px; height: 40px; left: 0px; top: 72px;"><div style="position: absolute; left: 50%; top: 50%; transform: scaleX(var(--pegman-scaleX));"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2023%2038%22%3E%3Cpath%20d%3D%22M16.6%2038.1h-5.5l-.2-2.9-.2%202.9H5.2L5%2025.3l-.8%202a1.53%201.53%200%2001-1.9.9l-1.2-.4a1.58%201.58%200%2001-1-1.9v-.1c.3-.9%203.1-11.2%203.1-11.2a2.66%202.66%200%20012.3-2l.6-.5a6.93%206.93%200%20014.7-12%206.8%206.8%200%20014.9%202%207%207%200%20012%204.9%206.65%206.65%200%2001-2.2%205l.7.5a2.78%202.78%200%20012.4%202s2.9%2011.2%202.9%2011.3a1.53%201.53%200%2001-.9%201.9l-1.3.4a1.63%201.63%200%2001-1.9-.9l-.7-1.8zm-3.6-2h1.7l.2-15.8%201.9-.3%202.4%206.3.3-.1c-.2-.8-.8-3.2-2.8-10.9a.63.63%200%2000-.6-.5h-.6l-1.1-.9h-1.9l-.3-2a4.83%204.83%200%20003.5-4.7A4.78%204.78%200%200011%202.3h-.2a4.9%204.9%200%2000-1.4%209.6l-.3%202H7.2l-1%20.9h-.6a.74.74%200%2000-.6.5c-2%207.5-2.7%2010-3%2010.9l.3.1L4.8%2020l1.9.3.2%2015.8h1.6l.6-8.4a1.52%201.52%200%20011.5-1.4%201.5%201.5%200%20011.5%201.4zm6.6-9.7%22%20style%3D%22isolation%3Aisolate%22%20fill%3D%22%23333%22%20opacity%3D%22.7%22/%3E%3Cpath%20d%3D%22m5.9%2013.6%201.1-.9h7.8l1.2.9%22%20fill%3D%22%23ce592c%22/%3E%3Cellipse%20cx%3D%2210.9%22%20cy%3D%2213.1%22%20rx%3D%222.7%22%20ry%3D%22.3%22%20style%3D%22isolation%3Aisolate%22%20fill%3D%22%23ce592c%22%20opacity%3D%22.5%22/%3E%3Cpath%20d%3D%22m20.6%2026.1-2.9-11.3a1.71%201.71%200%2000-1.6-1.2H5.7a1.69%201.69%200%2000-1.5%201.3L1.1%2026.2a.61.61%200%2000.3.7l1.1.4a.61.61%200%2000.7-.3l2.7-6.7.2%2016.8h3.6l.6-9.3a.47.47%200%2001.44-.5h.06c.4%200%20.4.2.5.5l.6%209.3h3.6l.2-16.8%202.5%206.6a.52.52%200%2000.66.31l1.2-.40000000000001a.57.57%200%2000.5-.7Z%22%20fill%3D%22%23fdbf2d%22/%3E%3Cpath%20d%3D%22m7%2013.6%203.9%206.7%203.9-6.7%22%20style%3D%22isolation%3Aisolate%22%20fill%3D%22%23cf572e%22%20opacity%3D%22.6%22/%3E%3Ccircle%20cx%3D%2210.9%22%20cy%3D%227%22%20r%3D%225.9%22%20fill%3D%22%23fdbf2d%22/%3E%3C/svg%3E" alt="ストリートビューのペグマン コントロール" style="height: 30px; width: 30px; position: absolute; transform: translate(-50%, -50%); pointer-events: none;"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2038%22%3E%3Cpath%20d%3D%22m22%2026.6-2.9-11.3a2.78%202.78%200%2000-2.4-2l-.7-.5a6.82%206.82%200%20002.2-5%206.9%206.9%200%2000-13.8%200%207%207%200%20002.2%205.1l-.6.5a2.55%202.55%200%2000-2.3%202s-3%2011.1-3%2011.2v.1a1.58%201.58%200%20001%201.9l1.2.4a1.63%201.63%200%20001.9-.9l.8-2%20.2%2012.8h11.3l.2-12.6.7%201.8a1.54%201.54%200%20001.5%201%201.09%201.09%200%2000.5-.1l1.3-.4a1.85%201.85%200%2000.7-2Zm-1.2.9-1.2.4a.61.61%200%2001-.7-.3L16.4%2021l-.2%2016.8H6.8L6.6%2021l-2.7%206.7a.52.52%200%2001-.66.31l-1.1-.4a.52.52%200%2001-.31-.66l3.1-11.3a1.69%201.69%200%20011.5-1.3h.2l1-.9h2.3a5.9%205.9%200%20113.2%200h2.3l1.1.9h.2a1.71%201.71%200%20011.6%201.2l2.9%2011.3a.84.84%200%2001-.4.7Z%22%20fill%3D%22%23333%22%20fill-opacity%3D%22.2%22/%3E%26quot%3B%3C/svg%3E" alt="ペグマンが地図の上部に表示されています" style="height: 30px; width: 30px; position: absolute; transform: translate(-50%, -50%); pointer-events: none; display: none;"><img alt="ストリートビューのペグマン コントロール" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2040%2050%22%3E%3Cpath%20d%3D%22m34-30.4-2.9-11.3a2.78%202.78%200%2000-2.4-2l-.7-.5a6.82%206.82%200%20002.2-5%206.9%206.9%200%2000-13.8%200%207%207%200%20002.2%205.1l-.6.5a2.55%202.55%200%2000-2.3%202s-3%2011.1-3%2011.2v.1a1.58%201.58%200%20001%201.9l1.2.4a1.63%201.63%200%20001.9-.9l.8-2%20.2%2012.8h11.3l.2-12.6.7%201.8a1.54%201.54%200%20001.5%201%201.09%201.09%200%2000.5-.1l1.3-.4a1.85%201.85%200%2000.7-2Zm-1.2.9-1.2.4a.61.61%200%2001-.7-.3L28.4-36l-.2%2016.8h-9.4L18.6-36l-2.7%206.7a.52.52%200%2001-.66.31l-1.1-.4a.52.52%200%2001-.31-.66l3.1-11.3a1.69%201.69%200%20011.5-1.3h.2l1-.9h2.3a5.9%205.9%200%20113.2%200h2.3l1.1.9h.2a1.71%201.71%200%20011.6%201.2l2.9%2011.3a.84.84%200%2001-.4.7ZM34%2029.6l-2.9-11.3a2.78%202.78%200%2000-2.4-2l-.7-.5a6.82%206.82%200%20002.2-5%206.9%206.9%200%2000-13.8%200%207%207%200%20002.2%205.1l-.6.5a2.55%202.55%200%2000-2.3%202s-3%2011.1-3%2011.2v.1a1.58%201.58%200%20001%201.9l1.2.4a1.63%201.63%200%20001.9-.9l.8-2%20.2%2012.8h11.3l.2-12.6.7%201.8a1.54%201.54%200%20001.5%201%201.09%201.09%200%2000.5-.1l1.3-.4a1.85%201.85%200%2000.7-2Zm-1.2.9-1.2.4a.61.61%200%2001-.7-.3L28.4%2024l-.2%2016.8h-9.4L18.6%2024l-2.7%206.7a.52.52%200%2001-.66.31l-1.1-.4a.52.52%200%2001-.31-.66l3.1-11.3a1.69%201.69%200%20011.5-1.3h.2l1-.9h2.3a5.9%205.9%200%20113.2%200h2.3l1.1.9h.2a1.71%201.71%200%20011.6%201.2l2.9%2011.3a.84.84%200%2001-.4.7Z%22%20fill%3D%22%23333%22%20fill-opacity%3D%22.2%22/%3E%3Cpath%20d%3D%22M15.4%2038.8h-4a1.64%201.64%200%2001-1.4-1.1l-3.1-8a.9.9%200%2001-.5.1l-1.4.1a1.62%201.62%200%2001-1.6-1.4L2.3%2015.4l1.6-1.3a6.87%206.87%200%2001-3-4.6A7.14%207.14%200%20012%204%207.6%207.6%200%20016.7.9%207.14%207.14%200%200112.2%202a7.28%207.28%200%20012.3%209.6l2.1-.1.1%201c0%20.2.1.5.1.8a2.41%202.41%200%20011%201s1.9%203.2%202.8%204.9c.7%201.2%202.1%204.2%202.8%205.9a2.1%202.1%200%2001-.8%202.6l-.6.4a1.63%201.63%200%2001-1.5.2l-.6-.3a8.93%208.93%200%2000.5%201.3%207.91%207.91%200%20001.8%202.6l.6.3v4.6l-4.5-.1a7.32%207.32%200%2001-2.5-1.5zm-10-19.2%203.5%209.8%202.9%207.5h1.6V35l-1.9-9.4%203.1%205.4a8.24%208.24%200%20003.8%203.8h2.1v-1.4a14%2014%200%2001-2.2-3.1%2044.55%2044.55%200%2001-2.2-8L14.8%2016l3.2%205.6c.6%201.1%202.1%203.6%202.8%204.9l.6-.4c-.8-1.6-2.1-4.6-2.8-5.8-.9-1.7-2.8-4.9-2.8-4.9a.54.54%200%2000-.4-.3l-.7-.1-.1-.7a4.33%204.33%200%2000-.1-.5l-5.3.3%202.2-1.9a4.3%204.3%200%2000.9-1%205.17%205.17%200%2000.8-4%205.67%205.67%200%2000-2.2-3.4%205.09%205.09%200%2000-4-.8%205.67%205.67%200%2000-3.4%202.2%205.17%205.17%200%2000-.8%204%205.67%205.67%200%20002.2%203.4%203.13%203.13%200%20001%20.5l1.6.6-3.2%202.6%201%2011.5h.4z%22%20fill%3D%22%23333%22/%3E%3Cpath%20d%3D%22m3.35%2015.9%201.1%2012.5a.39.39%200%2000.36.42h.14l1.4-.1a.66.66%200%2000.5-.4l-.2-3.8-3.3-8.6Z%22%20fill%3D%22%23fdbf2d%22/%3E%3Cpath%20d%3D%22m5.2%2028.8%201.1-.1a.66.66%200%2000.5-.4l-.2-3.8-1.2-3.1Z%22%20fill%3D%22%23ce592b%22%20fill-opacity%3D%22.25%22/%3E%3Cpath%20d%3D%22m21.4%2035.70000000000001-3.8-1.2-2.7-7.8L12%2015.5l3.4-2.9c.2%202.4%202.2%2014.1%203.7%2017.1%200%200%201.3%202.6%202.3%203.1zM13%2027.6l-2-.3%202.5%2010.1.9.4v-2.9%22%20fill%3D%22%23e5892b%22/%3E%3Cpath%20d%3D%22M17.8%2025.4c-.4-1.5-.7-3.1-1.1-4.8-.1-.4-.1-.7-.2-1.1l-1.1-2-1.7-1.6s.9%205%202.4%207.1a19.12%2019.12%200%20001.7%202.4Z%22%20style%3D%22isolation%3Aisolate%22%20fill%3D%22%23cf572e%22%20opacity%3D%22.6%22/%3E%3Cpath%20d%3D%22M14.4%2037.8h-3a.43.43%200%2001-.4-.4l-3-7.8-1.7-4.8-3-9%208.9-.4s2.9%2011.3%204.3%2014.4c1.9%204.1%203.1%204.7%205%205.8h-3.2s-4.1-1.2-5.9-7.7a.59.59%200%2000-.6-.4.62.62%200%2000-.3.7s.5%202.4.9%203.6a34.87%2034.87%200%20002%206%22%20fill%3D%22%23fdbf2d%22/%3E%3Cpath%20d%3D%22m15.4%2012.7-3.3%202.9-8.9.4%203.3-2.7%22%20fill%3D%22%23ce592b%22/%3E%3Cpath%20d%3D%22m9.1%2021.1%201.4-6.2-5.9.5%22%20style%3D%22isolation%3Aisolate%22%20fill%3D%22%23cf572e%22%20opacity%3D%22.6%22/%3E%3Cpath%20d%3D%22M12%2013.5a4.75%204.75%200%2001-2.6%201.1c-1.5.3-2.9.2-2.9%200s1.1-.6%202.7-1%22%20fill%3D%22%23bb3d19%22/%3E%3Ccircle%20cx%3D%227.92%22%20cy%3D%228.19%22%20r%3D%226.3%22%20fill%3D%22%23fdbf2d%22/%3E%3Cpath%20d%3D%22M4.7%2013.6a6.21%206.21%200%20008.4-1.9v-.1a8.89%208.89%200%2001-8.4%202%22%20fill%3D%22%23ce592b%22%20fill-opacity%3D%22.25%22/%3E%3Cpath%20d%3D%22m21.2%2027.2.6-.4a1.09%201.09%200%2000.4-1.3c-.7-1.5-2.1-4.6-2.8-5.8-.9-1.7-2.8-4.9-2.8-4.9a1.6%201.6%200%2000-2.17-.65l-.23.15a1.68%201.68%200%2000-.4%202.1s2.3%203.9%203.1%205.3c.6%201%202.1%203.7%202.9%205.1a.94.94%200%20001.24.49z%22%20fill%3D%22%23fdbf2d%22/%3E%3Cpath%20d%3D%22M19.4%2019.8c-.9-1.7-2.8-4.9-2.8-4.9a1.6%201.6%200%2000-2.17-.65l-.23.15-.3.3c1.1%201.5%202.9%203.8%203.9%205.4%201.1%201.8%202.9%205%203.8%206.7l.1-.1a1.09%201.09%200%2000.4-1.3%2057.67%2057.67%200%2000-2.7-5.6Z%22%20fill%3D%22%23ce592b%22%20fill-opacity%3D%22.25%22/%3E%3C/svg%3E" style="display: none; height: 40px; width: 40px; position: absolute; transform: translate(-60%, -45%); pointer-events: none;"></div></button></div></div><div><div style="margin: 0px 5px; z-index: 1000000; position: absolute; left: 0px; bottom: 0px;"><a target="_blank" rel="noopener" title="Google マップでこの地域を開きます（新しいウィンドウが開きます）" aria-label="Google マップでこの地域を開きます（新しいウィンドウが開きます）" href="https://maps.google.com/maps?ll=35.946,136.184&amp;z=15&amp;t=m&amp;hl=ja&amp;gl=US&amp;mapclient=apiv3" style="display: inline;"><div style="width: 66px; height: 26px;"><img alt="Google" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2069%2029%22%3E%3Cg%20fill%3D%22%23fff%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.5%22%20opacity%3D%22.6%22%3E%3Cpath%20d%3D%22m17.4706%207.33616.5412-.54112-.5519-.53011c-1.3636-1.30974-3.2017-2.31971-5.7591-2.31971-4.6137%200-8.50262%203.75517-8.50262%208.39578%200%204.6407%203.88892%208.3958%208.50262%208.3958%202.4704%200%204.3765-.8188%205.8732-2.3679%201.5695-1.5729%202.0216-3.7363%202.0216-5.4119%200-.5232-.044-1.0254-.1295-1.4529l-.1206-.6029h-8.3947v3.5942h4.8301c-.1724.5966-.4321%201.0286-.7491%201.3461-.6288.6214-1.5823%201.3094-3.331%201.3094-2.65245%200-4.73598-2.1312-4.73598-4.8099%200-2.67861%202.08353-4.80981%204.73598-4.80981%201.4362%200%202.4752.5607%203.257%201.29229l.5298.49574.513-.51303z%22/%3E%3Cpath%20d%3D%22M24.8656%2020.7286c3.089%200%205.6036-2.4192%205.6036-5.6692%200-3.2681-2.5162-5.66929-5.6036-5.66929-3.0873%200-5.6035%202.40119-5.6035%205.66929%200%203.25%202.5145%205.6692%205.6035%205.6692Zm0-7.9004c1.014%200%201.9766.837%201.9766%202.2312%200%201.3805-.9653%202.2311-1.9766%202.2311-1.0099%200-1.9765-.8574-1.9765-2.2311%200-1.3874.9639-2.2312%201.9765-2.2312Z%22/%3E%3Cpath%20d%3D%22M35.7511%2017.2905h-.0042c-1.0099%200-1.9766-.8574-1.9766-2.2311%200-1.3874.964-2.2312%201.9766-2.2312%201.0139%200%201.9765.837%201.9765%202.2312%200%201.3845-.968%202.2368-1.9723%202.2311Zm-.0124%203.4381c3.089%200%205.6035-2.4192%205.6035-5.6692%200-3.2681-2.5162-5.66929-5.6035-5.66929-3.0874%200-5.6036%202.40119-5.6036%205.66929%200%203.2508%202.5236%205.6692%205.6036%205.6692Z%22/%3E%3Cpath%20d%3D%22M51.953%2010.4357v-.74997h-3.5531v.12253c-.55-.26178-1.2022-.42639-1.9191-.42639-2.8837%200-5.464%202.51793-5.464%205.69393%200%202.1269%201.164%203.9479%202.8033%204.9137l-.0658.0273-1.8806.7802-.6929.2874.2876.6928c.6228%201.5004%202.2776%203.3697%205.0535%203.3697%201.4105%200%202.787-.4145%203.814-1.4093%201.0332-1.0009%201.6171-2.4965%201.6171-4.4653zm-7.2194%209.9844-.0002-.0005c.5552.2005%201.1446.309%201.7474.309.6808%200%201.3058-.1467%201.841-.3891-.0876.3891-.2417.671-.4252.8682-.2812.3022-.7202.5011-1.3747.5011-.91190000000001%200-1.5201-.6476-1.7883-1.2887Zm1.9361-7.5919c.9722%200%201.878.8483%201.878%202.2558%200%201.3796-.8956%202.2147-1.878%202.2147-1.0428%200-1.993-.8738-1.993-2.2147%200-1.3754.9595-2.2558%201.993-2.2558Zm9.069-7.60737v-.75h-3.6599V20.4412h3.6599z%22/%3E%3Cpath%20d%3D%22m63.9128%2016.0614-.6183-.4122-.4179.6145c-.4562.6709-1.0102%201.0432-1.8025%201.0432-.4306%200-.7595-.0981-1.0197-.2622-.07-.0441-.1383-.0951-.2046-.1536l5.6999-2.3625.6825-.283L65.9596%2013.5589l-.219-.5514c-.4528-1.2075-1.8899-3.60918-4.9128-3.60918-2.9833%200-5.3244%202.36358-5.3244%205.66928%200%203.1475%202.3222%205.6693%205.5625%205.6693%202.6043%200%204.1111-1.5991%204.7283-2.5156l.421-.625L65.5882%2017.1783zm-2.5667-3.2103-1.9353.8015c.3795-.5743%201.0107-.8572%201.4909-.8572.1653%200%20.3136.0207.4444.0557Z%22/%3E%3C/g%3E%3Cpath%20fill%3D%22%234285f4%22%20d%3D%22M11.7008%2019.9868c-4.21304%200-7.75262-3.4328-7.75262-7.6458%200-4.21297%203.53958-7.64578%207.75262-7.64578%202.3323%200%203.9912.91159%205.2395%202.11061l-1.47%201.47003c-.8952-.83767-2.1106-1.49467-3.7695-1.49467-3.07972%200-5.48598%202.48016-5.48598%205.55981%200%203.0797%202.40626%205.5599%205.48598%205.5599%201.9956%200%203.1289-.8048%203.8598-1.5275.5995-.5996.9855-1.4537%201.1333-2.628h-4.9931v-2.0942h7.0298c.0739.3695.115.8212.115%201.3058%200%201.5685-.427%203.5067-1.8067%204.8864-1.3469%201.3961-3.0551%202.1434-5.3381%202.1434%22/%3E%3Cpath%20fill%3D%22%23e94235%22%20d%3D%22M29.7192%2015.0594c0%202.8333-2.1763%204.9192-4.8536%204.9192-2.6772%200-4.8535-2.0859-4.8535-4.9192%200-2.8498%202.1763-4.9193%204.8535-4.9193%202.6773%200%204.8536%202.0695%204.8536%204.9193m-2.127%200c0-1.7739-1.2648-2.9812-2.7266-2.9812s-2.7265%201.2155-2.7265%202.9812c0%201.7492%201.2647%202.9811%202.7265%202.9811s2.7266-1.2237%202.7266-2.9811%22/%3E%3Cpath%20fill%3D%22%23fabb05%22%20d%3D%22M40.5922%2015.0594c0%202.8333-2.1763%204.9192-4.8535%204.9192-2.6691%200-4.8536-2.0859-4.8536-4.9192%200-2.8498%202.1763-4.9193%204.8536-4.9193%202.6772%200%204.8535%202.0695%204.8535%204.9193m-2.1188%200c0-1.7739-1.2647-2.9812-2.7265-2.9812s-2.7266%201.2155-2.7266%202.9812c0%201.7492%201.2648%202.9811%202.7266%202.9811%201.4618.0082%202.7265-1.2237%202.7265-2.9811%22/%3E%3Cpath%20fill%3D%22%234285f4%22%20d%3D%22M51.203%2010.4357v8.8366c0%203.6382-2.1435%205.1246-4.6811%205.1246-2.3899%200-3.8188-1.6014-4.3609-2.9072l1.8807-.7802c.3367.8048%201.158%201.7493%202.4802%201.7493%201.626%200%202.628-1.0101%202.628-2.8908v-.7063h-.074c-.4845.5995-1.4207%201.1169-2.5951%201.1169-2.4637%200-4.714-2.1434-4.714-4.9028%200-2.7758%202.2585-4.9439%204.714-4.9439%201.1744%200%202.1106.5256%202.5951%201.1004h.074v-.7966zm-1.9053%204.6483c0-1.7328-1.158-3.0058-2.628-3.0058-1.4947%200-2.743%201.2647-2.743%203.0058%200%201.7164%201.2483%202.9647%202.743%202.9647%201.47%200%202.628-1.2483%202.628-2.9647%22/%3E%3Cpath%20fill%3D%22%2334a853%22%20d%3D%22M54.9887%205.22083V19.6912h-2.1599V5.22083z%22/%3E%3Cpath%20fill%3D%22%23e94235%22%20d%3D%22m63.4968%2016.6854%201.6754%201.1169c-.5421.8049-1.8478%202.1846-4.1063%202.1846-2.8004%200-4.8125-2.1599-4.8125-4.9193%200-2.9237%202.0367-4.9193%204.5744-4.9193%202.554%200%203.8023%202.0285%204.213%203.129l.2217.5584-6.5782%202.7266c.501.9855%201.2894%201.4946%202.3898%201.4946%201.1005%200%201.8643-.5502%202.4227-1.3715m-5.1656-1.7739%204.4019-1.8231c-.2464-.616-.9691-1.043-1.8314-1.043-1.1005%200-2.628.9691-2.5705%202.8661%22/%3E%3C/svg%3E" draggable="false" style="position: absolute; left: 0px; top: 0px; width: 66px; height: 26px; user-select: none; border: 0px; padding: 0px; margin: 0px;"></div></a></div></div><div></div><div><div style="display: inline-flex; position: absolute; right: 0px; bottom: 0px;"><div class="gmnoprint" style="z-index: 1000001;"><div draggable="false" class="gm-style-cc" style="user-select: none; position: relative; height: 14px; line-height: 14px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; box-sizing: border-box; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(0, 0, 0); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><button draggable="false" aria-label="キーボード ショートカット" title="キーボード ショートカット" type="button" style="background: none; display: inline-block; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; color: rgb(0, 0, 0); font-family: inherit; line-height: inherit;">キーボード ショートカット</button></div></div></div><div class="gmnoprint" style="z-index: 1000001;"><div draggable="false" class="gm-style-cc" style="user-select: none; position: relative; height: 14px; line-height: 14px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; box-sizing: border-box; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(0, 0, 0); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><button draggable="false" aria-label="地図データ" title="地図データ" type="button" style="background: none; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; color: rgb(0, 0, 0); font-family: inherit; line-height: inherit; display: none;">地図データ</button><span style="">地図データ ©2026</span></div></div></div><div class="gmnoscreen"><div style="font-family: Roboto, Arial, sans-serif; font-size: 11px; color: rgb(0, 0, 0); direction: ltr; text-align: right; background-color: rgb(245, 245, 245);">地図データ ©2026</div></div><button draggable="false" aria-label="地図の縮尺: 52 ピクセルあたり 200 m" title="地図の縮尺: 52 ピクセルあたり 200 m" type="button" class="gm-style-cc" aria-describedby="2313B460-C47B-48A4-9DFA-9A48E231EABC" style="background: none; display: none; border: 0px; margin: 0px; padding: 0px; text-transform: none; appearance: none; position: relative; cursor: pointer; user-select: none; height: 14px; line-height: 14px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; box-sizing: border-box; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(0, 0, 0); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><span style="color: rgb(0, 0, 0);">200 m&nbsp;</span><div style="position: relative; display: inline-block; height: 8px; bottom: -1px; width: 56px;"><div style="width: 100%; height: 4px; position: absolute; left: 0px; top: 0px;"></div><div style="width: 4px; height: 8px; left: 0px; top: 0px;"></div><div style="width: 4px; height: 8px; position: absolute; right: 0px; bottom: 0px;"></div><div style="position: absolute; background-color: rgb(0, 0, 0); height: 2px; left: 1px; bottom: 1px; right: 1px;"></div><div style="position: absolute; width: 2px; height: 6px; left: 1px; top: 1px; background-color: rgb(0, 0, 0);"></div><div style="width: 2px; height: 6px; position: absolute; background-color: rgb(0, 0, 0); bottom: 1px; right: 1px;"></div></div></div><span id="2313B460-C47B-48A4-9DFA-9A48E231EABC" style="display: none;">クリックすると、メートル単位とヤードポンド単位が切り替わります</span></button><div class="gmnoprint gm-style-cc" draggable="false" style="z-index: 1000001; user-select: none; position: relative; height: 14px; line-height: 14px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; box-sizing: border-box; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(0, 0, 0); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a aria-label="利用規約（新しいタブで開きます）" href="https://www.google.com/intl/ja_US/help/terms_maps.html" target="_blank" rel="noopener" style="text-decoration: none; cursor: pointer; color: rgb(0, 0, 0);">利用規約</a></div></div><div draggable="false" class="gm-style-cc" style="user-select: none; position: relative; height: 14px; line-height: 14px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; box-sizing: border-box; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(0, 0, 0); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a target="_blank" rel="noopener" title="Google に地図や画像のエラーを報告する" dir="ltr" href="https://www.google.com/maps/@35.946,136.184,15z/data=!10m1!1e1!12b1?source=apiv3&amp;rapsrc=apiv3" style="font-family: Roboto, Arial, sans-serif; font-size: 10px; text-decoration: none; position: relative; color: rgb(0, 0, 0);">地図の誤りを報告する</a></div></div></div></div></div></div></div>
+  <div id="map"></div>
 
-  <!-- 操作パネル -->
   <div id="mapControls">
-
     <div id="dragHandle"></div>
     <select id="mapTypeSelector" onchange="changeMapType()">
       <option value="roadmap">通常地図</option>
@@ -136,93 +65,66 @@
       <option value="hybrid">ハイブリッド</option>
       <option value="terrain">地形</option>
     </select>
-        <!-- モード切替スイッチ -->
+    
     <div style="margin-bottom: 10px;">
       <label class="switch">
         <input type="checkbox" id="modeToggle">
         <span class="slider"></span>
       </label>
-      <span id="modeLabel">閲覧モード</span>
+      <span id="modeLabel">閲覧モード（タップで詳細）</span>
     </div>
 
-    <style>
-    /* トグル全体を縮小 */
-    .switch {
-      transform: scale(0.8);        /* 80%サイズに縮小 */
-      transform-origin: top left;   /* 縮小の基準位置 */
-    }
-    </style>
-
-    <button onclick="showMemoList()">メモ一覧</button>
     <button onclick="showRouteList()">ルート一覧</button>
     <button onclick="showCurrentLocation()">現在地</button>
     <button onclick="startTracking()">記録開始</button>
     <button onclick="stopTracking()">停止・保存</button>
     <button id="exitStreetViewBtn" onclick="exitStreetView()" style="display:none;">地図に戻す</button>
-    <select id="categoryFilter" style="display:none;" onchange="renderMemoList()"><option value="すべて">すべて表示</option><option value="危険">危険</option><option value="おすすめ">おすすめ</option><option value="注意">注意</option></select>
+    
+    <select id="categoryFilter" onchange="renderMemoList()">
+      <option value="すべて">すべてのピンを表示</option>
+    </select>
+    <button id="editCategoryBtn" onclick="showCategoryEditor()">カテゴリ追加</button>
 
-    <h3 id="memoTitle" style="display:none;">メモ一覧</h3>
-    <div id="memoList"></div>
+    <hr>
+
+    <input id="placeInput" type="text" placeholder="場所を検索">
+    <button onclick="searchPlace()">検索</button><br>
+
+    <input id="originInput" type="text" placeholder="出発地">
+    <input id="destinationInput" type="text" placeholder="目的地">
+    <button onclick="searchRoute()">ルート検索</button>
+    <button id="addWaypointBtn">経由地点を追加</button>
+    
+    <div id="waypointsContainer"></div> 
 
     <h3 id="routeTitle" style="display:none;">ルート一覧</h3>
     <div id="routeList"></div>
 
-    <input id="placeInput" type="text" placeholder="場所を検索" style="width:200px;">
-    <button onclick="searchPlace()">検索</button>
+    <div id="waypointModal" style="display:none; border-top:2px solid #ccc; margin-top:10px; padding-top:10px;">
+      <h3>経由地点を選択 <button id="confirmWaypoint">確定する</button></h3>
+      <input type="text" id="searchSpot" placeholder="場所検索">
+      <button id="searchBtn">検索</button>
+      <div id="searchResults"></div>
+      <h4>保存済みメモから選択</h4>
+      <div id="waypointMemoList"></div>
+    </div>
+  </div>
 
-    <input id="originInput" type="text" placeholder="出発地" style="width:150px;">
-    <div id="waypointsContainer"></div> 
-    <input id="destinationInput" type="text" placeholder="目的地" style="width:150px;">
-    <button onclick="searchRoute()">ルート検索</button>
-    <button id="addWaypointBtn">経由地点を追加</button>
-    <div id="waypointModal" style="display:none;">
-      <h3>経由地点を選択
-        <button id="confirmWaypoint">この地点を経由する</button>
-      </h3>
-  
-    <!-- 検索欄 -->
-    <input type="text" id="searchSpot" placeholder="場所検索">
-    <button id="searchBtn">検索</button>
-    <div id="searchResults"></div>
-  
-    <!-- メモ一覧 -->
-    <h4>保存済みメモ</h4>
-    <div id="memoList"></div>
-    
-  <!-- メモ一覧（モーダル用） -->
-   <h4></h4>
-   <div id="waypointMemoList"></div>
-
-
-  <!-- 高さ調整スクリプト -->
   <script>
+    // 高さ調整ドラッグ
     const controls = document.getElementById("mapControls");
     const handle = document.getElementById("dragHandle");
-
     let isDragging = false;
-
     handle.addEventListener("mousedown", () => isDragging = true);
     document.addEventListener("mouseup", () => isDragging = false);
     document.addEventListener("mousemove", (e) => {
-      if (isDragging) {
-        const newHeight = window.innerHeight - e.clientY;
-        controls.style.height = newHeight + "px";
-      }
+      if (isDragging) controls.style.height = (window.innerHeight - e.clientY) + "px";
     });
-
     handle.addEventListener("touchstart", () => isDragging = true);
     document.addEventListener("touchend", () => isDragging = false);
     document.addEventListener("touchmove", (e) => {
-      if (isDragging) {
-        const touch = e.touches[0];
-        const newHeight = window.innerHeight - touch.clientY;
-        controls.style.height = newHeight + "px";
-      }
+      if (isDragging) controls.style.height = (window.innerHeight - e.touches[0].clientY) + "px";
     });
-
-  </script>
-
-  <script>
 
     const routeColors = ["#FF0000", "#0000FF", "#00AA00", "#FF00FF", "#00FFFF", "#FFA500"];
     let displayedPolylines = [];
@@ -235,63 +137,47 @@
     let directionsService;
     let directionsRenderer;
     let searchMarker = null;
-    
+    let tempMarker = null; // 仮ピン用変数
 
     const defaultIcons = [
-      "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-      "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-      "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
-      "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+      "http://maps.google.com/mapfiles/ms/icons/red-dot.png", "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+      "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png", "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
       "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"
     ];
-
-    const categories = [
-      { name: "危険", icon: defaultIcons[0] },
-      { name: "おすすめ", icon: defaultIcons[1] },
-      { name: "注意", icon: defaultIcons[2] }
+    let categories = [
+      { name: "危険", icon: defaultIcons[0] }, { name: "おすすめ", icon: defaultIcons[1] }, { name: "注意", icon: defaultIcons[2] }
     ];
 
-function initMap() {
-      // 入力欄をタップした時、予測変換が隠れないようにパネルを自動で半分に広げる
+    function initMap() {
+      // 入力欄タップ時のパネル自動リサイズ
       document.querySelectorAll('input[type="text"]').forEach(input => {
-        input.addEventListener('focus', () => {
-          document.getElementById("mapControls").style.height = "50vh"; 
-        });
-        // 入力欄から指が離れたら、パネルを元の高さ（200px）に自動で戻す
-        input.addEventListener('blur', () => {
-          document.getElementById("mapControls").style.height = "200px";
-        });
+        input.addEventListener('focus', () => controls.style.height = "50vh");
+        input.addEventListener('blur', () => controls.style.height = "200px");
       });
 
-      // 地図の初期化
+      // 1本指移動を許可したマップ初期化
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 },
         zoom: 15,
         mapTypeId: "roadmap",
-        gestureHandling: "greedy" // ★スマホで一本指でスイスイ移動できる設定
+        gestureHandling: "greedy" 
       });
 
-      // 予測変換の処理（短い名前に自動上書きする共通の仕組み）
+      // スッキリ予測変換の設定
       function setupCleanAutocomplete(inputId) {
         const input = document.getElementById(inputId);
         if (!input) return;
         const auto = new google.maps.places.Autocomplete(input);
         auto.bindTo("bounds", map);
-        
         auto.addListener("place_changed", () => {
           const place = auto.getPlace();
-          if (place && place.name) {
-            setTimeout(() => {
-              input.value = place.name;
-            }, 10);
-          }
+          if (place && place.name) { setTimeout(() => { input.value = place.name; }, 10); }
         });
       }
-
-      setupCleanAutocomplete("originInput");      // 出発地
-      setupCleanAutocomplete("destinationInput"); // 目的地
-      setupCleanAutocomplete("searchSpot");       // 通常検索（予備）
-      setupCleanAutocomplete("placeInput");       // 通常検索の本当のID
+      setupCleanAutocomplete("originInput");
+      setupCleanAutocomplete("destinationInput");
+      setupCleanAutocomplete("searchSpot");
+      setupCleanAutocomplete("placeInput");
 
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer();
@@ -301,50 +187,28 @@ function initMap() {
       loadSpotMemos();
       updateRouteList();
 
-      // ★仮のピンを覚えておく変数（ここに置くことで1本だけに制御します）
-      let tempMarker = null; 
-
-      // 地図をクリックした時の処理
+      // 地図タップ処理（仮ピンを1本にする）
       map.addListener("click", (e) => {
         if (currentMode !== "edit") return;
-
-        // すでに仮のピンが立っていたら、古いものを画面から消す
-        if (tempMarker) {
-          tempMarker.setMap(null);
-        }
+        if (tempMarker) tempMarker.setMap(null);
 
         const latLng = e.latLng;
         const point = { lat: latLng.lat(), lng: latLng.lng(), memo: "", image: "", category: "" };
         tempMarker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map });
         const infoWindow = new google.maps.InfoWindow();
-
-        // 吹き出しの「×」を押して閉じた時、仮のピンも一緒に消す
-        infoWindow.addListener("closeclick", () => {
-          if (tempMarker) {
-            tempMarker.setMap(null);
-            tempMarker = null;
-          }
-        });
-
+        infoWindow.addListener("closeclick", () => { if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } });
         showInputForm(point, infoWindow, tempMarker, true);
       });
 
-      let editBtn = document.getElementById("editCategoryBtn");
-      if (editBtn) { 
-        editBtn.onclick = () => showCategoryEditor();
-      }
-
-      // 経由地点追加ボタン
+      // 経由地点関連のイベント
       document.getElementById("addWaypointBtn").addEventListener("click", () => {
         renderWaypointsList();
         document.getElementById("waypointModal").style.display = "block";
       });
 
-      // 検索処理
       document.getElementById("searchBtn").addEventListener("click", () => {
         const query = document.getElementById("searchSpot").value;
         if (!query) return;
-
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ address: query, bounds: map.getBounds() }, (results, status) => {
           if (status === "OK") {
@@ -353,216 +217,95 @@ function initMap() {
             results.slice(0, 5).forEach(place => {
               container.innerHTML += `<label><input type="checkbox" class="searchWaypoint" data-place-id="${place.place_id}"> ${place.formatted_address}</label><br>`;
             });
-          } else {
-            alert("検索に失敗しました: " + status);
-          }
+          } else { alert("検索に失敗しました: " + status); }
         });
       });
 
-      // 経由地点確定
       document.getElementById("confirmWaypoint").addEventListener("click", () => {
-        const selectedMemo = document.querySelectorAll("#waypointMemoList input:checked");
-        const selectedSearch = document.querySelectorAll("#searchResults input:checked");
-
+        const selectedMemo = document.querySelectorAll(".waypointCheckbox:checked");
+        const selectedSearch = document.querySelectorAll(".searchWaypoint:checked");
         const waypoints = [];
-
-        selectedMemo.forEach(cb => {
-          waypoints.push({
-            location: new google.maps.LatLng(
-              parseFloat(cb.dataset.lat),
-              parseFloat(cb.dataset.lng)
-            ),
-            stopover: true
-          });
-        });
-
-        selectedSearch.forEach(cb => {
-          waypoints.push({
-            location: { placeId: cb.dataset.placeId }, 
-            stopover: true
-          });
-        });
-
+        selectedMemo.forEach(cb => waypoints.push({ location: new google.maps.LatLng(parseFloat(cb.dataset.lat), parseFloat(cb.dataset.lng)), stopover: true }));
+        selectedSearch.forEach(cb => waypoints.push({ location: { placeId: cb.dataset.placeId }, stopover: true }));
         searchRoute(waypoints);
         document.getElementById("waypointModal").style.display = "none";
       });
     }
 
-function showCategoryEditor() {
-    const newName = prompt("新しいカテゴリ名を入力してください");
-    if (newName) {
+    function showCategoryEditor() {
+      const newName = prompt("新しいカテゴリ名を入力してください");
+      if (newName) {
         categories.push({ name: newName, icon: defaultIcons[categories.length % 5] });
         updateCategoryFilter();
         alert("追加しました");
+      }
     }
-}
 
     function updateCategoryFilter() {
-        const select = document.getElementById("categoryFilter");
-        select.innerHTML = "";
-        
-        const allOption = document.createElement("option");
-        allOption.value = "すべて";
-        allOption.textContent = "すべて表示";
-        select.appendChild(allOption);
-        
-        categories.forEach(c => {
-            const option = document.createElement("option");
-            option.value = c.name;
-            option.textContent = c.name;
-            select.appendChild(option);
-        });
+      const select = document.getElementById("categoryFilter");
+      select.innerHTML = '<option value="すべて">すべてのピンを表示</option>';
+      categories.forEach(c => {
+        const option = document.createElement("option");
+        option.value = c.name; option.textContent = c.name;
+        select.appendChild(option);
+      });
     }
 
     function filterPinsByCategory(categoryName) {
-        spotMemos.forEach(({ point, marker }) => {
-            if (categoryName === "すべて" || point.category === categoryName) {
-                marker.setMap(map); 
-            } else {
-                marker.setMap(null); 
-            }
-        });
-    }
-
-    function setMode(mode) {
-      currentMode = mode;
-      alert(mode === "edit" ? "編集モードになりました" : "閲覧モードになりました");
-    }
-
-      const modeToggle = document.getElementById("modeToggle");
-      const modeLabel = document.getElementById("modeLabel");
-      modeToggle.addEventListener("change", () => {
-        if (modeToggle.checked) {
-            setMode("edit");
-            modeLabel.textContent = "編集モード";
-        } else {
-            setMode("view");
-            modeLabel.textContent = "閲覧モード";
-        }}); 
-
-
-
-    function changeMapType() {
-      const type = document.getElementById("mapTypeSelector").value;
-      map.setMapTypeId(type);
-    }
-
-    function showMemoList() {
-      const showIds = ["memoList", "memoTitle", "categoryFilter", "editCategoryBtn"];
-      const hideIds = ["routeList", "routeTitle"];
-      
-      showIds.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.style.display = (id === "memoList" || id === "memoTitle") ? "block" : "inline";
+      spotMemos.forEach(({ point, marker }) => {
+        if (categoryName === "すべて" || point.category === categoryName) { marker.setMap(map); } 
+        else { marker.setMap(null); }
       });
-      hideIds.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.style.display = "none";
-      });
-      renderMemoList();
     }
 
-    function showRoute(index) {
-      const hideIds = ["memoTitle", "memoList", "categoryFilter", "editCategoryBtn"];
-      hideIds.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.style.display = "none";
-      });
-      
+    const modeToggle = document.getElementById("modeToggle");
+    const modeLabel = document.getElementById("modeLabel");
+    modeToggle.addEventListener("change", () => {
+      if (modeToggle.checked) {
+        currentMode = "edit"; modeLabel.textContent = "編集モード（タップで作成）";
+      } else {
+        currentMode = "view"; modeLabel.textContent = "閲覧モード（タップで詳細）";
+        if (tempMarker) { tempMarker.setMap(null); tempMarker = null; }
+      }
+    });
+
+    function changeMapType() { map.setMapTypeId(document.getElementById("mapTypeSelector").value); }
+
+    function showRouteList() {
       let rTitle = document.getElementById("routeTitle");
-      if (rTitle) rTitle.style.display = "block";
       let rList = document.getElementById("routeList");
-      if (rList) rList.style.display = "block";
-      
-      const routes = JSON.parse(localStorage.getItem("routes")) || [];
-      const route = routes[index];
-      if (!route || !route.points || route.points.length === 0) return;
-
-      const color = routeColors[index % routeColors.length];
-      const polyline = new google.maps.Polyline({
-        path: route.points,
-        map: map,
-        strokeColor: color,
-        strokeOpacity: 0.8,
-        strokeWeight: 4
-      });
-
-      displayedPolylines[index] = polyline;
-
-      let totalDistance = 0;
-      for (let i = 1; i < route.points.length; i++) {
-        const p1 = new google.maps.LatLng(route.points[i - 1]);
-        const p2 = new google.maps.LatLng(route.points[i]);
-        totalDistance += google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
-      }
-      alert(`ルート「${route.name}」の距離: ${(totalDistance / 1000).toFixed(2)} km`);
-      map.setCenter(route.points[0]);
-    }
-
-    function hideRoute(index) {
-      if (displayedPolylines[index]) {
-        displayedPolylines[index].setMap(null);
-        displayedPolylines[index] = null;
+      if (rTitle.style.display === "none") {
+        rTitle.style.display = "block"; rList.style.display = "block";
+      } else {
+        rTitle.style.display = "none"; rList.style.display = "none";
       }
     }
 
-    function showCurrentLocation() {
-      if (!navigator.geolocation) {
-        alert("現在地情報を取得できません");
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(pos => {
-        const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        map.setCenter(latLng);
-        if (currentLocationMarker) {
-          currentLocationMarker.setPosition(latLng);
-        } else {
-          currentLocationMarker = new google.maps.Marker({
-            position: latLng,
-            map: map,
-            icon: defaultIcons[3]
-          });
-        }
-      }, () => alert("現在地の取得に失敗しました"));
-    }
-
-    function updateCategoryFilter() {
-      const filter = document.getElementById("categoryFilter");
-      filter.innerHTML = '<option value="すべて">すべて表示</option>';
-      categories.forEach(c => {
-        const option = document.createElement("option");
-        option.value = c.name;
-        option.textContent = c.name;
-        filter.appendChild(option);
+    function searchPlace() {
+      const query = document.getElementById("placeInput").value;
+      if (!query) return;
+      if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address: query }, (results, status) => {
+        if (status === "OK") {
+          map.setCenter(results[0].geometry.location);
+          searchMarker = new google.maps.Marker({ position: results[0].geometry.location, map: map, title: results[0].formatted_address });
+        } else { alert("検索に失敗しました: " + status); }
       });
     }
-    
+
     function finalizeSpotMemo(point, marker) {
-        const existing = spotMemos.find(p =>
-          Math.abs(p.point.lat - point.lat) < 0.000001 &&
-          Math.abs(p.point.lng - point.lng) < 0.000001
-        );
-        
-        if (existing) {
-            existing.point = point;
-            existing.marker = marker;
-        } else {
-            spotMemos.push({ point, marker });
-        }
-        saveSpotMemos();
-        alert("保存しました");
+      const existing = spotMemos.find(p => Math.abs(p.point.lat - point.lat) < 0.000001 && Math.abs(p.point.lng - point.lng) < 0.000001);
+      if (existing) { existing.point = point; existing.marker = marker; } 
+      else { spotMemos.push({ point, marker }); }
+      saveSpotMemos();
+      alert("保存しました");
     }
-    
+
     function saveSpotMemos() {
-        const data = spotMemos.map(({ point }) => ({
-            lat: point.lat,
-            lng: point.lng,
-            memo: point.memo,
-            image: point.image,
-            category: point.category
-        }));
-        localStorage.setItem("spotMemos", JSON.stringify(data));
-        renderMemoList();
+      const data = spotMemos.map(({ point }) => ({ lat: point.lat, lng: point.lng, memo: point.memo, image: point.image, category: point.category }));
+      localStorage.setItem("spotMemos", JSON.stringify(data));
+      renderMemoList(); // 表示の更新
     }
 
     function loadSpotMemos() {
@@ -571,18 +314,16 @@ function showCategoryEditor() {
       saved.forEach(point => {
         if (typeof point.lat !== "number" || typeof point.lng !== "number") return;
         const category = categories.find(c => c.name === point.category);
-        const marker = new google.maps.Marker({
-          position: { lat: point.lat, lng: point.lng },
-          map: map,
-          icon: category ? category.icon : defaultIcons[0]
-        });
+        const marker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map, icon: category ? category.icon : defaultIcons[0] });
         const infoWindow = new google.maps.InfoWindow();
         updateInfoWindow(point, infoWindow, marker);
+        // ★タップで詳細画面（入力フォーム）を開く設定
         marker.addListener("click", () => showInputForm(point, infoWindow, marker, false));
         spotMemos.push({ point, marker });
       });
       renderMemoList();
     }
+
     function updateInfoWindow(point, infoWindow, marker) {
       let content = `<strong>カテゴリ:</strong> ${point.category || "（未設定）"}<br>`;
       content += `<strong>メモ:</strong> ${point.memo || "（なし）"}`;
@@ -599,386 +340,170 @@ function showCategoryEditor() {
       saveSpotMemos();
     }
 
-
     function renderMemoList() {
-        
-        const container = document.getElementById("memoList");
-        container.innerHTML = "";
-
-        const selectedCategory = document.getElementById("categoryFilter").value;
-        filterPinsByCategory(selectedCategory);
-
-        spotMemos.forEach(({ point, marker }) => {
-            if (selectedCategory === "すべて" || point.category === selectedCategory) {
-                const item = document.createElement("div");
-                item.className = "memo-item";
-                item.innerHTML = `
-                <span>カテゴリ: ${point.category}</span><br>
-                <span>メモ: ${point.memo}</span><br>
-                <button class="editMemoBtn" data-lat="${point.lat}" data-lng="${point.lng}">編集</button> `;
-                container.appendChild(item);
-            }
-        });
-
-        // 編集ボタンのイベント設定
-        document.querySelectorAll(".editMemoBtn").forEach(btn => {
- 
-            btn.onclick = () => {
-                const lat = parseFloat(btn.dataset.lat);
-                const lng = parseFloat(btn.dataset.lng);
-                const target = spotMemos.find(p =>
-                Math.abs(p.point.lat - lat) < 0.000001 &&
-                Math.abs(p.point.lng - lng) < 0.000001
-            );
-            if (target) {
-                const infoWindow = new google.maps.InfoWindow();
-                showInputForm(target.point, infoWindow, target.marker, false); 
-            }
-        };
-        });
+      // リスト画面は廃止し、カテゴリの絞り込み処理だけを行う
+      const selectedCategory = document.getElementById("categoryFilter").value;
+      filterPinsByCategory(selectedCategory);
     }
 
-  function showInputForm(point, infoWindow, marker, isNew = false) {
-    const container = document.createElement("div");
-    container.innerHTML = `
-      <label>カテゴリ:<br><select id="inputCategory">
-        ${categories.map(c => `<option value="${c.name}">${c.name}</option>`).join("")}
-      </select></label><br>
-      <label>メモ:<br><textarea id="inputMemo" rows="3" cols="30">${point.memo || ""}</textarea></label><br>
-      <label>画像:<br>
-        <input type="file" id="inputImage" accept="image/*"><br>
-        <img id="previewImage" src="${point.image || ""}" style="max-width:200px; ${point.image ? "display:block;" : "display:none;"}">
-      </label><br>
-      <button id="saveBtn">保存</button>
-      ${!isNew ? `<button id="updateBtn">変更</button>` : ""}
-      <button id="deleteBtn">削除</button>`;
-    infoWindow.setContent(container);
-    infoWindow.open(map, marker);
+    function showInputForm(point, infoWindow, marker, isNew = false) {
+      const container = document.createElement("div");
+      container.innerHTML = `
+        <label>カテゴリ:<br><select id="inputCategory">
+          ${categories.map(c => `<option value="${c.name}">${c.name}</option>`).join("")}
+        </select></label><br>
+        <label>メモ:<br><textarea id="inputMemo" rows="3" cols="25">${point.memo || ""}</textarea></label><br>
+        <label>画像:<br>
+          <input type="file" id="inputImage" accept="image/*"><br>
+          <img id="previewImage" src="${point.image || ""}" style="max-width:150px; ${point.image ? "display:block;" : "display:none;"}">
+        </label><br>
+        <button id="saveBtn">保存</button>
+        ${!isNew ? `<button id="updateBtn">変更</button>` : ""}
+        <button id="deleteBtn">削除</button>`;
+      infoWindow.setContent(container);
+      infoWindow.open(map, marker);
 
-  // InfoWindowが閉じられたときの処理
-    google.maps.event.addListener(infoWindow, "closeclick", () => {
-      if (isNew) {
-        // 保存されていない新規ピンは削除
-        marker.setMap(null);
-      }
-    });
+      google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+        document.getElementById("inputCategory").value = point.category || "";
 
-    google.maps.event.addListenerOnce(infoWindow, "domready", () => {
-      document.getElementById("inputCategory").value = point.category || "";
-
-      // 保存ボタン
-      document.getElementById("saveBtn").onclick = () => {
-        const lat = point.lat;
-        const lng = point.lng;
-  
-        point.category = document.getElementById("inputCategory").value;
-        point.memo = document.getElementById("inputMemo").value;
-        const file = document.getElementById("inputImage").files[0];
-        const categoryObj = categories.find(c => c.name === point.category);
-        marker.setIcon(categoryObj ? categoryObj.icon : defaultIcons[0]);
-  
-        const finalize = () => {
-          point.lat = lat;
-          point.lng = lng;
-          finalizeSpotMemo(point, marker);
-          infoWindow.close();
-        };
-
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = () => { point.image = reader.result; finalize(); };
-          reader.readAsDataURL(file);
-        } else {
-          finalize();
-        }
-      };
-
-      // 削除ボタン
-      document.getElementById("deleteBtn").onclick = () => {
-        deleteSpotMemo(point.lat, point.lng);
-        marker.setMap(null);
-        infoWindow.close();
-      };
-    
-  
-        
-        //更新ボタン
-      if (!isNew) {
-        document.getElementById("updateBtn").onclick = () => {
+        document.getElementById("saveBtn").onclick = () => {
           point.category = document.getElementById("inputCategory").value;
           point.memo = document.getElementById("inputMemo").value;
           const file = document.getElementById("inputImage").files[0];
           const categoryObj = categories.find(c => c.name === point.category);
           marker.setIcon(categoryObj ? categoryObj.icon : defaultIcons[0]);
+          const finalize = () => { finalizeSpotMemo(point, marker); infoWindow.close(); tempMarker = null; };
+          if (file) { const reader = new FileReader(); reader.onload = () => { point.image = reader.result; finalize(); }; reader.readAsDataURL(file); } 
+          else { finalize(); }
+        };
 
-          const update = () => {
-            const target = spotMemos.find(p =>
-              Math.abs(p.point.lat - point.lat) < 0.000001 &&
-              Math.abs(p.point.lng - point.lng) < 0.000001
-            );
-            if (target) {
-              target.point = point;
-              target.marker = marker;
-            }
-            saveSpotMemos();
-            updateInfoWindow(point, infoWindow, marker);
+        if (!isNew) {
+          document.getElementById("updateBtn").onclick = () => {
+            point.category = document.getElementById("inputCategory").value;
+            point.memo = document.getElementById("inputMemo").value;
+            const file = document.getElementById("inputImage").files[0];
+            const categoryObj = categories.find(c => c.name === point.category);
+            marker.setIcon(categoryObj ? categoryObj.icon : defaultIcons[0]);
+            const update = () => { saveSpotMemos(); updateInfoWindow(point, infoWindow, marker); };
+            if (file) { const reader = new FileReader(); reader.onload = () => { point.image = reader.result; update(); }; reader.readAsDataURL(file); } 
+            else { update(); }
           };
+        }
 
+        document.getElementById("deleteBtn").onclick = () => {
+          deleteSpotMemo(point.lat, point.lng); marker.setMap(null); infoWindow.close();
+        };
+
+        document.getElementById("inputImage").addEventListener("change", function () {
+          const file = this.files[0];
+          const preview = document.getElementById("previewImage");
           if (file) {
             const reader = new FileReader();
-            reader.onload = () => { point.image = reader.result; update(); };
+            reader.onload = function (e) { preview.src = e.target.result; preview.style.display = "block"; };
             reader.readAsDataURL(file);
-          } else {
-            update();
-          }};
-        }
-        
-        //削除ボタン
-        document.getElementById("deleteBtn").onclick = () => {
-            deleteSpotMemo(point.lat, point.lng);
-            infoWindow.close();
-        };
-        
-        //画像プレビュー
-        document.getElementById("inputImage").addEventListener("change", function () {
-            const file = this.files[0];
-            const preview = document.getElementById("previewImage");
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result;
-                    preview.style.display = "block";
-                };
-                reader.readAsDataURL(file);
-            } else {
-                preview.src = "";
-                preview.style.display = "none";
-            }
+          } else { preview.src = ""; preview.style.display = "none"; }
         });
-    });
+      });
     }
 
+    function searchRoute(waypoints = []) {
+      const origin = document.getElementById("originInput").value;
+      const destination = document.getElementById("destinationInput").value;
+      if (!origin || !destination) { alert("出発地と目的地を入力してください"); return; }
+      if (waypoints.length === 0) {
+        document.querySelectorAll(".waypointCheckbox:checked").forEach(cb => {
+          waypoints.push({ location: new google.maps.LatLng(parseFloat(cb.dataset.lat), parseFloat(cb.dataset.lng)), stopover: true });
+        });
+      }
+      directionsService.route({ origin, destination, waypoints, optimizeWaypoints: true, travelMode: google.maps.TravelMode.DRIVING }, (result, status) => {
+        if (status === "OK") { directionsRenderer.setDirections(result); } 
+        else { alert("ルート検索に失敗しました: " + status); }
+      });
+    }
+
+    function renderWaypointsList() {
+      const container = document.getElementById("waypointMemoList");
+      container.innerHTML = "";
+      spotMemos.forEach(({ point }) => {
+        const item = document.createElement("div");
+        item.innerHTML = `<label><input type="checkbox" class="waypointCheckbox" data-lat="${point.lat}" data-lng="${point.lng}"> カテゴリ: ${point.category} / メモ: ${point.memo}</label>`;
+        container.appendChild(item);
+      });
+    }
+
+    // ★ GPS等の機能（省略せず保持）
     function startTracking() {
       if (watchId) return;
       route = [];
       watchId = navigator.geolocation.watchPosition(pos => {
         const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         route.push(latLng);
-
-        if (currentLocationMarker) {
-          currentLocationMarker.setPosition(latLng);
-        } else {
-          currentLocationMarker = new google.maps.Marker({
-            position: latLng,
-            map: map,
-            icon: defaultIcons[3]
-          });
-        }
-
+        if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } 
+        else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
         map.setCenter(latLng);
       });
     }
-
     function stopTracking() {
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-      }
-
+      if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
       if (route.length > 0) {
         const name = prompt("ルート名を入力してください");
         const description = prompt("説明を入力してください");
-        if (name && description) {
-          saveRoute(name, description, route);
-        }
+        if (name && description) { saveRoute(name, description, route); }
       }
     }
-
     function saveRoute(name, description, points) {
-      const routeData = { name, description, points };
       const routes = JSON.parse(localStorage.getItem("routes")) || [];
-      routes.push(routeData);
+      routes.push({ name, description, points });
       localStorage.setItem("routes", JSON.stringify(routes));
       updateRouteList();
     }
-
     function updateRouteList() {
       const container = document.getElementById("routeList");
       container.innerHTML = "";
       const routes = JSON.parse(localStorage.getItem("routes")) || [];
-
       routes.forEach((route, index) => {
-        const item = document.createElement("div");
-        item.className = "memoItem";
+        const item = document.createElement("div"); item.className = "memoItem";
         let totalDistance = 0;
         for (let i = 1; i < route.points.length; i++) {
-          const p1 = new google.maps.LatLng(route.points[i - 1]);
-          const p2 = new google.maps.LatLng(route.points[i]);
+          const p1 = new google.maps.LatLng(route.points[i - 1]); const p2 = new google.maps.LatLng(route.points[i]);
           totalDistance += google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
         }
-        const distanceKm = (totalDistance / 1000).toFixed(2);
-        item.innerHTML = `
-        <strong>ルート:</strong> ${route.name}<br>
-        <strong>説明:</strong> ${route.description}<br>
-        <strong>距離:</strong> ${distanceKm} km<br>
-        <button onclick="showRoute(${index})">表示</button>
-        <button onclick="hideRoute(${index})">非表示</button>
-        <button onclick="deleteRoute(${index})">削除</button>
-        <button onclick="showStreetView(${route.points[0].lat}, ${route.points[0].lng})">ストリートビュー</button>
-        `;
+        item.innerHTML = `<strong>ルート:</strong> ${route.name}<br><strong>説明:</strong> ${route.description}<br><strong>距離:</strong> ${(totalDistance / 1000).toFixed(2)} km<br>
+        <button onclick="showRoute(${index})">表示</button> <button onclick="hideRoute(${index})">非表示</button> <button onclick="deleteRoute(${index})">削除</button>`;
         container.appendChild(item);
       });
     }
-
-    function showRouteList() {
-      const hideIds = ["memoList", "memoTitle", "categoryFilter", "editCategoryBtn"];
-      const showIds = ["routeList", "routeTitle"];
-      
-      hideIds.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.style.display = "none";
-      });
-      showIds.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.style.display = "block";
-      });
-      updateRouteList();
-     }
-
+    function showRoute(index) {
+      const routes = JSON.parse(localStorage.getItem("routes")) || [];
+      const route = routes[index];
+      if (!route || !route.points || route.points.length === 0) return;
+      const polyline = new google.maps.Polyline({ path: route.points, map: map, strokeColor: routeColors[index % routeColors.length], strokeOpacity: 0.8, strokeWeight: 4 });
+      displayedPolylines[index] = polyline;
+      map.setCenter(route.points[0]);
+    }
+    function hideRoute(index) { if (displayedPolylines[index]) { displayedPolylines[index].setMap(null); displayedPolylines[index] = null; } }
     function deleteRoute(index) {
-      const routes = JSON.parse(localStorage.getItem("routes")) || []; 
-      routes.splice(index, 1);
-      localStorage.setItem("routes", JSON.stringify(routes));
-      if (displayedPolylines[index]) {
-        displayedPolylines[index].setMap(null);
-        displayedPolylines[index] = null;
-      }
+      const routes = JSON.parse(localStorage.getItem("routes")) || [];
+      routes.splice(index, 1); localStorage.setItem("routes", JSON.stringify(routes));
+      if (displayedPolylines[index]) { displayedPolylines[index].setMap(null); displayedPolylines[index] = null; }
       updateRouteList();
     }
-
+    function showCurrentLocation() {
+      if (!navigator.geolocation) { alert("現在地情報を取得できません"); return; }
+      navigator.geolocation.getCurrentPosition(pos => {
+        const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        map.setCenter(latLng);
+        if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } 
+        else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
+      }, () => alert("現在地の取得に失敗しました"));
+    }
     function showStreetView(lat, lng) {
-      const panorama = new google.maps.StreetViewPanorama(document.getElementById("map"), {
-        position: { lat, lng },
-        pov: { heading: 165, pitch: 0 },
-        zoom: 1
-      });
-      map.setStreetView(panorama);
-      document.getElementById("exitStreetViewBtn").style.display = "inline-block";
+      const panorama = new google.maps.StreetViewPanorama(document.getElementById("map"), { position: { lat, lng }, pov: { heading: 165, pitch: 0 }, zoom: 1 });
+      map.setStreetView(panorama); document.getElementById("exitStreetViewBtn").style.display = "inline-block";
     }
-
-    function exitStreetView() {
-      const panorama = map.getStreetView();
-      panorama.setVisible(false);
-      document.getElementById("exitStreetViewBtn").style.display = "none";
-    }
-    
-
-    function saveCategoryChanges() {
-        const inputs = document.querySelectorAll(".categoryInput");
-        categories = Array.from(inputs)
-          .map(input => input.value.trim())
-          .filter(name => name !== "")
-          .map(name => ({ name }));
-
-        updateCategoryFilter(); 
-        document.getElementById("categoryEditor").remove();
-    }
-    
-    function cancelCategoryEdit() {
-        const editor = document.getElementById("categoryEditor");
-        if (editor) editor.remove();
-    }
-
-    function searchPlace() {
-      const query = document.getElementById("placeInput").value;
-      if (!query) return;
-
-      if (searchMarker) {
-        searchMarker.setMap(null);
-        searchMarker = null;
-      }
-
-      // Geocoder（住所検索）から PlacesService（施設検索）にアップグレード！
-      const service = new google.maps.places.PlacesService(map);
-      service.textSearch({
-        query: query,
-        bounds: map.getBounds() // 今見ている画面の範囲を優先する
-      }, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
-          map.setCenter(results[0].geometry.location);
-          searchMarker = new google.maps.Marker({
-            position: results[0].geometry.location,
-            map: map,
-            title: results[0].name // 施設名を表示
-          });
-        } else {
-          alert("検索エラー: " + status);
-        }
-      });
-    }
-
-
-function searchRoute(waypoints = []) {
-  if (!map || !directionsRenderer || !directionsService) {
-    alert("地図がまだ初期化されていません");
-    return;
-  }
-
-  const origin = document.getElementById("originInput").value;
-  const destination = document.getElementById("destinationInput").value;
-
-  if (!origin || !destination) {
-    alert("出発地と目的地を入力してください");
-    return;
-  }
-
-if (waypoints.length === 0) {
-  const checkboxes = document.querySelectorAll(".waypointCheckbox:checked");
-  checkboxes.forEach(cb => {
-    // ★チェックボックスが持っているのは placeId ではなく 緯度経度（lat/lng）
-    waypoints.push({
-      location: new google.maps.LatLng(parseFloat(cb.dataset.lat), parseFloat(cb.dataset.lng)),
-      stopover: true
-    });
-  });
-}
-
-  directionsService.route({
-    origin,
-    destination,
-    waypoints,
-    optimizeWaypoints: true,
-    travelMode: google.maps.TravelMode.DRIVING
-  }, (result, status) => {
-    if (status === "OK") {
-      directionsRenderer.setDirections(result);
-    } else {
-      alert("ルート検索に失敗しました: " + status);
-    }
-  });
-}
-
-function renderWaypointsList() {
-  const container = document.getElementById("waypointMemoList");
-  container.innerHTML = "<strong></strong><br>";
-
-  spotMemos.forEach(({ point }) => {
-    const item = document.createElement("div");
-    item.innerHTML = `
-      <label>
-        <input type="checkbox" class="waypointCheckbox"
-          data-lat="${point.lat}" data-lng="${point.lng}">
-        カテゴリ: ${point.category} / メモ: ${point.memo}
-      </label>
-    `;
-    container.appendChild(item);
-  });
-}
-
+    function exitStreetView() { map.getStreetView().setVisible(false); document.getElementById("exitStreetViewBtn").style.display = "none"; }
   </script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDWoGxmGYPAv-HShkfwXCT00vLATt4tiMc&callback=initMap&libraries=geometry,places" async defer></script>
-
-
-
-</div></div></body></html>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDWoGxmGYPAv-HShkfwXCT00vLATt4tiMc&callback=initMap&libraries=geometry,places"></script>
+</body>
+</html>
