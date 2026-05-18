@@ -181,21 +181,22 @@
       updateCategoryFilter(); loadSpotMemos(); updateRouteList();
 
       map.addListener("click", (e) => {
+        // お店（POI）をタップして e.placeId がある場合、かつピン置きモードなら邪魔しないようにキャンセル
         if (currentMode === "edit" && e.placeId) {
-          e.stop(); // 編集モード中はお店をタップしても詳細を開かない
+          e.stop();
         }
 
-        // ★閲覧モードの時の処理
+        // 閲覧モードの時の処理
         if (currentMode !== "edit") {
           closeActiveInfoWindow(); // 自作のピンを閉じる
           
-          // ★お店（POI）以外の「何もない地図」をタップした場合、確実にお店を閉じる強力な魔法
+          // ★ 何もない地図をタップした場合、ダミーを一瞬（0ミリ秒）だけ開いて光の速さで消すステルスハック
           if (!e.placeId) {
-            const dummy = new google.maps.InfoWindow({ content: "" });
+            const dummy = new google.maps.InfoWindow();
             dummy.setPosition(e.latLng);
             dummy.open(map);
-            // 0.05秒だけ待ってから消すことで、Googleマップに確実に「前のものを閉じる」処理を行わせる
-            setTimeout(() => { dummy.close(); }, 50); 
+            // 0ミリ秒（ブラウザが画面を描画する前）に閉じるため、チラつきが一切見えません！
+            setTimeout(() => { dummy.close(); }, 0); 
           }
           return;
         }
@@ -341,12 +342,12 @@
     function deleteRoute(index) { const routes = JSON.parse(localStorage.getItem("walkRoutes")) || []; routes.splice(index, 1); localStorage.setItem("walkRoutes", JSON.stringify(routes)); hideRoute(index); updateRouteList(); }
     
     function showCurrentLocation() {
-      if (!navigator.geolocation) { alert("現在地が取得できませんでした"); return; }
+      if (!navigator.geolocation) { alert("現在地が取得できません"); return; }
       const btn = document.getElementById("floatingLocationBtn"); btn.innerText = "⏳";
       navigator.geolocation.getCurrentPosition(pos => {
         btn.innerText = "🎯"; const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude }; map.setCenter(latLng);
         if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
-      }, () => { btn.innerText = "🎯"; alert("現在地が取得できませんでした"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      }, () => { btn.innerText = "🎯"; alert("現在地が取得できません"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
 
     function changeMapView() {
