@@ -322,13 +322,39 @@
       document.getElementById("startTrackBtn").style.backgroundColor = "#ff9800";
       document.getElementById("startTrackBtn").innerText = "記録中...";
 
-      watchId = navigator.geolocation.watchPosition(pos => {
-        const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        route.push(latLng);
-        if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } 
-        else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
-        map.setCenter(latLng);
-      });
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          
+          // ▼▼ ここから「10m間引き処理」の魔法 ▼▼
+          if (route.length === 0) {
+            // 最初の1歩目は無条件で記録する
+            route.push(latLng);
+          } else {
+            // 最後に記録した場所との距離を計算する
+            const lastPos = route[route.length - 1];
+            const p1 = new google.maps.LatLng(lastPos.lat, lastPos.lng);
+            const p2 = new google.maps.LatLng(latLng.lat, latLng.lng);
+            const distance = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+
+            // 10メートル以上移動していたら、新しい点として記録に追加！
+            if (distance >= 10) {
+              route.push(latLng);
+            }
+          }
+          // ▲▲ ここまで ▲▲
+
+          // 現在地アイコンと地図の中心は、10mルールに関係なく常に最新の場所に動かす
+          if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } 
+          else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
+          map.setCenter(latLng);
+        },
+        (error) => {
+          alert("GPSの取得中にエラーが発生しました。電波の良い場所へ移動してください。");
+        },
+        // GPSの精度を最高レベルに設定
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
     }
 
     function stopTracking() {
