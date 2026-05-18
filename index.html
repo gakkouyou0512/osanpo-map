@@ -222,23 +222,58 @@
       });
     }
 
+    // 連続検索ができるように改良したルート検索
     function searchRoute() {
-      const origin = document.getElementById("originInput").value, destination = document.getElementById("destinationInput").value;
+      const origin = document.getElementById("originInput").value;
+      const destination = document.getElementById("destinationInput").value;
       if (!origin || !destination) { alert("出発地と目的地を入力してください"); return; }
-      const waypoints = []; document.querySelectorAll(".waypoint-input").forEach(input => { if (input.value) { waypoints.push({ location: input.value, stopover: true }); } });
+      
+      // 検索中であることを視覚的に伝える（ボタン連打防止）
+      const btn = document.querySelector('button[onclick="searchRoute()"]');
+      const originalText = btn.innerText;
+      btn.innerText = "検索中...";
+      btn.disabled = true;
+
+      const waypoints = []; 
+      document.querySelectorAll(".waypoint-input").forEach(input => { 
+        if (input.value) { waypoints.push({ location: input.value, stopover: true }); } 
+      });
+      
       directionsService.route({ origin, destination, waypoints, optimizeWaypoints: true, travelMode: google.maps.TravelMode.DRIVING }, (result, status) => {
-        if (status === "OK") { directionsRenderer.setDirections(result); lastSearchedRoutePoints = result.routes[0].overview_path.map(p => ({lat: p.lat(), lng: p.lng()})); document.getElementById("saveSearchedRouteBtn").style.display = "inline-block"; } 
-        else { alert("ルート検索に失敗しました"); }
+        // 処理が終わったらボタンを元に戻す
+        btn.innerText = originalText;
+        btn.disabled = false;
+
+        if (status === "OK") { 
+          directionsRenderer.setDirections(result); 
+          lastSearchedRoutePoints = result.routes[0].overview_path.map(p => ({lat: p.lat(), lng: p.lng()})); 
+          document.getElementById("saveSearchedRouteBtn").style.display = "inline-block"; 
+        } else { 
+          alert("ルートが見つかりませんでした。別の場所を指定してみてください。"); 
+        }
       });
     }
 
+    // タイトルを必須入力にした保存機能
     function saveSearchedRoute() {
       if (!lastSearchedRoutePoints) return;
-      const name = prompt("検索したルートの名前を入力してください"); if (!name) return;
-      saveRoute(name, prompt("ルートの説明を入力してください（空欄OK）") || "", lastSearchedRoutePoints); 
-      alert("保存しました！"); document.getElementById("saveSearchedRouteBtn").style.display = "none"; lastSearchedRoutePoints = null;
+      
+      let name = prompt("検索したルートの名前を入力してください");
+      if (name === null) return; // キャンセルを押したらそのまま終了
+      
+      // 空欄のままOKを押されたら、入力されるまで警告を出し続ける（ループ）
+      while (name.trim() === "") {
+        name = prompt("【注意】タイトルは必須です！\n検索したルートの名前を入力してください");
+        if (name === null) return; // キャンセルを押したら終了
+      }
+      
+      const description = prompt("ルートの説明を入力してください（空欄OK）");
+      saveRoute(name, description || "", lastSearchedRoutePoints); 
+      alert("保存しました！"); 
+      document.getElementById("saveSearchedRouteBtn").style.display = "none"; 
+      lastSearchedRoutePoints = null;
     }
-
+    
     function startTracking() {
       if (watchId) { alert("すでに記録中です！"); return; }
       route = []; alert("🚶‍♂️ ルートの記録を開始しました！スマホを持ったまま歩いてください。");
