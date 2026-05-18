@@ -156,10 +156,12 @@
         mapTypeControl: false, fullscreenControl: false
       });
 
-      // ストリートビューに入った時、左上の地図切り替えメニューを隠す
+      // ★ストリートビューに入った時、不要なボタンを隠して景色を見やすくする
       const sv = map.getStreetView();
       sv.addListener('visible_changed', () => {
-        document.getElementById('customMapSelector').style.display = sv.getVisible() ? 'none' : 'block';
+        const isSV = sv.getVisible();
+        document.getElementById('customMapSelector').style.display = isSV ? 'none' : 'block';
+        document.getElementById('floatingLocationBtn').style.display = isSV ? 'none' : 'block'; // ← ★この1行を追加！
       });
 
       setupCleanAutocomplete("originInput"); setupCleanAutocomplete("destinationInput"); setupCleanAutocomplete("placeInput");
