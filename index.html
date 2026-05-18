@@ -3,55 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <title>お散歩マップ</title>
   <style>
+    /* 全体の基本設定（文字を大きく見やすく） */
     html, body {
-      height: 100%; margin: 0; padding: 0; overscroll-behavior-y: none;
+      height: 100%; margin: 0; padding: 0;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+      font-size: 16px; /* ★基本文字サイズを大きく */
+      color: #333;
+      overflow: hidden;
     }
+
     #map { width: 100%; height: 100vh; }
+
+    /* ★モダンなボトムシート（操作パネル） */
     #mapControls {
-      position: fixed; bottom: 0; left: 0; width: 100%; height: 200px;
-      background: #f9f9f9; transition: height 0.2s ease; overflow-y: auto;
-      z-index: 999; max-height: 80vh; overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch; padding: 10px; box-sizing: border-box;
+      position: fixed; bottom: 0; left: 0; width: 100%; height: 120px; /* 初期は少しだけ見せる */
+      background: #ffffff;
+      border-radius: 20px 20px 0 0; /* 上の角を丸く */
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+      transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      overflow-y: auto; z-index: 999;
+      padding: 0 20px 20px 20px; box-sizing: border-box;
     }
+
+    /* ドラッグするためのバー */
     #dragHandle {
-      height: 10px; background: #ccc; cursor: ns-resize; margin-bottom: 10px; border-radius: 5px;
+      width: 50px; height: 6px; background: #ddd;
+      border-radius: 3px; margin: 12px auto 20px auto;
+      cursor: ns-resize;
     }
+
+    /* メニューごとの区切り */
+    .menu-section {
+      background: #f8f9fa; border-radius: 12px;
+      padding: 15px; margin-bottom: 20px;
+    }
+    .menu-section h3 {
+      margin: 0 0 10px 0; font-size: 18px; color: #444;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ★スマホで押しやすい入力欄とボタン */
     input[type="text"], select {
-      width: 70% !important; padding: 8px; margin: 4px 0; font-size: 14px !important;
-      border: 1px solid #ccc; border-radius: 4px; display: inline-block; vertical-align: middle;
+      width: 100%; padding: 12px; margin-bottom: 10px;
+      font-size: 16px !important; /* iOSのズーム防止 */
+      border: 1px solid #ccc; border-radius: 8px;
+      box-sizing: border-box; background: #fff;
     }
     button {
-      padding: 8px 12px; margin: 4px 2px; font-size: 13px !important; touch-action: manipulation;
-      cursor: pointer; border: none; background-color: #e0e0e0; border-radius: 4px; display: inline-block;
+      width: 100%; padding: 14px; margin-bottom: 8px;
+      font-size: 16px; font-weight: bold;
+      color: #fff; background-color: #4CAF50;
+      border: none; border-radius: 8px;
+      cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    #mapControls h3, #mapControls h4, #modeLabel {
-      font-size: 14px !important; font-family: sans-serif; margin: 10px 0 5px 0;
+    button.secondary {
+      background-color: #6c757d;
     }
-    .switch {
-      transform: scale(0.8); transform-origin: top left; display: inline-block; vertical-align: middle;
-      width: 60px; height: 34px; position: relative; margin-right: 10px;
+    button.danger {
+      background-color: #dc3545;
     }
+
+    /* ピン置きモードのスイッチ（大きく押しやすく） */
+    .mode-switch-container {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #e9ecef; padding: 12px 20px; border-radius: 50px;
+      margin-bottom: 20px; font-weight: bold; font-size: 18px;
+    }
+    .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #ccc; transition: .4s; border-radius: 34px;
-    }
-    .slider:before {
-      position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px;
-      background-color: white; transition: .4s; border-radius: 50%;
-    }
-    input:checked + .slider { background-color: #4CAF50; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #ff9800; }
     input:checked + .slider:before { transform: translateX(26px); }
-    .pac-container { z-index: 99999 !important; }
-    #routeList { margin-top: 10px; display: none; }
-    .memoItem { border: 1px solid #ccc; padding: 5px; margin-bottom: 5px; cursor: pointer; }
-    #previewImage { max-width: 200px; display: none; margin-top: 5px; }
-    #waypointModal, #searchResults, #waypointMemoList { font-size: 14px !important; line-height: 1.6; }
+
+    #memoList, #routeList { margin-top: 10px; display: none; }
+    .memoItem { background: #fff; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -59,44 +87,65 @@
 
   <div id="mapControls">
     <div id="dragHandle"></div>
-    <select id="mapTypeSelector" onchange="changeMapType()">
-      <option value="roadmap">通常地図</option>
-      <option value="satellite">航空写真</option>
-      <option value="hybrid">ハイブリッド</option>
-      <option value="terrain">地形</option>
-    </select>
-    
-    <div style="margin-bottom: 10px;">
+
+    <div class="mode-switch-container">
+      <span id="modeLabel">🔍 地図を見るモード</span>
       <label class="switch">
         <input type="checkbox" id="modeToggle">
         <span class="slider"></span>
       </label>
-      <span id="modeLabel">🔍 地図を見る</span>
     </div>
 
-    <button onclick="showRouteList()">ルート一覧</button>
-    <button onclick="showCurrentLocation()">現在地</button>
-    <button onclick="startTracking()">記録開始</button>
-    <button onclick="stopTracking()">停止・保存</button>
-    <button id="exitStreetViewBtn" onclick="exitStreetView()" style="display:none;">地図に戻す</button>
-    
-    <select id="categoryFilter" onchange="renderMemoList()">
-      <option value="すべて">すべてのピンを表示</option>
-    </select>
-    <button id="editCategoryBtn" onclick="showCategoryEditor()">カテゴリ追加</button>
+    <div class="menu-section">
+      <h3>🔍 場所を調べる</h3>
+      <input id="placeInput" type="text" placeholder="例：西山公園">
+      <button onclick="searchPlace()">検索する</button>
+      <div id="searchResults" style="margin-top:10px; font-size:14px;"></div>
+    </div>
 
-    <hr>
+    <div class="menu-section">
+      <h3>🗺️ ルートを調べる</h3>
+      <input id="originInput" type="text" placeholder="出発地（例：保育園）">
+      <input id="destinationInput" type="text" placeholder="目的地">
+      <button onclick="searchRoute()">ルートを検索</button>
+      <button id="addWaypointBtn" class="secondary">経由地点を追加</button>
+    </div>
 
-    <input id="placeInput" type="text" placeholder="場所を検索">
-    <button onclick="searchPlace()">検索</button><br>
+    <div class="menu-section">
+      <h3>🚶‍♂️ 記録・一覧・設定</h3>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="startTracking()" style="background-color: #007bff;">記録開始</button>
+        <button onclick="stopTracking()" class="danger">停止・保存</button>
+      </div>
+      <button onclick="showRouteList()" class="secondary">保存したルート一覧</button>
+      <button onclick="showCurrentLocation()" class="secondary">現在地に戻る</button>
+      
+      <div style="margin-top: 15px;">
+        <label style="font-size: 14px; font-weight:bold;">ピンの絞り込み表示:</label>
+        <select id="categoryFilter" onchange="renderMemoList()">
+          <option value="すべて">すべてのピンを表示</option>
+        </select>
+      </div>
+      <div style="margin-top: 10px;">
+        <label style="font-size: 14px; font-weight:bold;">地図の切り替え:</label>
+        <select id="mapTypeSelector" onchange="changeMapType()">
+          <option value="roadmap">通常地図</option>
+          <option value="satellite">航空写真</option>
+        </select>
+      </div>
+    </div>
 
-    <input id="originInput" type="text" placeholder="出発地">
-    <input id="destinationInput" type="text" placeholder="目的地">
-    <button onclick="searchRoute()">ルート検索</button>
-    <button id="addWaypointBtn">経由地点を追加</button>
-    <button id="saveSearchedRouteBtn" onclick="saveSearchedRoute()" style="display:none; background-color: #4CAF50; color: white;">検索ルートを保存</button>
-    
-    <div id="waypointsContainer"></div> 
+    <h3 id="routeTitle" style="display:none;">保存したルート</h3>
+    <div id="routeList"></div>
+
+    <div id="waypointModal" style="display:none; padding-top:20px;">
+      <h3>経由地点を選択 <button id="confirmWaypoint" style="width:auto; padding:8px;">決定</button></h3>
+      <input type="text" id="searchSpot" placeholder="場所検索">
+      <button id="searchBtn" class="secondary">検索</button>
+      <div id="waypointMemoList"></div>
+    </div>
+
+  </div>
 
     <h3 id="routeTitle" style="display:none;">ルート一覧</h3>
     <div id="routeList"></div>
