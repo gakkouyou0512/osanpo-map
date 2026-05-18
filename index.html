@@ -48,13 +48,12 @@
     input:checked + .slider { background-color: #ff9800; }
     input:checked + .slider:before { transform: translateX(26px); }
 
-    /* 右上の浮遊ボタン（現在地） */
-    .floating-btn {
-      position: absolute; right: 10px; width: 44px; height: 44px;
+    /* 右下の浮遊ボタン（現在地）※ペグマンと被らないように右下に移動！ */
+    #floatingLocationBtn {
+      position: absolute; bottom: 140px; right: 10px; width: 44px; height: 44px;
       background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998;
     }
-    #floatingLocationBtn { top: 120px; }
 
     #routeList { margin-top: 10px; display: none; }
     .memoItem { background: #fff; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
@@ -69,7 +68,7 @@
     <option value="3d">🏢 建物を立体表示 (3D)</option>
   </select>
   
-  <div id="floatingLocationBtn" class="floating-btn" onclick="showCurrentLocation()">🎯</div>
+  <div id="floatingLocationBtn" onclick="showCurrentLocation()">🎯</div>
 
   <div id="mapControls">
     <div id="dragHandleArea"><div id="dragHandle"></div></div>
@@ -135,7 +134,7 @@
     let map, route = [], watchId = null, currentLocationMarker = null, spotMemos = [], currentMode = "view", directionsService, directionsRenderer, searchMarker = null, tempMarker = null, lastSearchedRoutePoints = null, waypointCount = 0;
     let displayedPolylines = [];
     
-    // 最初から入れておく推奨カテゴリ（ここから現場で追加できる）
+    // 最初から入れておく推奨カテゴリ
     let categories = JSON.parse(localStorage.getItem("customCategories")) || [
       { name: "危険", icon: defaultIcons[0] }, { name: "おすすめ", icon: defaultIcons[1] }, { name: "注意", icon: defaultIcons[2] }
     ];
@@ -152,12 +151,12 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         zoomControl: true, zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
-        streetViewControl: true, // ★ペグマン（黄色い人）を復活！
+        streetViewControl: true, // ★ペグマン（黄色い人）を確実に右上に配置！
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, fullscreenControl: false
       });
 
-      // ★ストリートビューに入った時、左上の地図切り替えメニューを隠して「戻る」矢印と被らないようにする
+      // ストリートビューに入った時、左上の地図切り替えメニューを隠す
       const sv = map.getStreetView();
       sv.addListener('visible_changed', () => {
         document.getElementById('customMapSelector').style.display = sv.getVisible() ? 'none' : 'block';
@@ -185,7 +184,6 @@
       });
     }
 
-    // ★ 更新ボタン（タイムラグの注意書きを追加！）
     function forceUpdateApp() {
       alert("最新データを取得します。\n※送信直後の場合、システム反映に1〜3分ほどかかるため、変わらない場合は少し待ってから再度押してください。");
       window.location.href = window.location.protocol + "//" + window.location.host + window.location.pathname + '?v=' + Date.now();
@@ -320,14 +318,20 @@
       spotMemos.forEach(({ point, marker }) => { if (selectedCategory === "すべて" || point.category === selectedCategory) { marker.setMap(map); } else { marker.setMap(null); } });
     }
 
+    // ★ モードによって表示を綺麗に切り替える魔法（写真が見えないバグを解決！）
     function loadSpotMemos() {
       spotMemos = []; const saved = JSON.parse(localStorage.getItem("spotMemos")) || [];
       saved.forEach(point => {
         if (typeof point.lat !== "number" || typeof point.lng !== "number") return;
         const category = categories.find(c => c.name === point.category);
         const marker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map, icon: category ? category.icon : defaultIcons[0] });
-        const infoWindow = new google.maps.InfoWindow(); updateInfoWindow(point, infoWindow, marker);
-        marker.addListener("click", () => showInputForm(point, infoWindow, marker, false)); spotMemos.push({ point, marker });
+        const infoWindow = new google.maps.InfoWindow(); 
+        
+        marker.addListener("click", () => {
+          if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
+          else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); }
+        }); 
+        spotMemos.push({ point, marker });
       });
       renderMemoList();
     }
@@ -335,7 +339,14 @@
     function finalizeSpotMemo(point, marker) {
       const existing = spotMemos.find(p => Math.abs(p.point.lat - point.lat) < 0.000001 && Math.abs(p.point.lng - point.lng) < 0.000001);
       if (existing) { existing.point = point; existing.marker = marker; } 
-      else { const infoWindow = new google.maps.InfoWindow(); marker.addListener("click", () => showInputForm(point, infoWindow, marker, false)); spotMemos.push({ point, marker }); }
+      else { 
+        const infoWindow = new google.maps.InfoWindow(); 
+        marker.addListener("click", () => {
+          if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
+          else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); }
+        }); 
+        spotMemos.push({ point, marker }); 
+      }
       saveSpotMemos(); alert("保存しました");
     }
 
@@ -352,9 +363,15 @@
       saveSpotMemos();
     }
 
+    // ★ 閲覧モード用のスッキリした画面（写真を大きく表示！）
     function updateInfoWindow(point, infoWindow, marker) {
-      let content = `<strong>カテゴリ:</strong> ${point.category || "（未設定）"}<br><strong>メモ:</strong> ${point.memo || "（なし）"}`;
-      if (point.image) content += `<br><img src="${point.image}" style="max-width:200px; max-height:200px; display:block; margin-top:5px;">`;
+      let content = `
+        <div style="min-width: 150px;">
+          <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">📍 ${point.category || "（未設定）"}</div>
+          <div style="font-size: 14px; margin-bottom: 10px;">${point.memo || "（メモなし）"}</div>
+          ${point.image ? `<img src="${point.image}" style="max-width: 100%; max-height: 200px; display: block; border-radius: 8px;">` : ""}
+        </div>
+      `;
       infoWindow.setContent(content);
     }
 
@@ -373,14 +390,19 @@
       reader.readAsDataURL(file);
     }
 
+    // ★ 編集モード用の入力画面（現在保存されている写真も小さく表示！）
     function showInputForm(point, infoWindow, marker, isNew = false) {
       const container = document.createElement("div");
       container.innerHTML = `
-        <label>カテゴリ:<br><select id="inputCategory">${categories.map(c => `<option value="${c.name}">${c.name}</option>`).join("")}</select></label><br>
-        <label>メモ:<br><textarea id="inputMemo" rows="3" style="width:100%;">${point.memo || ""}</textarea></label><br>
-        <label>写真 (自動で軽く圧縮されます):<br><input type="file" id="inputImage" accept="image/*" style="font-size:12px;"></label><br>
-        <button id="saveBtn" style="padding:10px; margin-top:5px;">保存</button>
-        ${!isNew ? `<button id="deleteBtn" class="danger" style="padding:10px; margin-top:5px;">削除</button>` : ""}`;
+        <label style="font-weight:bold;">カテゴリ:</label><br>
+        <select id="inputCategory" style="margin-bottom:10px;">${categories.map(c => `<option value="${c.name}">${c.name}</option>`).join("")}</select><br>
+        <label style="font-weight:bold;">メモ:</label><br>
+        <textarea id="inputMemo" rows="3" style="width:100%; margin-bottom:10px;">${point.memo || ""}</textarea><br>
+        <label style="font-weight:bold;">写真 (自動圧縮):</label><br>
+        <input type="file" id="inputImage" accept="image/*" style="font-size:12px; margin-bottom:5px;"><br>
+        ${point.image ? `<img src="${point.image}" style="max-width:120px; display:block; margin-bottom:10px; border-radius:4px;">` : ""}
+        <button id="saveBtn" style="padding:10px; margin-top:5px;">保存する</button>
+        ${!isNew ? `<button id="deleteBtn" class="danger" style="padding:10px; margin-top:5px;">このピンを削除</button>` : ""}`;
       infoWindow.setContent(container); infoWindow.open(map, marker);
 
       google.maps.event.addListenerOnce(infoWindow, "domready", () => {
