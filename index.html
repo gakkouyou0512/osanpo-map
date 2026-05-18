@@ -55,7 +55,6 @@
       font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998;
     }
     #floatingLocationBtn { top: 120px; }
-    #floatingSvBtn { top: 175px; } /* 現在地ボタンの下に配置 */
 
     #routeList { margin-top: 10px; display: none; }
     .memoItem { background: #fff; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
@@ -71,8 +70,7 @@
   </select>
   
   <div id="floatingLocationBtn" class="floating-btn" onclick="showCurrentLocation()">🎯</div>
-  <div id="floatingSvBtn" class="floating-btn" onclick="toggleStreetView()">🚶‍♂️</div>
-
+  
   <div id="mapControls">
     <div id="dragHandleArea"><div id="dragHandle"></div></div>
 
@@ -156,9 +154,21 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         zoomControl: true, zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
-        streetViewControl: false, // スマホ専用ボタンを作ったので純正は隠す
+        streetViewControl: true, // ★ ペグマンを復活させる！
+        streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, fullscreenControl: false
       });
+
+      // ★ ストリートビューに入った時だけ「地図切り替えメニュー」を隠す魔法
+      const sv = map.getStreetView();
+      sv.addListener('visible_changed', () => {
+        if (sv.getVisible()) {
+          document.getElementById('customMapSelector').style.display = 'none'; // 隠す
+        } else {
+          document.getElementById('customMapSelector').style.display = 'block'; // 出す
+        }
+      });
+      // ...（オートコンプリートの設定などはそのまま残す）...
 
       setupCleanAutocomplete("originInput"); setupCleanAutocomplete("destinationInput"); setupCleanAutocomplete("placeInput");
       directionsService = new google.maps.DirectionsService(); directionsRenderer = new google.maps.DirectionsRenderer(); directionsRenderer.setMap(map);
