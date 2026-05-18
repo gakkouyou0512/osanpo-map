@@ -190,13 +190,10 @@
         if (currentMode !== "edit") {
           closeActiveInfoWindow(); // 自作のピンを閉じる
           
-          // ★ 何もない地図をタップした場合、ダミーを一瞬（0ミリ秒）だけ開いて光の速さで消すステルスハック
+          // ★ 天才的ハック：ダミーを使わず、画面にある「×ボタン」をプログラムの指で直接タップさせる！
           if (!e.placeId) {
-            const dummy = new google.maps.InfoWindow();
-            dummy.setPosition(e.latLng);
-            dummy.open(map);
-            // 0ミリ秒（ブラウザが画面を描画する前）に閉じるため、チラつきが一切見えません！
-            setTimeout(() => { dummy.close(); }, 0); 
+            const closeButtons = document.querySelectorAll('button.gm-ui-hover-effect');
+            closeButtons.forEach(btn => btn.click());
           }
           return;
         }
