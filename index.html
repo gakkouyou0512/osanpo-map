@@ -12,6 +12,9 @@
     html, body { height: 100%; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; color: #333; overflow: hidden; }
     #map { width: 100%; height: 100vh; }
 
+    /* ★Googleマップ標準の分かりにくい「×（閉じる）」ボタンを完全に隠す魔法 */
+    button.gm-ui-hover-effect { display: none !important; }
+
     /* 左上の地図切り替えメニュー */
     #customMapSelector {
       position: absolute; top: 10px; left: 10px; z-index: 998;
@@ -48,7 +51,7 @@
     input:checked + .slider { background-color: #ff9800; }
     input:checked + .slider:before { transform: translateX(26px); }
 
-    /* 右下の浮遊ボタン（現在地）※ペグマンと被らないように右下に移動！ */
+    /* 右下の浮遊ボタン（現在地） */
     #floatingLocationBtn {
       position: absolute; bottom: 140px; right: 10px; width: 44px; height: 44px;
       background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
@@ -134,7 +137,17 @@
     let map, route = [], watchId = null, currentLocationMarker = null, spotMemos = [], currentMode = "view", directionsService, directionsRenderer, searchMarker = null, tempMarker = null, lastSearchedRoutePoints = null, waypointCount = 0;
     let displayedPolylines = [];
     
-    // 最初から入れておく推奨カテゴリ
+    // ★ 現在開いている吹き出しを記憶する変数
+    let activeInfoWindow = null;
+
+    // ★ 開いている吹き出しを閉じる共通機能
+    function closeActiveInfoWindow() {
+      if (activeInfoWindow) {
+        activeInfoWindow.close();
+        activeInfoWindow = null;
+      }
+    }
+
     let categories = JSON.parse(localStorage.getItem("customCategories")) || [
       { name: "危険", icon: defaultIcons[0] }, { name: "おすすめ", icon: defaultIcons[1] }, { name: "注意", icon: defaultIcons[2] }
     ];
@@ -151,17 +164,16 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         zoomControl: true, zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
-        streetViewControl: true, // ★ペグマン（黄色い人）を確実に右上に配置！
+        streetViewControl: true,
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, fullscreenControl: false
       });
 
-      // ★ストリートビューに入った時、不要なボタンを隠して景色を見やすくする
       const sv = map.getStreetView();
       sv.addListener('visible_changed', () => {
         const isSV = sv.getVisible();
         document.getElementById('customMapSelector').style.display = isSV ? 'none' : 'block';
-        document.getElementById('floatingLocationBtn').style.display = isSV ? 'none' : 'block'; // ← ★この1行を追加！
+        document.getElementById('floatingLocationBtn').style.display = isSV ? 'none' : 'block';
       });
 
       setupCleanAutocomplete("originInput"); setupCleanAutocomplete("destinationInput"); setupCleanAutocomplete("placeInput");
@@ -169,12 +181,21 @@
       updateCategoryFilter(); loadSpotMemos(); updateRouteList();
 
       map.addListener("click", (e) => {
-        if (currentMode !== "edit") return;
+        // ★ 地図の何もないところをタップした時の処理
+        if (currentMode !== "edit") {
+          closeActiveInfoWindow(); // 吹き出しが開いていれば閉じる
+          return;
+        }
+        
+        // 編集モードでピンを置く時の処理
         if (tempMarker) tempMarker.setMap(null);
         const latLng = e.latLng; const point = { lat: latLng.lat(), lng: latLng.lng(), memo: "", image: "", category: "" };
         tempMarker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map });
+        
         const infoWindow = new google.maps.InfoWindow();
-        infoWindow.addListener("closeclick", () => { if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } });
+        closeActiveInfoWindow(); // 前のものを閉じてから新しいのを開く
+        activeInfoWindow = infoWindow;
+        
         showInputForm(point, infoWindow, tempMarker, true);
       });
 
@@ -222,58 +243,30 @@
       });
     }
 
-    // 連続検索ができるように改良したルート検索
     function searchRoute() {
-      const origin = document.getElementById("originInput").value;
-      const destination = document.getElementById("destinationInput").value;
+      const origin = document.getElementById("originInput").value, destination = document.getElementById("destinationInput").value;
       if (!origin || !destination) { alert("出発地と目的地を入力してください"); return; }
       
-      // 検索中であることを視覚的に伝える（ボタン連打防止）
       const btn = document.querySelector('button[onclick="searchRoute()"]');
-      const originalText = btn.innerText;
-      btn.innerText = "検索中...";
-      btn.disabled = true;
+      const originalText = btn.innerText; btn.innerText = "検索中..."; btn.disabled = true;
 
-      const waypoints = []; 
-      document.querySelectorAll(".waypoint-input").forEach(input => { 
-        if (input.value) { waypoints.push({ location: input.value, stopover: true }); } 
-      });
-      
+      const waypoints = []; document.querySelectorAll(".waypoint-input").forEach(input => { if (input.value) { waypoints.push({ location: input.value, stopover: true }); } });
       directionsService.route({ origin, destination, waypoints, optimizeWaypoints: true, travelMode: google.maps.TravelMode.DRIVING }, (result, status) => {
-        // 処理が終わったらボタンを元に戻す
-        btn.innerText = originalText;
-        btn.disabled = false;
-
-        if (status === "OK") { 
-          directionsRenderer.setDirections(result); 
-          lastSearchedRoutePoints = result.routes[0].overview_path.map(p => ({lat: p.lat(), lng: p.lng()})); 
-          document.getElementById("saveSearchedRouteBtn").style.display = "inline-block"; 
-        } else { 
-          alert("ルートが見つかりませんでした。別の場所を指定してみてください。"); 
-        }
+        btn.innerText = originalText; btn.disabled = false;
+        if (status === "OK") { directionsRenderer.setDirections(result); lastSearchedRoutePoints = result.routes[0].overview_path.map(p => ({lat: p.lat(), lng: p.lng()})); document.getElementById("saveSearchedRouteBtn").style.display = "inline-block"; } 
+        else { alert("ルートが見つかりませんでした。"); }
       });
     }
 
-    // タイトルを必須入力にした保存機能
     function saveSearchedRoute() {
       if (!lastSearchedRoutePoints) return;
-      
       let name = prompt("検索したルートの名前を入力してください");
-      if (name === null) return; // キャンセルを押したらそのまま終了
-      
-      // 空欄のままOKを押されたら、入力されるまで警告を出し続ける（ループ）
-      while (name.trim() === "") {
-        name = prompt("【注意】タイトルは必須です！\n検索したルートの名前を入力してください");
-        if (name === null) return; // キャンセルを押したら終了
-      }
-      
-      const description = prompt("ルートの説明を入力してください（空欄OK）");
-      saveRoute(name, description || "", lastSearchedRoutePoints); 
-      alert("保存しました！"); 
-      document.getElementById("saveSearchedRouteBtn").style.display = "none"; 
-      lastSearchedRoutePoints = null;
+      if (name === null) return;
+      while (name.trim() === "") { name = prompt("【注意】タイトルは必須です！\n検索したルートの名前を入力してください"); if (name === null) return; }
+      saveRoute(name, prompt("ルートの説明を入力してください（空欄OK）") || "", lastSearchedRoutePoints); 
+      alert("保存しました！"); document.getElementById("saveSearchedRouteBtn").style.display = "none"; lastSearchedRoutePoints = null;
     }
-    
+
     function startTracking() {
       if (watchId) { alert("すでに記録中です！"); return; }
       route = []; alert("🚶‍♂️ ルートの記録を開始しました！スマホを持ったまま歩いてください。");
@@ -293,7 +286,7 @@
 
     function stopTracking() {
       if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; document.getElementById("startTrackBtn").style.backgroundColor = "#007bff"; document.getElementById("startTrackBtn").innerText = "記録開始"; }
-      if (route.length > 0) { const name = prompt("ルート名を入力してください"); if (name) { saveRoute(name, prompt("説明を入力してください（空欄OK）") || "", route); alert("保存しました！"); } } 
+      if (route.length > 0) { let name = prompt("ルート名を入力してください"); if (name === null) return; while (name.trim() === "") { name = prompt("【注意】タイトルは必須です！\nルート名を入力してください"); if (name === null) return; } saveRoute(name, prompt("説明を入力してください（空欄OK）") || "", route); alert("保存しました！"); } 
       else { alert("移動データがありませんでした。"); }
     }
 
@@ -355,7 +348,6 @@
       spotMemos.forEach(({ point, marker }) => { if (selectedCategory === "すべて" || point.category === selectedCategory) { marker.setMap(map); } else { marker.setMap(null); } });
     }
 
-    // ★ モードによって表示を綺麗に切り替える魔法（写真が見えないバグを解決！）
     function loadSpotMemos() {
       spotMemos = []; const saved = JSON.parse(localStorage.getItem("spotMemos")) || [];
       saved.forEach(point => {
@@ -365,6 +357,8 @@
         const infoWindow = new google.maps.InfoWindow(); 
         
         marker.addListener("click", () => {
+          closeActiveInfoWindow(); // ★ 前のものを閉じてから新しいのを開く
+          activeInfoWindow = infoWindow;
           if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
           else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); }
         }); 
@@ -379,6 +373,8 @@
       else { 
         const infoWindow = new google.maps.InfoWindow(); 
         marker.addListener("click", () => {
+          closeActiveInfoWindow();
+          activeInfoWindow = infoWindow;
           if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
           else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); }
         }); 
@@ -400,13 +396,13 @@
       saveSpotMemos();
     }
 
-    // ★ 閲覧モード用のスッキリした画面（写真を大きく表示！）
     function updateInfoWindow(point, infoWindow, marker) {
       let content = `
         <div style="min-width: 150px;">
           <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">📍 ${point.category || "（未設定）"}</div>
           <div style="font-size: 14px; margin-bottom: 10px;">${point.memo || "（メモなし）"}</div>
-          ${point.image ? `<img src="${point.image}" style="max-width: 100%; max-height: 200px; display: block; border-radius: 8px;">` : ""}
+          ${point.image ? `<img src="${point.image}" style="max-width: 100%; max-height: 200px; display: block; border-radius: 8px; margin-bottom: 10px;">` : ""}
+          <button onclick="closeActiveInfoWindow()" class="secondary" style="padding:8px; margin-top:5px; font-size:14px; width:100%;">閉じる</button>
         </div>
       `;
       infoWindow.setContent(content);
@@ -427,7 +423,6 @@
       reader.readAsDataURL(file);
     }
 
-    // ★ 編集モード用の入力画面（現在保存されている写真も小さく表示！）
     function showInputForm(point, infoWindow, marker, isNew = false) {
       const container = document.createElement("div");
       container.innerHTML = `
@@ -439,19 +434,33 @@
         <input type="file" id="inputImage" accept="image/*" style="font-size:12px; margin-bottom:5px;"><br>
         ${point.image ? `<img src="${point.image}" style="max-width:120px; display:block; margin-bottom:10px; border-radius:4px;">` : ""}
         <button id="saveBtn" style="padding:10px; margin-top:5px;">保存する</button>
-        ${!isNew ? `<button id="deleteBtn" class="danger" style="padding:10px; margin-top:5px;">このピンを削除</button>` : ""}`;
+        ${!isNew ? `<button id="deleteBtn" class="danger" style="padding:10px; margin-top:5px;">このピンを削除</button>` : ""}
+        <button id="closeInfoBtn" class="secondary" style="padding:10px; margin-top:5px;">閉じる（キャンセル）</button>`;
+      
       infoWindow.setContent(container); infoWindow.open(map, marker);
 
       google.maps.event.addListenerOnce(infoWindow, "domready", () => {
         document.getElementById("inputCategory").value = point.category || "";
+        
+        // 保存ボタン
         document.getElementById("saveBtn").onclick = () => {
           point.category = document.getElementById("inputCategory").value; point.memo = document.getElementById("inputMemo").value;
           const categoryObj = categories.find(c => c.name === point.category); marker.setIcon(categoryObj ? categoryObj.icon : defaultIcons[0]);
           const file = document.getElementById("inputImage").files[0];
-          const doSave = () => { finalizeSpotMemo(point, marker); infoWindow.close(); tempMarker = null; };
+          const doSave = () => { finalizeSpotMemo(point, marker); closeActiveInfoWindow(); tempMarker = null; };
           if (file) { compressImage(file, (compressedData) => { point.image = compressedData; doSave(); }); } else { doSave(); }
         };
-        if (!isNew) { document.getElementById("deleteBtn").onclick = () => { deleteSpotMemo(point.lat, point.lng); marker.setMap(null); infoWindow.close(); }; }
+        
+        // 削除ボタン
+        if (!isNew) { 
+          document.getElementById("deleteBtn").onclick = () => { deleteSpotMemo(point.lat, point.lng); marker.setMap(null); closeActiveInfoWindow(); }; 
+        }
+        
+        // 閉じるボタン（新規作成時にキャンセルした場合はピンも消す）
+        document.getElementById("closeInfoBtn").onclick = () => {
+          if (isNew && tempMarker) { tempMarker.setMap(null); tempMarker = null; }
+          closeActiveInfoWindow();
+        };
       });
     }
   </script>
