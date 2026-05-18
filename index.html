@@ -48,7 +48,7 @@
     input:checked + .slider { background-color: #ff9800; }
     input:checked + .slider:before { transform: translateX(26px); }
 
-    /* 右上の浮遊ボタン（現在地 ＆ ストリートビュー） */
+    /* 右上の浮遊ボタン（現在地） */
     .floating-btn {
       position: absolute; right: 10px; width: 44px; height: 44px;
       background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
@@ -70,7 +70,7 @@
   </select>
   
   <div id="floatingLocationBtn" class="floating-btn" onclick="showCurrentLocation()">🎯</div>
-  
+
   <div id="mapControls">
     <div id="dragHandleArea"><div id="dragHandle"></div></div>
 
@@ -130,18 +130,16 @@
     document.addEventListener("touchend", stopDrag);
     document.addEventListener("touchmove", (e) => { if (isDragging) { controls.style.height = (window.innerHeight - e.touches[0].clientY) + "px"; e.preventDefault(); } }, {passive: false});
 
-    // グローバル変数
     const routeColors = ["#FF0000", "#0000FF", "#00AA00", "#FF00FF", "#00FFFF", "#FFA500"];
     const defaultIcons = ["http://maps.google.com/mapfiles/ms/icons/red-dot.png", "http://maps.google.com/mapfiles/ms/icons/green-dot.png", "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png", "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"];
     let map, route = [], watchId = null, currentLocationMarker = null, spotMemos = [], currentMode = "view", directionsService, directionsRenderer, searchMarker = null, tempMarker = null, lastSearchedRoutePoints = null, waypointCount = 0;
     let displayedPolylines = [];
     
-    // カテゴリデータの読み込み（新機能）
+    // 最初から入れておく推奨カテゴリ（ここから現場で追加できる）
     let categories = JSON.parse(localStorage.getItem("customCategories")) || [
       { name: "危険", icon: defaultIcons[0] }, { name: "おすすめ", icon: defaultIcons[1] }, { name: "注意", icon: defaultIcons[2] }
     ];
 
-    // オートコンプリート共通関数
     function setupCleanAutocomplete(inputId) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -154,21 +152,16 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         zoomControl: true, zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
-        streetViewControl: true, // ★ ペグマンを復活させる！
+        streetViewControl: true, // ★ペグマン（黄色い人）を復活！
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, fullscreenControl: false
       });
 
-      // ★ ストリートビューに入った時だけ「地図切り替えメニュー」を隠す魔法
+      // ★ストリートビューに入った時、左上の地図切り替えメニューを隠して「戻る」矢印と被らないようにする
       const sv = map.getStreetView();
       sv.addListener('visible_changed', () => {
-        if (sv.getVisible()) {
-          document.getElementById('customMapSelector').style.display = 'none'; // 隠す
-        } else {
-          document.getElementById('customMapSelector').style.display = 'block'; // 出す
-        }
+        document.getElementById('customMapSelector').style.display = sv.getVisible() ? 'none' : 'block';
       });
-      // ...（オートコンプリートの設定などはそのまま残す）...
 
       setupCleanAutocomplete("originInput"); setupCleanAutocomplete("destinationInput"); setupCleanAutocomplete("placeInput");
       directionsService = new google.maps.DirectionsService(); directionsRenderer = new google.maps.DirectionsRenderer(); directionsRenderer.setMap(map);
@@ -192,7 +185,11 @@
       });
     }
 
-    function forceUpdateApp() { window.location.href = window.location.protocol + "//" + window.location.host + window.location.pathname + '?v=' + Date.now(); }
+    // ★ 更新ボタン（タイムラグの注意書きを追加！）
+    function forceUpdateApp() {
+      alert("最新データを取得します。\n※送信直後の場合、システム反映に1〜3分ほどかかるため、変わらない場合は少し待ってから再度押してください。");
+      window.location.href = window.location.protocol + "//" + window.location.host + window.location.pathname + '?v=' + Date.now();
+    }
 
     const modeToggle = document.getElementById("modeToggle"); const modeLabel = document.getElementById("modeLabel");
     modeToggle.addEventListener("change", () => {
@@ -200,7 +197,6 @@
       else { currentMode = "view"; modeLabel.textContent = "🔍 地図を見るモード"; if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } }
     });
 
-    // カスタムカテゴリ追加機能
     function addCustomCategory() {
       const name = prompt("新しいカテゴリ名を入力してください（例：トイレ、日陰）");
       if (name) {
@@ -243,7 +239,6 @@
       alert("保存しました！"); document.getElementById("saveSearchedRouteBtn").style.display = "none"; lastSearchedRoutePoints = null;
     }
 
-    // 10m間引き付きGPSトラッキング
     function startTracking() {
       if (watchId) { alert("すでに記録中です！"); return; }
       route = []; alert("🚶‍♂️ ルートの記録を開始しました！スマホを持ったまま歩いてください。");
@@ -254,7 +249,7 @@
         else {
           const lastPos = route[route.length - 1];
           const distance = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(lastPos.lat, lastPos.lng), new google.maps.LatLng(latLng.lat, latLng.lng));
-          if (distance >= 10) { route.push(latLng); } // 10m以上移動時のみ記録（データ大幅削減）
+          if (distance >= 10) { route.push(latLng); }
         }
         if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
         map.setCenter(latLng);
@@ -306,13 +301,6 @@
         btn.innerText = "🎯"; const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude }; map.setCenter(latLng);
         if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
       }, () => { btn.innerText = "🎯"; alert("現在地が取得できませんでした"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-    }
-
-    // ストリートビュー切り替え機能
-    function toggleStreetView() {
-      const sv = map.getStreetView();
-      if (sv.getVisible()) { sv.setVisible(false); } 
-      else { sv.setPosition(map.getCenter()); sv.setVisible(true); }
     }
 
     function changeMapView() {
@@ -370,18 +358,15 @@
       infoWindow.setContent(content);
     }
 
-    // 画像を超軽量化（圧縮）する魔法の関数
     function compressImage(file, callback) {
       const reader = new FileReader();
       reader.onload = function(e) {
         const img = new Image();
         img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 400; // ガラケー並のサイズまで小さくする
-          const scaleSize = MAX_WIDTH / img.width;
+          const canvas = document.createElement('canvas'); const MAX_WIDTH = 400; const scaleSize = MAX_WIDTH / img.width;
           canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
           const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          callback(canvas.toDataURL('image/jpeg', 0.6)); // 画質を60%に落としてデータ量を極小化
+          callback(canvas.toDataURL('image/jpeg', 0.6));
         }
         img.src = e.target.result;
       }
@@ -404,7 +389,6 @@
           point.category = document.getElementById("inputCategory").value; point.memo = document.getElementById("inputMemo").value;
           const categoryObj = categories.find(c => c.name === point.category); marker.setIcon(categoryObj ? categoryObj.icon : defaultIcons[0]);
           const file = document.getElementById("inputImage").files[0];
-          
           const doSave = () => { finalizeSpotMemo(point, marker); infoWindow.close(); tempMarker = null; };
           if (file) { compressImage(file, (compressedData) => { point.image = compressedData; doSave(); }); } else { doSave(); }
         };
