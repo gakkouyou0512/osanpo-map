@@ -12,9 +12,6 @@
     html, body { height: 100%; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; color: #333; overflow: hidden; }
     #map { width: 100%; height: 100vh; }
 
-    /* ★Googleマップ標準の分かりにくい「×（閉じる）」ボタンを完全に隠す魔法 */
-    button.gm-ui-hover-effect { display: none !important; }
-
     /* 左上の地図切り替えメニュー */
     #customMapSelector {
       position: absolute; top: 10px; left: 10px; z-index: 998;
@@ -137,10 +134,10 @@
     let map, route = [], watchId = null, currentLocationMarker = null, spotMemos = [], currentMode = "view", directionsService, directionsRenderer, searchMarker = null, tempMarker = null, lastSearchedRoutePoints = null, waypointCount = 0;
     let displayedPolylines = [];
     
-    // ★ 現在開いている吹き出しを記憶する変数
+    // 現在開いている吹き出しを記憶する変数
     let activeInfoWindow = null;
 
-    // ★ 開いている吹き出しを閉じる共通機能
+    // 開いている吹き出しを閉じる共通機能
     function closeActiveInfoWindow() {
       if (activeInfoWindow) {
         activeInfoWindow.close();
@@ -180,21 +177,41 @@
       directionsService = new google.maps.DirectionsService(); directionsRenderer = new google.maps.DirectionsRenderer(); directionsRenderer.setMap(map);
       updateCategoryFilter(); loadSpotMemos(); updateRouteList();
 
+      // ★ マップをタップしたときの処理（ここで全部制御します）
       map.addListener("click", (e) => {
-        // ★ 地図の何もないところをタップした時の処理
+        // お店（POI）をタップして e.placeId がある場合、かつピン置きモードなら邪魔しないようにキャンセル
+        if (currentMode === "edit" && e.placeId) {
+          e.stop();
+        }
+
+        // 閲覧モードの時の処理
         if (currentMode !== "edit") {
-          closeActiveInfoWindow(); // 吹き出しが開いていれば閉じる
+          closeActiveInfoWindow(); // 自作のピンの吹き出しを閉じる
+          
+          // ★ もし何もない地図（お店以外）をタップしたなら、開いているお店の詳細も強制的に消すハック
+          if (!e.placeId) {
+            const dummy = new google.maps.InfoWindow({ disableAutoPan: true });
+            dummy.setPosition(e.latLng);
+            dummy.open(map);
+            dummy.close();
+          }
           return;
         }
         
-        // 編集モードでピンを置く時の処理
+        // ピンを置くモードの処理
         if (tempMarker) tempMarker.setMap(null);
         const latLng = e.latLng; const point = { lat: latLng.lat(), lng: latLng.lng(), memo: "", image: "", category: "" };
         tempMarker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map });
         
         const infoWindow = new google.maps.InfoWindow();
-        closeActiveInfoWindow(); // 前のものを閉じてから新しいのを開く
+        closeActiveInfoWindow();
         activeInfoWindow = infoWindow;
+        
+        // 右上の「×」ボタンを押した時、作成中ならピンごと消す
+        infoWindow.addListener("closeclick", () => {
+          if (tempMarker) { tempMarker.setMap(null); tempMarker = null; }
+          activeInfoWindow = null;
+        });
         
         showInputForm(point, infoWindow, tempMarker, true);
       });
@@ -357,11 +374,12 @@
         const infoWindow = new google.maps.InfoWindow(); 
         
         marker.addListener("click", () => {
-          closeActiveInfoWindow(); // ★ 前のものを閉じてから新しいのを開く
+          closeActiveInfoWindow();
           activeInfoWindow = infoWindow;
           if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
           else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); }
-        }); 
+        });
+        infoWindow.addListener("closeclick", () => { activeInfoWindow = null; });
         spotMemos.push({ point, marker });
       });
       renderMemoList();
@@ -377,7 +395,8 @@
           activeInfoWindow = infoWindow;
           if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
           else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); }
-        }); 
+        });
+        infoWindow.addListener("closeclick", () => { activeInfoWindow = null; });
         spotMemos.push({ point, marker }); 
       }
       saveSpotMemos(); alert("保存しました");
@@ -396,13 +415,13 @@
       saveSpotMemos();
     }
 
+    // ★ 閲覧時のスッキリした画面（×ボタンが復活しています）
     function updateInfoWindow(point, infoWindow, marker) {
       let content = `
         <div style="min-width: 150px;">
           <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">📍 ${point.category || "（未設定）"}</div>
           <div style="font-size: 14px; margin-bottom: 10px;">${point.memo || "（メモなし）"}</div>
           ${point.image ? `<img src="${point.image}" style="max-width: 100%; max-height: 200px; display: block; border-radius: 8px; margin-bottom: 10px;">` : ""}
-          <button onclick="closeActiveInfoWindow()" class="secondary" style="padding:8px; margin-top:5px; font-size:14px; width:100%;">閉じる</button>
         </div>
       `;
       infoWindow.setContent(content);
@@ -423,6 +442,7 @@
       reader.readAsDataURL(file);
     }
 
+    // ★ 編集時の画面（×ボタンでキャンセルできます）
     function showInputForm(point, infoWindow, marker, isNew = false) {
       const container = document.createElement("div");
       container.innerHTML = `
@@ -434,15 +454,13 @@
         <input type="file" id="inputImage" accept="image/*" style="font-size:12px; margin-bottom:5px;"><br>
         ${point.image ? `<img src="${point.image}" style="max-width:120px; display:block; margin-bottom:10px; border-radius:4px;">` : ""}
         <button id="saveBtn" style="padding:10px; margin-top:5px;">保存する</button>
-        ${!isNew ? `<button id="deleteBtn" class="danger" style="padding:10px; margin-top:5px;">このピンを削除</button>` : ""}
-        <button id="closeInfoBtn" class="secondary" style="padding:10px; margin-top:5px;">閉じる（キャンセル）</button>`;
+        ${!isNew ? `<button id="deleteBtn" class="danger" style="padding:10px; margin-top:5px;">このピンを削除</button>` : ""}`;
       
       infoWindow.setContent(container); infoWindow.open(map, marker);
 
       google.maps.event.addListenerOnce(infoWindow, "domready", () => {
         document.getElementById("inputCategory").value = point.category || "";
         
-        // 保存ボタン
         document.getElementById("saveBtn").onclick = () => {
           point.category = document.getElementById("inputCategory").value; point.memo = document.getElementById("inputMemo").value;
           const categoryObj = categories.find(c => c.name === point.category); marker.setIcon(categoryObj ? categoryObj.icon : defaultIcons[0]);
@@ -451,16 +469,9 @@
           if (file) { compressImage(file, (compressedData) => { point.image = compressedData; doSave(); }); } else { doSave(); }
         };
         
-        // 削除ボタン
         if (!isNew) { 
           document.getElementById("deleteBtn").onclick = () => { deleteSpotMemo(point.lat, point.lng); marker.setMap(null); closeActiveInfoWindow(); }; 
         }
-        
-        // 閉じるボタン（新規作成時にキャンセルした場合はピンも消す）
-        document.getElementById("closeInfoBtn").onclick = () => {
-          if (isNew && tempMarker) { tempMarker.setMap(null); tempMarker = null; }
-          closeActiveInfoWindow();
-        };
       });
     }
   </script>
