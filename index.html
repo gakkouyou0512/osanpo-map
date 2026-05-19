@@ -44,13 +44,20 @@
     button.danger { background-color: #dc3545; }
 
     /* モード切替スイッチ */
-    .mode-switch-container { display: flex; align-items: center; justify-content: space-between; background: #e9ecef; padding: 12px 20px; border-radius: 50px; margin-bottom: 20px; font-weight: bold; font-size: 18px; }
+    .mode-switch-container { display: flex; align-items: center; justify-content: space-between; background: #e9ecef; padding: 12px 20px; border-radius: 50px; margin-bottom: 10px; font-weight: bold; font-size: 18px; }
     .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
     .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
     input:checked + .slider { background-color: #ff9800; }
     input:checked + .slider:before { transform: translateX(26px); }
+
+    /* ★ 邪魔にならないコンパクトな1タップピンボタン */
+    .quick-pin-container { display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; }
+    .quick-pin-btn { 
+      padding: 8px 12px; font-size: 13px; font-weight: bold; border-radius: 20px; border: none; 
+      color: white; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+    }
 
     /* 右下の浮遊ボタン（現在地） */
     #floatingLocationBtn {
@@ -80,6 +87,12 @@
     <div class="mode-switch-container">
       <span id="modeLabel">🔍 地図を見るモード</span>
       <label class="switch"><input type="checkbox" id="modeToggle"><span class="slider"></span></label>
+    </div>
+
+    <div class="quick-pin-container">
+      <button class="quick-pin-btn" style="background-color: #dc3545;" onclick="dropPinAtCurrentLocation('危険')">🚨危険を記録</button>
+      <button class="quick-pin-btn" style="background-color: #ffc107; color: #333;" onclick="dropPinAtCurrentLocation('注意')">⚠️注意を記録</button>
+      <button class="quick-pin-btn" style="background-color: #28a745;" onclick="dropPinAtCurrentLocation('おすすめ')">✨おすすめ記録</button>
     </div>
 
     <div class="menu-section">
@@ -138,8 +151,10 @@
     let map, route = [], watchId = null, currentLocationMarker = null, spotMemos = [], currentMode = "view", directionsService, directionsRenderer, searchMarker = null, tempMarker = null, lastSearchedRoutePoints = null, waypointCount = 0;
     let displayedPolylines = [];
     
-    // 現在開いている自作ピンの吹き出しを記憶
+    // 現在開いている自作ピンの吹き出しと、スリープ防止・時間記録用変数
     let activeInfoWindow = null;
+    let trackingStartTime = null;
+    let wakeLock = null;
 
     function closeActiveInfoWindow() {
       if (activeInfoWindow) {
@@ -181,16 +196,14 @@
       updateCategoryFilter(); loadSpotMemos(); updateRouteList();
 
       map.addListener("click", (e) => {
-        // お店（POI）をタップして e.placeId がある場合、かつピン置きモードなら邪魔しないようにキャンセル
         if (currentMode === "edit" && e.placeId) {
           e.stop();
         }
 
-        // 閲覧モードの時の処理
         if (currentMode !== "edit") {
-          closeActiveInfoWindow(); // 自作のピンを閉じる
+          closeActiveInfoWindow();
           
-          // ★ 天才的ハック：ダミーを使わず、画面にある「×ボタン」をプログラムの指で直接タップさせる！
+          // ★ 何もない地図をタップした場合、プログラムの指で直接×ボタンをタップさせるハック
           if (!e.placeId) {
             const closeButtons = document.querySelectorAll('button.gm-ui-hover-effect');
             closeButtons.forEach(btn => btn.click());
@@ -198,7 +211,6 @@
           return;
         }
         
-        // 編集モードでピンを置く時の処理
         if (tempMarker) tempMarker.setMap(null);
         const latLng = e.latLng; const point = { lat: latLng.lat(), lng: latLng.lng(), memo: "", image: "", category: "" };
         tempMarker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map });
@@ -233,6 +245,36 @@
       if (modeToggle.checked) { currentMode = "edit"; modeLabel.textContent = "📌 ピンを置くモード"; } 
       else { currentMode = "view"; modeLabel.textContent = "🔍 地図を見るモード"; if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } }
     });
+
+    // ★ 1タップで現在地にピンを置く魔法
+    function dropPinAtCurrentLocation(categoryName) {
+      if (!navigator.geolocation) { alert("GPSが使えません。"); return; }
+      
+      const btn = document.getElementById("floatingLocationBtn");
+      btn.innerText = "⏳";
+      
+      navigator.geolocation.getCurrentPosition(pos => {
+        btn.innerText = "🎯";
+        const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const point = { lat: latLng.lat, lng: latLng.lng, memo: "", image: "", category: categoryName };
+        
+        map.setCenter(latLng);
+        if (tempMarker) tempMarker.setMap(null);
+        tempMarker = new google.maps.Marker({ position: latLng, map: map });
+        
+        const infoWindow = new google.maps.InfoWindow();
+        closeActiveInfoWindow();
+        activeInfoWindow = infoWindow;
+        
+        infoWindow.addListener("closeclick", () => {
+          if (tempMarker) { tempMarker.setMap(null); tempMarker = null; }
+          activeInfoWindow = null;
+        });
+        
+        showInputForm(point, infoWindow, tempMarker, true);
+        
+      }, () => { btn.innerText = "🎯"; alert("現在地が取得できませんでした。"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    }
 
     function addCustomCategory() {
       const name = prompt("新しいカテゴリ名を入力してください（例：トイレ、日陰）");
@@ -283,26 +325,56 @@
       alert("保存しました！"); document.getElementById("saveSearchedRouteBtn").style.display = "none"; lastSearchedRoutePoints = null;
     }
 
-    function startTracking() {
+    // ★ スリープ防止＆自由地図操作対応トラッキング
+    async function startTracking() {
       if (watchId) { alert("すでに記録中です！"); return; }
-      route = []; alert("🚶‍♂️ ルートの記録を開始しました！スマホを持ったまま歩いてください。");
+      route = []; 
+      trackingStartTime = new Date(); 
+      
+      if ('wakeLock' in navigator) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { console.log(err); }
+      }
+      
+      alert("🚶‍♂️ ルートの記録を開始しました！\n（記録中はスマホが勝手に寝ないように設定しています。ポケットに入れる際は画面の明るさを下げてください）");
       document.getElementById("startTrackBtn").style.backgroundColor = "#ff9800"; document.getElementById("startTrackBtn").innerText = "記録中...";
+      
       watchId = navigator.geolocation.watchPosition(pos => {
         const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        if (route.length === 0) { route.push(latLng); } 
+        if (route.length === 0) { 
+          route.push(latLng); 
+          map.setCenter(latLng); 
+        } 
         else {
           const lastPos = route[route.length - 1];
           const distance = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(lastPos.lat, lastPos.lng), new google.maps.LatLng(latLng.lat, latLng.lng));
-          if (distance >= 10) { route.push(latLng); }
+          // ★ 5mごとに記録して道なりを綺麗に
+          if (distance >= 5) { route.push(latLng); }
         }
+        
         if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
-        map.setCenter(latLng);
       }, () => { alert("GPSエラー。電波の良い場所へ移動してください。"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
 
+    // ★ 時間自動計算＆スリープ防止解除
     function stopTracking() {
       if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; document.getElementById("startTrackBtn").style.backgroundColor = "#007bff"; document.getElementById("startTrackBtn").innerText = "記録開始"; }
-      if (route.length > 0) { let name = prompt("ルート名を入力してください"); if (name === null) return; while (name.trim() === "") { name = prompt("【注意】タイトルは必須です！\nルート名を入力してください"); if (name === null) return; } saveRoute(name, prompt("説明を入力してください（空欄OK）") || "", route); alert("保存しました！"); } 
+      
+      if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
+
+      if (route.length > 0) { 
+        const endTime = new Date();
+        const diffMinutes = Math.max(1, Math.round((endTime - trackingStartTime) / 60000));
+        const defaultDesc = `所要時間: 約${diffMinutes}分`;
+
+        let name = prompt("ルート名を入力してください"); 
+        if (name === null) return; 
+        while (name.trim() === "") { name = prompt("【注意】タイトルは必須です！\nルート名を入力してください"); if (name === null) return; } 
+        
+        let description = prompt("ルートの説明を入力してください（空欄OK）\n※所要時間は自動計算されています", defaultDesc);
+        
+        saveRoute(name, description || defaultDesc, route); 
+        alert("保存しました！"); 
+      } 
       else { alert("移動データがありませんでした。"); }
     }
 
