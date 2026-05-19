@@ -59,9 +59,9 @@
       color: white; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
     }
 
-    /* 右下の浮遊ボタン（現在地） */
+    /* ★ 🎯現在地ボタン（パネルと被らないよう、右上の純正ボタン群の下に配置！） */
     #floatingLocationBtn {
-      position: absolute; bottom: 140px; right: 10px; width: 44px; height: 44px;
+      position: absolute; top: 220px; right: 10px; width: 44px; height: 44px;
       background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998;
     }
@@ -89,7 +89,7 @@
       <label class="switch"><input type="checkbox" id="modeToggle"><span class="slider"></span></label>
     </div>
 
-    <div class="quick-pin-container">
+    <div id="quickPinContainer" class="quick-pin-container" style="display: none;">
       <button class="quick-pin-btn" style="background-color: #dc3545;" onclick="dropPinAtCurrentLocation('危険')">🚨危険を記録</button>
       <button class="quick-pin-btn" style="background-color: #ffc107; color: #333;" onclick="dropPinAtCurrentLocation('注意')">⚠️注意を記録</button>
       <button class="quick-pin-btn" style="background-color: #28a745;" onclick="dropPinAtCurrentLocation('おすすめ')">✨おすすめ記録</button>
@@ -196,14 +196,10 @@
       updateCategoryFilter(); loadSpotMemos(); updateRouteList();
 
       map.addListener("click", (e) => {
-        if (currentMode === "edit" && e.placeId) {
-          e.stop();
-        }
+        if (currentMode === "edit" && e.placeId) { e.stop(); }
 
         if (currentMode !== "edit") {
           closeActiveInfoWindow();
-          
-          // ★ 何もない地図をタップした場合、プログラムの指で直接×ボタンをタップさせるハック
           if (!e.placeId) {
             const closeButtons = document.querySelectorAll('button.gm-ui-hover-effect');
             closeButtons.forEach(btn => btn.click());
@@ -241,12 +237,22 @@
     }
 
     const modeToggle = document.getElementById("modeToggle"); const modeLabel = document.getElementById("modeLabel");
+    
+    // ★ スイッチを切り替えた時の動作（1タップボタンの表示/非表示を連動）
     modeToggle.addEventListener("change", () => {
-      if (modeToggle.checked) { currentMode = "edit"; modeLabel.textContent = "📌 ピンを置くモード"; } 
-      else { currentMode = "view"; modeLabel.textContent = "🔍 地図を見るモード"; if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } }
+      const quickPin = document.getElementById("quickPinContainer");
+      if (modeToggle.checked) { 
+        currentMode = "edit"; modeLabel.textContent = "📌 ピンを置くモード"; 
+        quickPin.style.display = "flex"; // ★編集モードの時だけ出す
+      } 
+      else { 
+        currentMode = "view"; modeLabel.textContent = "🔍 地図を見るモード"; 
+        quickPin.style.display = "none"; // ★見るモードの時は隠す
+        if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } 
+      }
     });
 
-    // ★ 1タップで現在地にピンを置く魔法
+    // ★ 完璧なワンタップ現在地ピン（入力画面を出さず一瞬で保存）
     function dropPinAtCurrentLocation(categoryName) {
       if (!navigator.geolocation) { alert("GPSが使えません。"); return; }
       
@@ -259,19 +265,26 @@
         const point = { lat: latLng.lat, lng: latLng.lng, memo: "", image: "", category: categoryName };
         
         map.setCenter(latLng);
-        if (tempMarker) tempMarker.setMap(null);
-        tempMarker = new google.maps.Marker({ position: latLng, map: map });
+        
+        // ★ 即座にピンを作って保存リストに入れる
+        const categoryObj = categories.find(c => c.name === categoryName);
+        const marker = new google.maps.Marker({ position: latLng, map: map, icon: categoryObj ? categoryObj.icon : defaultIcons[0] });
         
         const infoWindow = new google.maps.InfoWindow();
-        closeActiveInfoWindow();
-        activeInfoWindow = infoWindow;
-        
-        infoWindow.addListener("closeclick", () => {
-          if (tempMarker) { tempMarker.setMap(null); tempMarker = null; }
-          activeInfoWindow = null;
+        marker.addListener("click", () => {
+          closeActiveInfoWindow();
+          activeInfoWindow = infoWindow;
+          // タップされた時は、今のモードに合わせて表示・編集を切り替える
+          if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
+          else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); }
         });
+        infoWindow.addListener("closeclick", () => { activeInfoWindow = null; });
         
-        showInputForm(point, infoWindow, tempMarker, true);
+        spotMemos.push({ point, marker });
+        saveSpotMemos(); // 画面に表示＆ストレージに保存
+        
+        // ★ 完了メッセージを出して終了（2タップ目を要求しない）
+        alert(`現在地に「${categoryName}」のピンを配置しました！\n詳細を追加したい場合は、置かれたピンをタップしてください。`);
         
       }, () => { btn.innerText = "🎯"; alert("現在地が取得できませんでした。"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
@@ -325,7 +338,6 @@
       alert("保存しました！"); document.getElementById("saveSearchedRouteBtn").style.display = "none"; lastSearchedRoutePoints = null;
     }
 
-    // ★ スリープ防止＆自由地図操作対応トラッキング
     async function startTracking() {
       if (watchId) { alert("すでに記録中です！"); return; }
       route = []; 
@@ -347,7 +359,6 @@
         else {
           const lastPos = route[route.length - 1];
           const distance = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(lastPos.lat, lastPos.lng), new google.maps.LatLng(latLng.lat, latLng.lng));
-          // ★ 5mごとに記録して道なりを綺麗に
           if (distance >= 5) { route.push(latLng); }
         }
         
@@ -355,7 +366,6 @@
       }, () => { alert("GPSエラー。電波の良い場所へ移動してください。"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
 
-    // ★ 時間自動計算＆スリープ防止解除
     function stopTracking() {
       if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; document.getElementById("startTrackBtn").style.backgroundColor = "#007bff"; document.getElementById("startTrackBtn").innerText = "記録開始"; }
       
