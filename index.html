@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>お散歩マップ（操作改善版）</title>
+  <title>お散歩マップ（UI最適化・キー反映版）</title>
   <style>
     html, body { height: 100%; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; color: #333; overflow: hidden; }
     #map { width: 100%; height: 100vh; }
@@ -35,7 +35,8 @@
     input:checked + .slider { background-color: #ff9800; }
     input:checked + .slider:before { transform: translateX(26px); }
 
-    #floatingLocationBtn { position: absolute; top: 220px; right: 10px; width: 44px; height: 44px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998; }
+    #floatingLocationBtn { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998; }
+    
     .route-setter-box { display: flex; gap: 5px; margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; }
     .route-setter-btn { flex: 1; padding: 6px; font-size: 11px; font-weight: bold; background: #e9ecef; color: #333; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; text-align: center; }
 
@@ -56,11 +57,13 @@
 </head>
 <body>
   <div id="map"></div>
+  
   <select id="customMapSelector" onchange="changeMapView()">
     <option value="roadmap">🗺️ デフォルト地図</option>
     <option value="satellite">🛰️ 航空写真</option>
     <option value="3d">🏢 建物を立体表示 (3D)</option>
   </select>
+  
   <div id="floatingLocationBtn" onclick="showCurrentLocation()">🎯</div>
 
   <div class="fab-container" id="fabContainer" style="display: none;">
@@ -70,6 +73,7 @@
 
   <div id="mapControls">
     <div id="dragHandleArea"><div id="dragHandle"></div></div>
+
     <div class="mode-switch-container">
       <span id="modeLabel">🔍 地図を見るモード</span>
       <label class="switch"><input type="checkbox" id="modeToggle"><span class="slider"></span></label>
@@ -111,8 +115,10 @@
         <select id="categoryFilter" onchange="renderMemoList()"><option value="すべて">すべてのピンを表示</option></select>
         <button onclick="addCustomCategory()" class="secondary" style="padding:10px; font-size:14px; margin-top:5px;">＋ 新しいカテゴリを追加</button>
       </div>
+
       <button onclick="forceUpdateApp()" style="background-color: #6c757d; margin-top: 20px;">🔄 アプリを最新版に更新する</button>
     </div>
+
     <h3 id="routeTitle" style="display:none;">保存したルート</h3>
     <div id="routeList"></div>
   </div>
@@ -147,7 +153,6 @@
       { name: "おすすめ", icon: defaultIcons[1], color: "#28a745" }
     ];
 
-    // ★修正1：ボタンを押したら「現在地に即座にピンを落とす（ワンタップ保存）」に戻しました
     function generateQuickPinButtons() {
       const menu = document.getElementById("fabMenu");
       menu.innerHTML = "";
@@ -160,7 +165,7 @@
 
         btn.onclick = () => {
           document.getElementById('fabContainer').classList.remove('open');
-          dropPinAtCurrentLocation(c.name); // 現在地にピンを落とす関数を即座に呼ぶ
+          dropPinAtCurrentLocation(c.name); 
         };
         li.appendChild(span); li.appendChild(btn); menu.appendChild(li);
       });
@@ -185,9 +190,11 @@
     function initMap() {
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
-        zoomControl: true, zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
-        streetViewControl: true, streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
-        mapTypeControl: false, fullscreenControl: false
+        zoomControl: false, 
+        streetViewControl: true, 
+        streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
+        mapTypeControl: false, 
+        fullscreenControl: false
       });
       const sv = map.getStreetView();
       sv.addListener('visible_changed', () => {
@@ -201,7 +208,6 @@
 
       map.addListener("click", (e) => {
         if (currentMode === "edit" && e.placeId) { e.stop(); }
-        // 編集モードでの通常の地図タップ時（好きな場所に刺す用）
         if (currentMode === "edit") {
           if (tempMarker) tempMarker.setMap(null);
           const latLng = e.latLng; 
@@ -213,7 +219,6 @@
           showInputForm(point, infoWindow, tempMarker, true);
           return;
         }
-        // 閲覧モード時の地図タップ
         if (currentMode !== "edit") {
           closeActiveInfoWindow();
           if (!e.placeId) { 
@@ -248,24 +253,28 @@
       else { currentMode = "view"; modeLabel.textContent = "🔍 地図を見るモード"; fab.style.display = "none"; fab.classList.remove('open'); if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } }
     });
 
-    // 現在地に指定されたカテゴリのピンを落として入力画面を開く
     function dropPinAtCurrentLocation(categoryName) {
       if (!navigator.geolocation) { alert("GPSが使えません。"); return; }
-      const btn = document.getElementById("floatingLocationBtn"); btn.innerText = "⏳";
       navigator.geolocation.getCurrentPosition(pos => {
-        btn.innerText = "🎯"; const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const point = { lat: latLng.lat, lng: latLng.lng(), memo: "", image: "", category: categoryName };
+        const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const point = { lat: latLng.lat, lng: latLng.lng, memo: "", image: "", category: categoryName };
         map.setCenter(latLng);
         if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: defaultIcons[3] }); }
         
         const categoryObj = categories.find(c => c.name === categoryName);
         const marker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map, icon: categoryObj ? categoryObj.icon : defaultIcons[0] });
+        
         const infoWindow = new google.maps.InfoWindow();
+        marker.addListener("click", () => {
+          closeActiveInfoWindow(); activeInfoWindow = infoWindow;
+          if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
+          else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); }
+        });
         
-        closeActiveInfoWindow(); activeInfoWindow = infoWindow;
-        showInputForm(point, infoWindow, marker, true); // true = 新規作成扱い（保存を押すまで確定しない）
-        
-      }, () => { btn.innerText = "🎯"; alert("現在地が取得できませんでした。"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+        spotMemos.push({ point, marker });
+        saveSpotMemos(); 
+        alert(`現在地に「${categoryName}」のピンを保存しました！`);
+      }, () => { alert("現在地が取得できませんでした。"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
 
     function addCustomCategory() { const name = prompt("新しいカテゴリ名を入力してください"); if (name) { categories.push({ name: name, icon: defaultIcons[categories.length % 5], color: "#6c757d" }); localStorage.setItem("customCategories_" + gardenId, JSON.stringify(categories)); generateQuickPinButtons(); updateCategoryFilter(); alert("カテゴリ「" + name + "」を追加しました！"); } }
@@ -279,25 +288,63 @@
         if (status === "OK") {
           const loc = results[0].geometry.location; map.setCenter(loc);
           searchMarker = new google.maps.Marker({ position: loc, map: map, title: results[0].formatted_address });
-          const saveBtnHTML = (currentMode === "edit") ? `<button onclick="convertSearchToCustomPin('${query}', ${loc.lat()}, ${loc.lng()})" style="padding:5px; font-size:12px; margin-top:5px; background:#ff9800;">📍 ピンとして保存</button>` : '';
-          const info = new google.maps.InfoWindow({ content: `<div><strong>🔍 検索結果: ${query}</strong><br>${saveBtnHTML}${createRouteSetterHTML(loc.lat(), loc.lng(), query)}</div>` });
+          
+          const escapedQuery = query.replace(/'/g, "\\'");
+          let step1HTML = '';
+          
+          if (currentMode === "edit") {
+            step1HTML = `
+              <div id="search-action-view" style="min-width: 180px; text-align: center;">
+                <strong style="display:block; margin-bottom:10px; font-size: 14px;">🔍 ${query}</strong>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                   <button onclick="window.showSearchPinCategories('${escapedQuery}', ${loc.lat()}, ${loc.lng()})" style="flex:1; padding:10px; background:#ff9800; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">📍 ピン保存</button>
+                   <button onclick="window.showSearchRouteOptions('${escapedQuery}', ${loc.lat()}, ${loc.lng()})" style="flex:1; padding:10px; background:#007bff; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">🗺️ ルート</button>
+                </div>
+              </div>`;
+          } else {
+            step1HTML = `
+              <div id="search-action-view" style="min-width: 180px; text-align: center;">
+                <strong style="display:block; margin-bottom:10px; font-size: 14px;">🔍 ${query}</strong>
+                <div style="margin-top:5px;">${createRouteSetterHTML(loc.lat(), loc.lng(), query)}</div>
+              </div>`;
+          }
+
+          const info = new google.maps.InfoWindow({ content: step1HTML });
           info.open(map, searchMarker); activeInfoWindow = info;
         } else { alert("検索に失敗しました"); }
       });
     }
 
-    // ★修正2：検索結果からピン保存を押した時、通常の「カテゴリ選択画面」を出すように変更
-    function convertSearchToCustomPin(name, lat, lng) {
-      // 初期状態として1番目のカテゴリをセット
-      const point = { lat: lat, lng: lng, memo: name, image: "", category: categories[0].name };
-      const marker = new google.maps.Marker({ position: { lat, lng }, map: map, icon: categories[0].icon });
+    window.showSearchPinCategories = function(name, lat, lng) {
+      let buttonsHTML = '<div style="margin-bottom: 8px; font-weight:bold; text-align:left;">カテゴリを選択:</div><div style="display: flex; flex-wrap: wrap; gap: 5px; justify-content:center;">';
+      categories.forEach(c => {
+         buttonsHTML += `<button onclick="saveSearchAsCategory('${name}', ${lat}, ${lng}, '${c.name}')" style="padding: 8px; font-size:12px; font-weight: bold; color: ${c.name==='注意'?'#333':'#fff'}; background-color: ${c.color}; border: none; border-radius: 4px; cursor: pointer;">${c.name}</button>`;
+      });
+      buttonsHTML += '</div>';
+      document.getElementById('search-action-view').innerHTML = buttonsHTML;
+    };
+
+    window.showSearchRouteOptions = function(name, lat, lng) {
+       document.getElementById('search-action-view').innerHTML = `<strong style="display:block; margin-bottom:5px; font-size: 14px;">🗺️ ルートにセット</strong>` + createRouteSetterHTML(lat, lng, name);
+    };
+
+    function saveSearchAsCategory(name, lat, lng, categoryName) {
+      const point = { lat: lat, lng: lng, memo: name, image: "", category: categoryName };
+      const categoryObj = categories.find(c => c.name === categoryName);
+      const marker = new google.maps.Marker({ position: { lat, lng }, map: map, icon: categoryObj ? categoryObj.icon : defaultIcons[0] });
       const infoWindow = new google.maps.InfoWindow();
       
-      if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
-      closeActiveInfoWindow(); activeInfoWindow = infoWindow;
+      marker.addListener("click", () => { 
+        closeActiveInfoWindow(); activeInfoWindow = infoWindow; 
+        if (currentMode === "edit") { showInputForm(point, infoWindow, marker, false); } 
+        else { updateInfoWindow(point, infoWindow, marker); infoWindow.open(map, marker); } 
+      });
       
-      // showInputFormを開いて、ユーザー自身でカテゴリを選ばせる
-      showInputForm(point, infoWindow, marker, true); 
+      spotMemos.push({ point, marker });
+      saveSpotMemos(); 
+      if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
+      closeActiveInfoWindow(); 
+      alert(`「${name}」を「${categoryName}」のピンとして保存しました！`);
     }
 
     async function searchRoute() {
