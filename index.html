@@ -10,8 +10,26 @@
     #map { width: 100%; height: 100vh; }
     .gm-ui-hover-effect span { background-color: #333 !important; }
     .gm-ui-hover-effect { background-color: rgba(255,255,255,0.8) !important; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    
+    /* マップ切り替えボタン（左上） */
     #customMapSelector { position: absolute; top: 10px; left: 10px; z-index: 998; width: auto; max-width: 160px; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     
+    /* 🎯 現在地ボタン（人マークと被らないように少し下にズラしました） */
+    #floatingLocationBtn { position: absolute; top: 60px; right: 10px; width: 44px; height: 44px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998; }
+
+    /* FAB（＋ボタン）（下のメニューに隠れないように少し上にズラしました） */
+    .fab-container { position: fixed; bottom: 140px; right: 20px; z-index: 1001; display: flex; flex-direction: column-reverse; align-items: center; }
+    .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0;}
+    .fab-container.open .fab-main { transform: rotate(135deg); background-color: #ff4747; }
+    .fab-menu { list-style: none; padding: 0; margin: 0; margin-bottom: 15px; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; transform: translateY(20px); display: flex; flex-direction: column; align-items: flex-end; }
+    .fab-container.open .fab-menu { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .fab-item { margin-bottom: 10px; display: flex; align-items: center; justify-content: flex-end; }
+    .fab-btn { width: 50px; height: 50px; border-radius: 50%; border: none; color: white; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; display: flex; align-items: center; justify-content: center; }
+    .fab-btn:active { transform: scale(0.9); }
+    .fab-label { background-color: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px; margin-right: 10px; opacity: 0; transition: opacity 0.3s; white-space: nowrap;}
+    .fab-container.open .fab-label { opacity: 1; }
+
+    /* 下部のコントロールパネル */
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 120px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0 20px 20px 20px; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
     #dragHandleArea { width: 100%; padding: 15px 0; margin-top: -5px; margin-bottom: 5px; cursor: ns-resize; touch-action: none; }
@@ -34,25 +52,12 @@
     .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
     input:checked + .slider { background-color: #ff9800; }
     input:checked + .slider:before { transform: translateX(26px); }
-
-    #floatingLocationBtn { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998; }
     
     .route-setter-box { display: flex; gap: 5px; margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; }
     .route-setter-btn { flex: 1; padding: 6px; font-size: 11px; font-weight: bold; background: #e9ecef; color: #333; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; text-align: center; }
 
     #routeList { margin-top: 10px; display: none; }
     .memoItem { background: #fff; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
-
-    .fab-container { position: fixed; bottom: 20px; right: 20px; z-index: 1001; display: flex; flex-direction: column-reverse; align-items: center; }
-    .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0;}
-    .fab-container.open .fab-main { transform: rotate(135deg); background-color: #ff4747; }
-    .fab-menu { list-style: none; padding: 0; margin: 0; margin-bottom: 15px; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; transform: translateY(20px); display: flex; flex-direction: column; align-items: flex-end; }
-    .fab-container.open .fab-menu { opacity: 1; pointer-events: auto; transform: translateY(0); }
-    .fab-item { margin-bottom: 10px; display: flex; align-items: center; justify-content: flex-end; }
-    .fab-btn { width: 50px; height: 50px; border-radius: 50%; border: none; color: white; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; display: flex; align-items: center; justify-content: center; }
-    .fab-btn:active { transform: scale(0.9); }
-    .fab-label { background-color: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px; margin-right: 10px; opacity: 0; transition: opacity 0.3s; white-space: nowrap;}
-    .fab-container.open .fab-label { opacity: 1; }
   </style>
 </head>
 <body>
@@ -188,13 +193,14 @@
     }
 
     function initMap() {
-      // ★絶対に最新だと分かるアラート表示
-      alert("✅ VSCodeからの連携プッシュに成功しました！\n右下の移動ボタン（＋/ー）は消去されています。");
-
       map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
+        center: { lat: 35.946, lng: 136.184 }, 
+        zoom: 15, 
+        mapTypeId: "roadmap", 
+        gestureHandling: "greedy",
+        disableDefaultUI: true, // ★【解決策1】デフォルトの邪魔なUI（ズーム等）を一度全消去
         zoomControl: false, 
-        streetViewControl: true, 
+        streetViewControl: true, // ★【解決策2】ストリートビューだけをONにして復活させる
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, 
         fullscreenControl: false
