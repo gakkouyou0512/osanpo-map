@@ -173,7 +173,6 @@
 
     document.getElementById('fabMain').addEventListener('click', () => { document.getElementById('fabContainer').classList.toggle('open'); });
 
-    // Google Maps APIキー直込対応
     function setupCleanAutocomplete(inputId) {
       const input = document.getElementById(inputId); if (!input) return;
       const auto = new google.maps.places.Autocomplete(input); auto.bindTo("bounds", map);
@@ -351,7 +350,7 @@
     async function searchRoute() {
       directionsRenderer.setDirections({routes: []});
       let originInputVal = document.getElementById("originInput").value; let destinationInputVal = document.getElementById("destinationInput").value;
-      if (!originInputVal || !destinationInputVal) { alert("出発地と目的地を入力してください"); return; }
+      if (!originInputVal || !destinationInputVal) { alert("出発地 and 目的地を入力してください"); return; }
       let origin = parseLocationInput(originInputVal); let destination = parseLocationInput(destinationInputVal);
       const btn = document.querySelector('button[onclick="searchRoute()"]'); btn.innerText = "検索中..."; btn.disabled = true;
       const waypoints = []; const wpInputs = document.querySelectorAll(".waypoint-input");
