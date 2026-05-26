@@ -14,12 +14,12 @@
     #customMapSelector { position: absolute; top: 10px; left: 10px; z-index: 998; width: auto; max-width: 160px; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     #floatingLocationBtn { position: absolute; top: 60px; right: 10px; width: 44px; height: 44px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998; }
 
-    /* ★ FAB（赤い十字）バリア解除設定 */
-    .fab-container { position: fixed; bottom: 30px; right: 20px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; /* 透明バリアを無効化（地図が触れる） */ }
-    .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; pointer-events: auto; /* ボタン本体だけクリック可能に */ }
+    /* FAB（赤い十字）バリア解除設定 */
+    .fab-container { position: fixed; bottom: 30px; right: 20px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; }
+    .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; pointer-events: auto; }
     .fab-container.open .fab-main { transform: rotate(135deg); background-color: #ff4747; }
     .fab-menu { list-style: none; padding: 0; margin: 0; margin-bottom: 15px; opacity: 0; transition: opacity 0.3s, transform 0.3s; transform: translateY(20px); display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
-    .fab-container.open .fab-menu { opacity: 1; transform: translateY(0); pointer-events: auto; /* 開いた時だけメニューもクリック可能に */ }
+    .fab-container.open .fab-menu { opacity: 1; transform: translateY(0); pointer-events: auto; }
     .fab-item { margin-bottom: 10px; display: flex; align-items: center; justify-content: flex-end; }
     .fab-btn { width: 50px; height: 50px; border-radius: 50%; border: none; color: white; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; display: flex; align-items: center; justify-content: center; pointer-events: auto; }
     .fab-btn:active { transform: scale(0.9); }
@@ -32,9 +32,6 @@
     #dragHandleArea { position: sticky; top: 0; background: #ffffff; width: 100%; padding: 15px 0; z-index: 1010; cursor: ns-resize; touch-action: none; border-radius: 20px 20px 0 0; }
     #dragHandle { width: 60px; height: 6px; background: #bbb; border-radius: 3px; margin: 0 auto; }
     .panel-content { padding: 0 20px 20px 20px; }
-
-    /* ★ ピン情報のメモを大きく一行にするスタイル */
-    .pin-memo { font-size: 18px !important; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; margin-bottom: 8px; color: #333; }
 
     .menu-section { background: #f8f9fa; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
     .menu-section h3 { margin: 0 0 10px 0; font-size: 18px; color: #444; }
@@ -258,7 +255,7 @@
     }
     function setRouteField(fieldId, lat, lng, label) { document.getElementById(fieldId).value = `${label} (${lat.toFixed(4)},${lng.toFixed(4)})`; closeActiveInfoWindow(); }
     function addWaypointFromMap(lat, lng, label) { waypointCount++; const id = "waypointInput_" + waypointCount; const div = document.createElement("div"); div.style.display = "flex"; div.style.gap = "5px"; div.innerHTML = `<input id="${id}" class="waypoint-input" type="text" value="${label} (${lat.toFixed(4)},${lng.toFixed(4)})"><button onclick="this.parentElement.remove()" class="danger" style="width:50px; padding:0; margin-bottom:10px;">×</button>`; document.getElementById("waypointsContainer").appendChild(div); closeActiveInfoWindow(); }
-    function setRouteInputFromCurrent(fieldId) { if (!navigator.geolocation) { alert("GPSが使えません"); return; } navigator.geolocation.getCurrentPosition(pos => { document.getElementById(fieldId).value = `現在地 (${pos.coords.latitude.toFixed(4)},${pos.coords.longitude.toFixed(4)})`; }, () => { alert("現在地が取得できませんでした"); }); }
+    function setRouteInputFromCurrent(fieldId) { if (!navigator.geolocation) { alert("GPSが使えません"); return; } navigator.geolocation.getCurrentPosition(pos => { document.getElementById(fieldId).value = `現在地 (${pos.coords.latitude.toFixed(4)},${pos.coords.longitude.toFixed(4)})`; }, () => { alert("現在地が取得できません"); }); }
     function forceUpdateApp() { window.location.href = window.location.protocol + "//" + window.location.host + window.location.pathname + '?v=' + Date.now(); }
 
     const modeToggle = document.getElementById("modeToggle"); const modeLabel = document.getElementById("modeLabel");
@@ -344,7 +341,6 @@
     };
 
     window.saveSearchAsCategory = function(name, lat, lng, categoryName) {
-      // 検索から保存した時は、検索ワード(name)を初期メモにする
       const point = { lat: lat, lng: lng, memo: name, image: "", category: categoryName };
       const categoryObj = categories.find(c => c.name === categoryName);
       const marker = new google.maps.Marker({ position: { lat, lng }, map: map, icon: categoryObj ? categoryObj.icon : defaultIcons[0] });
@@ -542,26 +538,39 @@
     function saveSpotMemos() { const data = spotMemos.map(({ point }) => ({ lat: point.lat, lng: point.lng, memo: point.memo, image: point.image, category: point.category })); localStorage.setItem("spotMemos_" + gardenId, JSON.stringify(data)); renderMemoList(); }
     function deleteSpotMemo(lat, lng) { spotMemos = spotMemos.filter(({ point, marker }) => { const match = Math.abs(point.lat - lat) < 0.000001 && Math.abs(point.lng - lng) < 0.000001; if (match && marker) marker.setMap(null); return !match; }); saveSpotMemos(); }
     
-    // ★ ピンのメモ入力フォーム（一行で大きく表示＋直接保存）
+    // ★ ピンのメモ入力フォーム（入力欄一体型 ＆ カテゴリ選択可能）
     function showInputForm(point, infoWindow, marker, isNew = false) {
       const container = document.createElement("div");
-      // 一行で省略表示するクラス(pin-memo)を使用。入力はテキストボックスで。
+      
+      // カテゴリ選択用のプルダウンを作成（タップ保存時はこれでジャンルを選べる）
+      const catOptions = categories.map(c => 
+        `<option value="${c.name}" ${c.name === point.category ? "selected" : ""}>${c.name}</option>`
+      ).join("");
+
       container.innerHTML = `
-        <div style="font-size: 12px; color: #666; margin-bottom: 2px;">📍 ${point.category || "カテゴリなし"}</div>
-        <div class="pin-memo">${point.memo || "（メモなし）"}</div>
-        <input type="text" id="editMemo" value="${point.memo || ""}" placeholder="メモを入力" style="width:100%; padding:8px; margin-bottom:10px; font-size:16px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
-        <button id="saveBtn" style="padding:10px; margin-bottom: 5px;">メモを保存</button>
-        ${!isNew ? `<button id="deleteBtn" class="danger" style="padding:10px; margin-bottom: 0;">このピンを削除</button>` : ""}`;
+        <div style="margin-bottom: 10px;">
+          <select id="editCategory" style="width:100%; padding:8px; font-size:16px; border-radius:6px; border:1px solid #ccc; background:#f8f9fa;">
+            ${catOptions}
+          </select>
+        </div>
+        <input type="text" id="editMemo" value="${point.memo || ""}" placeholder="メモを入力" style="width:100%; padding:12px; margin-bottom:10px; font-size:18px; font-weight:bold; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+        <button id="saveBtn" style="width:100%; padding:12px; margin-bottom:8px; font-size:16px; font-weight:bold; color:#fff; background-color:#4CAF50; border:none; border-radius:6px; cursor:pointer;">保存する</button>
+        ${!isNew ? `<button id="deleteBtn" class="danger" style="width:100%; padding:12px; margin-bottom:0; font-size:16px; font-weight:bold; color:#fff; background-color:#dc3545; border:none; border-radius:6px; cursor:pointer;">このピンを削除</button>` : ""}`;
       
       infoWindow.setContent(container); 
       infoWindow.open(map, marker);
       
       google.maps.event.addListenerOnce(infoWindow, "domready", () => {
         document.getElementById("saveBtn").onclick = () => {
+          point.category = document.getElementById("editCategory").value;
           point.memo = document.getElementById("editMemo").value;
+          
+          // アイコンを新しいカテゴリの色に変更
+          const categoryObj = categories.find(c => c.name === point.category);
+          marker.setIcon(categoryObj ? categoryObj.icon : defaultIcons[0]);
+
           const doSave = () => { finalizeSpotMemo(point, marker); closeActiveInfoWindow(); tempMarker = null; };
           doSave();
-          alert("メモを保存しました！");
         };
         if (!isNew) { 
           document.getElementById("deleteBtn").onclick = () => { 
