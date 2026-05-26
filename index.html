@@ -14,7 +14,7 @@
     #customMapSelector { position: absolute; top: 10px; left: 10px; z-index: 998; width: auto; max-width: 160px; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     #floatingLocationBtn { position: absolute; top: 60px; right: 10px; width: 44px; height: 44px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998; }
 
-    /* ★FABボタンをガッツリ下げました（bottom: 40px） */
+    /* ★FABボタンをガッツリ下げました（パネルと被る位置） */
     .fab-container { position: fixed; bottom: 40px; right: 20px; z-index: 1001; display: flex; flex-direction: column-reverse; align-items: center; }
     .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0;}
     .fab-container.open .fab-main { transform: rotate(135deg); background-color: #ff4747; }
@@ -26,13 +26,16 @@
     .fab-label { background-color: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px; margin-right: 10px; opacity: 0; transition: opacity 0.3s; white-space: nowrap;}
     .fab-container.open .fab-label { opacity: 1; }
 
-    #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 120px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0 20px 20px 20px; box-sizing: border-box; overscroll-behavior-y: contain; }
+    /* ★下部のコントロールパネル */
+    #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 120px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
-    #dragHandleArea { width: 100%; padding: 15px 0; margin-top: -5px; margin-bottom: 5px; cursor: ns-resize; touch-action: none; }
+    
+    /* ★持ち手部分を「追従（sticky）」に変更 */
+    #dragHandleArea { position: sticky; top: 0; background: #ffffff; width: 100%; padding: 15px 0; z-index: 1010; cursor: ns-resize; touch-action: none; border-radius: 20px 20px 0 0; }
     #dragHandle { width: 60px; height: 6px; background: #bbb; border-radius: 3px; margin: 0 auto; }
-
-    #bottomDragArea { width: 100%; padding: 20px 0 10px 0; margin-top: 15px; border-top: 1px solid #eee; cursor: ns-resize; touch-action: none; text-align: center; }
-    #bottomDragArea #dragHandle { width: 60px; height: 6px; background: #bbb; border-radius: 3px; margin: 0 auto; }
+    
+    /* パネル内の中身の余白 */
+    .panel-content { padding: 0 20px 20px 20px; }
 
     .menu-section { background: #f8f9fa; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
     .menu-section h3 { margin: 0 0 10px 0; font-size: 18px; color: #444; }
@@ -77,58 +80,55 @@
 
   <div id="mapControls">
     <div id="dragHandleArea"><div id="dragHandle"></div></div>
-
-    <div class="mode-switch-container">
-      <span id="modeLabel">🔍 地図を見るモード</span>
-      <label class="switch"><input type="checkbox" id="modeToggle"><span class="slider"></span></label>
-    </div>
-
-    <div class="menu-section">
-      <h3>🔍 場所を調べる</h3>
-      <input id="placeInput" type="text" placeholder="例：西山公園">
-      <button onclick="searchPlace()">検索する</button>
-    </div>
-
-    <div class="menu-section">
-      <h3>🗺️ ルートを調べる</h3>
-      <div class="input-row">
-        <input id="originInput" type="text" placeholder="出発地（例：保育園）">
-        <button class="set-inline-btn" onclick="setRouteInputFromCurrent('originInput')">🎯現在地</button>
-      </div>
-      <div id="waypointsContainer"></div>
-      <div class="input-row">
-        <input id="destinationInput" type="text" placeholder="目的地">
-        <button class="set-inline-btn" onclick="setRouteInputFromCurrent('destinationInput')">🎯現在地</button>
-      </div>
-      <button id="addWaypointBtn" class="secondary" style="background:#e0e0e0; color:#333; margin-bottom:15px; padding:10px;">＋ 経由地点を追加</button>
-      <button onclick="searchRoute()">ルートを検索</button>
-      <button id="saveSearchedRouteBtn" onclick="saveSearchedRoute()" style="display:none; background-color: #ff9800;">検索ルートを保存</button>
-    </div>
-
-    <div class="menu-section">
-      <h3>🔍 園名パラメータ: <span id="gardenIdLabel">未指定(全体)</span></h3>
-      <h3>🚶‍♂️ 歩いて記録・一覧・設定</h3>
-      <div style="display: flex; gap: 10px;">
-        <button id="startTrackBtn" onclick="startTracking()" style="background-color: #007bff;">記録開始</button>
-        <button id="stopTrackBtn" onclick="stopTracking()" class="danger">停止・保存</button>
-      </div>
-      <button onclick="showRouteList()" class="secondary">保存したルート一覧</button>
-      
-      <div style="margin-top: 15px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
-        <label style="font-size: 14px; font-weight:bold;">ピンの絞り込み:</label>
-        <select id="categoryFilter" onchange="renderMemoList()"><option value="すべて">すべてのピンを表示</option></select>
-        <button onclick="addCustomCategory()" class="secondary" style="padding:10px; font-size:14px; margin-top:5px;">＋ 新しいカテゴリを追加</button>
+    
+    <div class="panel-content">
+      <div class="mode-switch-container">
+        <span id="modeLabel">🔍 地図を見るモード</span>
+        <label class="switch"><input type="checkbox" id="modeToggle"><span class="slider"></span></label>
       </div>
 
-      <button onclick="forceUpdateApp()" style="background-color: #6c757d; margin-top: 20px;">🔄 アプリを最新版に更新する</button>
-    </div>
+      <div class="menu-section">
+        <h3>🔍 場所を調べる</h3>
+        <input id="placeInput" type="text" placeholder="例：西山公園">
+        <button onclick="searchPlace()">検索する</button>
+      </div>
 
-    <h3 id="routeTitle" style="display:none;">保存したルート</h3>
-    <div id="routeList"></div>
+      <div class="menu-section">
+        <h3>🗺️ ルートを調べる</h3>
+        <div class="input-row">
+          <input id="originInput" type="text" placeholder="出発地（例：保育園）">
+          <button class="set-inline-btn" onclick="setRouteInputFromCurrent('originInput')">🎯現在地</button>
+        </div>
+        <div id="waypointsContainer"></div>
+        <div class="input-row">
+          <input id="destinationInput" type="text" placeholder="目的地">
+          <button class="set-inline-btn" onclick="setRouteInputFromCurrent('destinationInput')">🎯現在地</button>
+        </div>
+        <button id="addWaypointBtn" class="secondary" style="background:#e0e0e0; color:#333; margin-bottom:15px; padding:10px;">＋ 経由地点を追加</button>
+        <button onclick="searchRoute()">ルートを検索</button>
+        <button id="saveSearchedRouteBtn" onclick="saveSearchedRoute()" style="display:none; background-color: #ff9800;">検索ルートを保存</button>
+      </div>
 
-    <div id="bottomDragArea">
-      <div id="dragHandle"></div>
-      <div style="font-size: 11px; color: #888; margin-top: 5px;">上下にスワイプ</div>
+      <div class="menu-section">
+        <h3>🔍 園名パラメータ: <span id="gardenIdLabel">未指定(全体)</span></h3>
+        <h3>🚶‍♂️ 歩いて記録・一覧・設定</h3>
+        <div style="display: flex; gap: 10px;">
+          <button id="startTrackBtn" onclick="startTracking()" style="background-color: #007bff;">記録開始</button>
+          <button id="stopTrackBtn" onclick="stopTracking()" class="danger">停止・保存</button>
+        </div>
+        <button onclick="showRouteList()" class="secondary">保存したルート一覧</button>
+        
+        <div style="margin-top: 15px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+          <label style="font-size: 14px; font-weight:bold;">ピンの絞り込み:</label>
+          <select id="categoryFilter" onchange="renderMemoList()"><option value="すべて">すべてのピンを表示</option></select>
+          <button onclick="addCustomCategory()" class="secondary" style="padding:10px; font-size:14px; margin-top:5px;">＋ 新しいカテゴリを追加</button>
+        </div>
+
+        <button onclick="forceUpdateApp()" style="background-color: #6c757d; margin-top: 20px;">🔄 アプリを最新版に更新する</button>
+      </div>
+
+      <h3 id="routeTitle" style="display:none;">保存したルート</h3>
+      <div id="routeList"></div>
     </div>
   </div>
 
@@ -139,19 +139,16 @@
 
     const controls = document.getElementById("mapControls");
     const handleArea = document.getElementById("dragHandleArea");
-    const bottomHandleArea = document.getElementById("bottomDragArea");
     
     let isDragging = false;
     const startDrag = () => { isDragging = true; controls.classList.add("dragging"); };
     const stopDrag = () => { isDragging = false; controls.classList.remove("dragging"); };
     
     handleArea.addEventListener("mousedown", startDrag);
-    bottomHandleArea.addEventListener("mousedown", startDrag);
     document.addEventListener("mouseup", stopDrag);
     document.addEventListener("mousemove", (e) => { if (isDragging) controls.style.height = (window.innerHeight - e.clientY) + "px"; });
     
     handleArea.addEventListener("touchstart", startDrag, {passive: false});
-    bottomHandleArea.addEventListener("touchstart", startDrag, {passive: false});
     document.addEventListener("touchend", stopDrag);
     document.addEventListener("touchmove", (e) => { if (isDragging) { controls.style.height = (window.innerHeight - e.touches[0].clientY) + "px"; e.preventDefault(); } }, {passive: false});
 
@@ -300,10 +297,10 @@
           const loc = results[0].geometry.location; map.setCenter(loc);
           searchMarker = new google.maps.Marker({ position: loc, map: map, title: results[0].formatted_address });
           
-          const escapedQuery = query.replace(/'/g, "\\'").replace(/"/g, """);
+          // ★ここが原因でした（"の閉じ忘れを修正しました）
+          const escapedQuery = query.replace(/'/g, "\\'").replace(/"/g, '\\"');
           let step1HTML = '';
           
-          // ★ モードによって検索結果の表示を分ける
           if (currentMode === "edit") {
             step1HTML = `
               <div id="search-action-view" style="min-width: 180px; text-align: center;">
