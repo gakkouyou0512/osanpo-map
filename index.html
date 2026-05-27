@@ -4,21 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>お散歩マップ（実働完全版）</title>
+  <title>お散歩マップ（完全版）</title>
   <style>
     html, body { height: 100%; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; color: #333; overflow: hidden; }
     #map { width: 100%; height: 100vh; }
     .gm-ui-hover-effect span { background-color: #333 !important; }
     .gm-ui-hover-effect { background-color: rgba(255,255,255,0.8) !important; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
     
-    #customMapSelector { position: absolute; top: 10px; left: 10px; z-index: 998; width: auto; max-width: 160px; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
-    #floatingLocationBtn { position: absolute; top: 60px; right: 10px; width: 44px; height: 44px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998; }
+    /* ★ マップ選択の文字を小さく・幅を調整 */
+    #customMapSelector { position: absolute; top: 10px; left: 10px; z-index: 998; width: auto; max-width: 140px; padding: 6px 8px; font-size: 14px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    
+    #floatingLocationBtn { position: absolute; top: 50px; left: 10px; width: 40px; height: 40px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
-    /* FAB（赤い十字） */
-    .fab-container { position: fixed; bottom: 30px; right: 20px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; }
+    /* ★ 赤いボタンを右下ギリギリに配置 */
+    .fab-container { position: fixed; bottom: 10px; right: 10px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; padding: 5px; }
     .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; pointer-events: auto; }
     .fab-container.open .fab-main { transform: rotate(135deg); background-color: #ff4747; }
-    .fab-menu { list-style: none; padding: 0; margin: 0; margin-bottom: 15px; opacity: 0; transition: opacity 0.3s, transform 0.3s; transform: translateY(20px); display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
+    .fab-menu { list-style: none; padding: 0; margin: 0; margin-bottom: 10px; opacity: 0; transition: opacity 0.3s, transform 0.3s; transform: translateY(20px); display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
     .fab-container.open .fab-menu { opacity: 1; transform: translateY(0); pointer-events: auto; }
     .fab-item { margin-bottom: 10px; display: flex; align-items: center; justify-content: flex-end; }
     .fab-btn { width: 50px; height: 50px; border-radius: 50%; border: none; color: white; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; display: flex; align-items: center; justify-content: center; pointer-events: auto; }
@@ -26,10 +28,9 @@
     .fab-label { background-color: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px; margin-right: 10px; opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none; }
     .fab-container.open .fab-label { opacity: 1; }
 
-    /* 下部コントロールパネル */
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 120px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
-    #dragHandleArea { position: sticky; top: 0; background: #ffffff; width: 100%; padding: 15px 0; z-index: 1010; cursor: ns-resize; touch-action: none; border-radius: 20px 20px 0 0; text-align: center; }
+    #dragHandleArea { position: sticky; top: 0; background: #ffffff; width: 100%; padding: 15px 0; z-index: 1010; cursor: ns-resize; touch-action: none; border-radius: 20px 20px 0 0; }
     #dragHandle { width: 60px; height: 6px; background: #bbb; border-radius: 3px; margin: 0 auto; }
     .panel-content { padding: 0 20px 20px 20px; }
 
@@ -157,11 +158,28 @@
     
     handleArea.addEventListener("mousedown", startDrag);
     document.addEventListener("mouseup", stopDrag);
-    document.addEventListener("mousemove", (e) => { if (isDragging) controls.style.height = (window.innerHeight - e.clientY) + "px"; });
+    
+    // ★ マウス操作での「下がりすぎ防止」 (最小40pxを残す)
+    document.addEventListener("mousemove", (e) => { 
+      if (isDragging) {
+        let newHeight = window.innerHeight - e.clientY;
+        if (newHeight < 40) newHeight = 40;
+        controls.style.height = newHeight + "px"; 
+      }
+    });
     
     handleArea.addEventListener("touchstart", startDrag, {passive: false});
     document.addEventListener("touchend", stopDrag);
-    document.addEventListener("touchmove", (e) => { if (isDragging) { controls.style.height = (window.innerHeight - e.touches[0].clientY) + "px"; e.preventDefault(); } }, {passive: false});
+    
+    // ★ スワイプ操作での「下がりすぎ防止」 (最小40pxを残す)
+    document.addEventListener("touchmove", (e) => { 
+      if (isDragging) { 
+        let newHeight = window.innerHeight - e.touches[0].clientY;
+        if (newHeight < 40) newHeight = 40;
+        controls.style.height = newHeight + "px"; 
+        e.preventDefault(); 
+      } 
+    }, {passive: false});
 
     const routeColors = ["#FF0000", "#0000FF", "#00AA00", "#FF00FF", "#00FFFF", "#FFA500"];
     const defaultIcons = ["http://maps.google.com/mapfiles/ms/icons/red-dot.png", "http://maps.google.com/mapfiles/ms/icons/green-dot.png", "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png", "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"];
@@ -189,7 +207,8 @@
         btn.style.backgroundColor = c.color || "#6c757d";
         btn.innerHTML = (c.name === "危険" ? "🚨" : c.name === "注意" ? "⚠️" : "✨");
 
-        btn.onclick = () => {
+        btn.onclick = (e) => {
+          e.stopPropagation(); // FABボタン外クリックの処理を阻止
           document.getElementById('fabContainer').classList.remove('open');
           dropPinAtCurrentLocation(c.name); 
         };
@@ -197,7 +216,26 @@
       });
     }
 
-    document.getElementById('fabMain').addEventListener('click', () => { document.getElementById('fabContainer').classList.toggle('open'); });
+    const fabContainer = document.getElementById('fabContainer');
+    const fabMain = document.getElementById('fabMain');
+
+    fabMain.addEventListener('click', (e) => { 
+      e.stopPropagation(); // FABボタン外クリックの処理を阻止
+      fabContainer.classList.toggle('open'); 
+    });
+
+    // ★ 画面の「他の部分（FABの外）」をタップしたらメニューを閉じる
+    document.addEventListener('click', (e) => {
+      if (!fabContainer.contains(e.target) && fabContainer.classList.contains('open')) {
+        fabContainer.classList.remove('open');
+      }
+    });
+    // スワイプ（タッチ）でも閉じるようにする
+    document.addEventListener('touchstart', (e) => {
+      if (!fabContainer.contains(e.target) && fabContainer.classList.contains('open')) {
+        fabContainer.classList.remove('open');
+      }
+    });
 
     function setupCleanAutocomplete(inputId) {
       const input = document.getElementById(inputId); if (!input) return;
@@ -288,9 +326,8 @@
     const modeToggle = document.getElementById("modeToggle"); const modeLabel = document.getElementById("modeLabel");
     
     modeToggle.addEventListener("change", () => {
-      const fab = document.getElementById("fabContainer");
-      if (modeToggle.checked) { currentMode = "edit"; modeLabel.textContent = "📌 ピンを置くモード"; fab.style.display = "flex"; } 
-      else { currentMode = "view"; modeLabel.textContent = "🔍 地図を見るモード"; fab.style.display = "none"; fab.classList.remove('open'); if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } }
+      if (modeToggle.checked) { currentMode = "edit"; modeLabel.textContent = "📌 ピンを置くモード"; fabContainer.style.display = "flex"; } 
+      else { currentMode = "view"; modeLabel.textContent = "🔍 地図を見るモード"; fabContainer.style.display = "none"; fabContainer.classList.remove('open'); if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } }
     });
 
     function dropPinAtCurrentLocation(categoryName) {
@@ -409,7 +446,7 @@
       if (watchId) { trackingPins.push(point); }
       if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
       closeActiveInfoWindow(); 
-      alert(`「${name}」を「${categoryName}」として保存しました！`);
+      alert(`「${name}」を「${categoryName}」として保存しました！\n後でピンをタップすると説明を編集できます。`);
     };
 
     async function searchRoute() {
