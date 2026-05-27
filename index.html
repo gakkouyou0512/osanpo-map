@@ -14,6 +14,7 @@
     #customMapSelector { position: absolute; top: 10px; left: 10px; z-index: 998; width: auto; max-width: 160px; padding: 8px 12px; font-size: 16px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     #floatingLocationBtn { position: absolute; top: 60px; right: 10px; width: 44px; height: 44px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 22px; text-align: center; line-height: 44px; cursor: pointer; z-index: 998; }
 
+    /* FAB（赤い十字） */
     .fab-container { position: fixed; bottom: 30px; right: 20px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; }
     .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; pointer-events: auto; }
     .fab-container.open .fab-main { transform: rotate(135deg); background-color: #ff4747; }
@@ -25,9 +26,10 @@
     .fab-label { background-color: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px; margin-right: 10px; opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none; }
     .fab-container.open .fab-label { opacity: 1; }
 
+    /* 下部コントロールパネル */
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 120px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
-    #dragHandleArea { position: sticky; top: 0; background: #ffffff; width: 100%; padding: 15px 0; z-index: 1010; cursor: ns-resize; touch-action: none; border-radius: 20px 20px 0 0; }
+    #dragHandleArea { position: sticky; top: 0; background: #ffffff; width: 100%; padding: 15px 0; z-index: 1010; cursor: ns-resize; touch-action: none; border-radius: 20px 20px 0 0; text-align: center; }
     #dragHandle { width: 60px; height: 6px; background: #bbb; border-radius: 3px; margin: 0 auto; }
     .panel-content { padding: 0 20px 20px 20px; }
 
@@ -125,18 +127,19 @@
         
         <div style="margin-top: 15px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
           <label style="font-size: 14px; font-weight:bold;">ピンの絞り込み:</label>
-          <select id="categoryFilter" onchange="renderMemoList()"><option value="すべて">すべてのピンを表示</option></select>
-          <div style="display: flex; gap: 5px; margin-top: 5px;">
+          <select id="categoryFilter" onchange="renderMemoList()">
+            <option value="すべて">すべてのピンを表示</option>
+          </select>
+          <div style="display: flex; gap: 5px; margin-top: 8px;">
             <button onclick="addCustomCategory()" class="secondary" style="padding:10px; font-size:14px; flex: 1; margin: 0;">＋ ジャンル追加</button>
             <button onclick="deleteCustomCategory()" class="danger" style="padding:10px; font-size:14px; flex: 1; margin: 0;">－ ジャンル削除</button>
           </div>
         </div>
-
-        <button onclick="forceUpdateApp()" style="background-color: #6c757d; margin-top: 20px;">🔄 アプリを最新版に更新する</button>
       </div>
 
       <h3>保存したルート</h3>
       <div id="routeList"></div>
+      <button onclick="forceUpdateApp()" class="secondary" style="margin-top: 20px;">🔄 アプリを最新版に更新する</button>
     </div>
   </div>
 
@@ -315,22 +318,21 @@
     }
 
     function addCustomCategory() { 
-      const name = prompt("新しいカテゴリ名を入力してください"); 
+      const name = prompt("新しいジャンル名を入力してください"); 
       if (name) { 
         categories.push({ name: name, icon: defaultIcons[categories.length % 5], color: "#6c757d" }); 
         localStorage.setItem("customCategories_" + gardenId, JSON.stringify(categories)); 
         generateQuickPinButtons(); 
         updateCategoryFilter(); 
-        alert("カテゴリ「" + name + "」を追加しました！"); 
+        alert("ジャンル「" + name + "」を追加しました！"); 
       } 
     }
     
-    // ★ 追加機能：ジャンル削除
     function deleteCustomCategory() {
       const select = document.getElementById("categoryFilter");
       const categoryName = select.value;
       if (categoryName === "すべて") {
-        alert("削除したいジャンルをプルダウンで選んでから削除ボタンを押してください。");
+        alert("削除したいジャンルを上のプルダウンから選んでください。");
         return;
       }
       if (confirm(`ジャンル「${categoryName}」を削除してもよろしいですか？\n※すでに配置されているピン自体は消えません。`)) {
@@ -407,7 +409,7 @@
       if (watchId) { trackingPins.push(point); }
       if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
       closeActiveInfoWindow(); 
-      alert(`「${name}」を「${categoryName}」として保存しました！\n後でピンをタップすると説明を編集できます。`);
+      alert(`「${name}」を「${categoryName}」として保存しました！`);
     };
 
     async function searchRoute() {
@@ -617,7 +619,7 @@
           <select id="editCategory" style="flex: 1; padding:8px; font-size:16px; border-radius:6px; border:1px solid #ccc; background:#f8f9fa; margin:0;">
             ${catOptions}
           </select>
-          <button id="addCatBtnInline" style="width: auto; margin: 0; padding: 10px 12px; font-size: 14px; background-color: #6c757d; border-radius: 6px; white-space: nowrap; color:#fff; border:none; font-weight:bold; cursor:pointer;">＋ジャンル追加</button>
+          <button id="addCatBtnInline" style="width: auto; margin: 0; padding: 10px 12px; font-size: 14px; background-color: #6c757d; border-radius: 6px; white-space: nowrap; color:#fff; border:none; font-weight:bold; cursor:pointer;">＋追加</button>
         </div>
         <input type="text" id="editMemo" value="${point.memo || ""}" placeholder="メモを入力" style="width:100%; padding:12px; margin-bottom:10px; font-size:18px; font-weight:bold; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
         <button id="saveBtn" style="width:100%; padding:12px; margin-bottom:8px; font-size:16px; font-weight:bold; color:#fff; background-color:#4CAF50; border:none; border-radius:6px; cursor:pointer;">保存する</button>
@@ -628,7 +630,7 @@
       
       google.maps.event.addListenerOnce(infoWindow, "domready", () => {
         document.getElementById("addCatBtnInline").onclick = () => {
-          const newCatName = prompt("新しいカテゴリ名を入力してください");
+          const newCatName = prompt("新しいジャンル名を入力してください");
           if (newCatName && newCatName.trim() !== "") {
             const trimmedName = newCatName.trim();
             let exists = categories.find(c => c.name === trimmedName);
