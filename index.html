@@ -13,7 +13,7 @@
     #mapWrapper { position: absolute; top: 0; bottom: 0; width: 100%; }
     #map { width: 100%; height: 100%; }
     
-    /* ★ バージョン番号をひっそりと表示 */
+    /* バージョン番号 */
     #versionBadge { position: fixed; bottom: 125px; right: 5px; color: #999; font-size: 10px; font-weight: bold; z-index: 9999; pointer-events: none; }
     
     /* アラート */
@@ -55,7 +55,6 @@
     .section-content { padding: 15px; border-top: 1px dashed #e0e0e0; background: #f8f9fa; }
     
     .menu-section-plain { background: #f8f9fa; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #e0e0e0; }
-    .menu-section-plain h3 { margin: 0 0 10px 0; font-size: 16px; color: #444; }
 
     .input-row { display: flex; gap: 5px; margin-bottom: 10px; align-items: center; }
     input[type="text"], select { width: 100%; padding: 12px; margin: 0; font-size: 16px !important; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; background: #fff; }
@@ -89,7 +88,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.1</div>
+  <div id="versionBadge">v6.2</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -120,8 +119,8 @@
 
       <button onclick="clearMapData()" class="clear-btn">🗑️ マップ上のルート・検索履歴をクリア</button>
 
-      <div class="menu-section-plain">
-        <h3>🔍 場所を調べる（手動検索）</h3>
+      <!-- ★ 場所検索（見出しを削除してスッキリ） -->
+      <div class="menu-section-plain" style="padding-top: 10px;">
         <div class="input-row" style="margin-bottom: 0;">
           <input id="placeInput" type="text" placeholder="場所を名前で探す（例：西山公園）">
           <button onclick="searchPlace()" style="width:auto; margin:0; padding:12px;">検索</button>
@@ -282,10 +281,10 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
-        /* ★ 人マーク（ペグマン）を右上に配置 */
+        /* ★ 人マークをさらに押し下げるために上部余白を90pxに拡大 */
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
         mapTypeControl: false, fullscreenControl: false,
-        padding: { top: 60 } /* アラート分下げる */
+        padding: { top: 90 }
       });
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
@@ -326,10 +325,11 @@
         } else {
           closeActiveInfoWindow();
           if (!e.placeId) { 
+            // ★ 見やすい色に調整
             const html = `<div style="text-align:center;"><strong>🗺️ タップした地点</strong><br><div style="display:flex; gap:5px; margin-top:8px;">
-            <button style="flex:1; padding:6px; font-size:11px; background:#e9ecef; border:1px solid #ccc; border-radius:4px; font-weight:bold;" onclick="document.getElementById('manualOriginInput').value='タップ地点 (${e.latLng.lat().toFixed(4)},${e.latLng.lng().toFixed(4)})'; closeActiveInfoWindow();">🛫出発に</button>
-            <button style="flex:1; padding:6px; font-size:11px; background:#e9ecef; border:1px solid #ccc; border-radius:4px; font-weight:bold;" onclick="window.addWaypointFromPin('タップ地点', ${e.latLng.lat()}, ${e.latLng.lng()}); closeActiveInfoWindow();">🚗経由に</button>
-            <button style="flex:1; padding:6px; font-size:11px; background:#e9ecef; border:1px solid #ccc; border-radius:4px; font-weight:bold;" onclick="document.getElementById('manualDestInput').value='タップ地点 (${e.latLng.lat().toFixed(4)},${e.latLng.lng().toFixed(4)})'; closeActiveInfoWindow();">🏁目的地に</button>
+            <button style="flex:1; padding:6px; font-size:11px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualOriginInput').value='タップ地点 (${e.latLng.lat().toFixed(4)},${e.latLng.lng().toFixed(4)})'; closeActiveInfoWindow();">🛫 出発</button>
+            <button style="flex:1; padding:6px; font-size:11px; background:#17a2b8; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.addWaypointFromPin('タップ地点', ${e.latLng.lat()}, ${e.latLng.lng()}); closeActiveInfoWindow();">🚗 経由</button>
+            <button style="flex:1; padding:6px; font-size:11px; background:#28a745; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualDestInput').value='タップ地点 (${e.latLng.lat().toFixed(4)},${e.latLng.lng().toFixed(4)})'; closeActiveInfoWindow();">🏁 目的</button>
             </div></div>`;
             const info = new google.maps.InfoWindow({ content: html });
             info.setPosition(e.latLng); info.open(map); activeInfoWindow = info;
@@ -370,7 +370,6 @@
     
     function forceUpdateApp() { window.location.href = window.location.protocol + "//" + window.location.host + window.location.pathname + '?v=' + Date.now(); }
 
-    // ★ 履歴クリア機能
     window.clearMapData = function() {
       if(manualDirectionsRenderer) manualDirectionsRenderer.setDirections({routes: []});
       omakaseRenderers.forEach(r => r.setMap(null)); omakaseRenderers = [];
@@ -563,7 +562,6 @@
       let titleLabel = prefixTitle ? `${prefixTitle}：お散歩計画` : `📝 お散歩計画`;
       let textForShare = `【お散歩計画】\n🚩目的地: ${destName}\n📏往復距離: 約${roundDist}km\n👣往復時間: 約${roundTime}分\n⚠️リスク: ${warningText}`;
 
-      // こどもの足表記はUIから消し、説明文に移動
       let html = `
         <div class="plan-title" style="color: ${colorCode}; border-color: ${colorCode};">${titleLabel}</div>
         <div class="plan-detail">🚩 目的地：<b>${destName}</b></div>
@@ -580,7 +578,7 @@
       else { navigator.clipboard.writeText(text).then(() => { alert("クリップボードにコピーしました！"); }); }
     };
 
-    // ★ 保存バグ修正＆自動タブ開き
+    // ★ 保存バグを完全に修正（エラーハンドリング強化）
     window.saveSpecificRoute = function(index) {
       try {
         let data = window.tempRoutes[index];
@@ -589,20 +587,24 @@
         let name = prompt("保存するルートの名前を入力してください", data.name); 
         if (!name || name.trim() === "") { return; }
         
-        const routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; 
+        // データの読み込みエラーを防ぐ
+        let routes = [];
+        try {
+            routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || [];
+            if(!Array.isArray(routes)) routes = [];
+        } catch(e) { routes = []; }
+        
         routes.push({ name: name.trim(), duration: data.duration, distance: data.distance, points: data.points, pins: [], timestamp: new Date().toISOString() }); 
         localStorage.setItem("walkRoutes_" + gardenId, JSON.stringify(routes)); 
         
         window.updateRouteList();
         
-        // 保存したら一覧をパカッと開く
         const listDetails = document.getElementById("routeListDetails");
         if(listDetails) listDetails.open = true;
         
-        alert(`「${name.trim()}」を保存しました！`); 
+        alert(`「${name.trim()}」を保存しました！\n「📁 保存したルート一覧」タブから確認できます。`); 
       } catch (e) { 
-        console.error(e);
-        alert("保存に失敗しました。"); 
+        alert("保存エラー: " + e.message + "\nスマホのデータ容量制限などが原因の可能性があります。"); 
       }
     };
 
@@ -641,7 +643,9 @@
           let name = prompt("記録したルートの名前を入力してください"); 
           if (!name || name.trim() === "") return; 
           
-          const routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; 
+          let routes = [];
+          try { routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; if(!Array.isArray(routes)) routes = []; } catch(e) { routes = []; }
+          
           routes.push({ name: name.trim(), duration: diffMinutes, distance: (totalDistance / 1000).toFixed(2), points: route, pins: trackingPins, timestamp: new Date().toISOString() }); 
           localStorage.setItem("walkRoutes_" + gardenId, JSON.stringify(routes)); 
           window.updateRouteList();
@@ -664,7 +668,13 @@
         if (status === "OK") {
           const loc = results[0].geometry.location; map.setCenter(loc);
           searchMarker = new google.maps.Marker({ position: loc, map: map, title: results[0].formatted_address });
-          const info = new google.maps.InfoWindow({ content: `<div><div style="font-weight:bold;margin-bottom:8px;">🔍 ${query}</div><button onclick="document.getElementById('manualOriginInput').value='${query}'; closeActiveInfoWindow();" style="padding:6px; background:#e9ecef; border:1px solid #ccc; cursor:pointer; width:100%;">ルートの出発地にセット</button></div>` });
+          // ★ 検索した場所も見やすいボタンに変更
+          const info = new google.maps.InfoWindow({ content: `<div><div style="font-weight:bold;margin-bottom:8px;">🔍 ${query}</div>
+            <div style="display:flex; gap:5px; margin-top:8px;">
+              <button style="flex:1; padding:6px; font-size:11px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualOriginInput').value='${query}'; closeActiveInfoWindow();">🛫 出発</button>
+              <button style="flex:1; padding:6px; font-size:11px; background:#17a2b8; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.addWaypointFromPin('${query}', ${loc.lat()}, ${loc.lng()}); closeActiveInfoWindow();">🚗 経由</button>
+              <button style="flex:1; padding:6px; font-size:11px; background:#28a745; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualDestInput').value='${query}'; closeActiveInfoWindow();">🏁 目的</button>
+            </div></div>` });
           info.open(map, searchMarker); activeInfoWindow = info;
         } else { alert("検索に失敗しました"); }
       });
@@ -697,7 +707,13 @@
 
     function loadSpotMemos() { spotMemos = []; const saved = JSON.parse(localStorage.getItem("spotMemos_" + gardenId)) || []; saved.forEach(point => { const category = window.categories.find(c => c.name === point.category); const marker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map, icon: category ? category.icon : defaultIcons[0] }); const infoWindow = new google.maps.InfoWindow(); marker.addListener("click", () => { closeActiveInfoWindow(); activeInfoWindow = infoWindow; showInputForm(point, infoWindow, marker, false); }); spotMemos.push({ point, marker }); }); window.renderMemoList(); }
     function saveSpotMemos() { const data = spotMemos.map(({ point }) => ({ lat: point.lat, lng: point.lng, memo: point.memo, image: point.image, category: point.category })); localStorage.setItem("spotMemos_" + gardenId, JSON.stringify(data)); window.renderMemoList(); }
-    function deleteSpotMemo(lat, lng) { spotMemos = spotMemos.filter(({ point, marker }) => { const match = Math.abs(point.lat - lat) < 0.000001 && Math.abs(point.lng - lng) < 0.000001; if (match && marker) marker.setMap(null); return !match; }); saveSpotMemos(); }
+    
+    // ★ 削除バグを安全に修正（座標ではなくオブジェクトそのものを消す）
+    window.deleteSpotMemo = function(marker) { 
+      spotMemos = spotMemos.filter(m => m.marker !== marker);
+      marker.setMap(null);
+      saveSpotMemos(); 
+    };
     
     function showInputForm(point, infoWindow, marker, isNew = false) {
       const container = document.createElement("div");
@@ -705,10 +721,11 @@
       
       let routeSetHtml = "";
       if (!isNew && currentMode !== "edit") {
+        // ★ 見やすい色に変更
         routeSetHtml = `<div style="display:flex; gap:5px; margin-top:8px; padding-top:8px; border-top:1px dashed #ccc;">
-          <button style="flex:1; padding:6px; font-size:11px; background:#e9ecef; border:1px solid #ccc; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualOriginInput').value='${point.memo || point.category} (${point.lat.toFixed(4)},${point.lng.toFixed(4)})'; closeActiveInfoWindow();">🛫出発に</button>
-          <button style="flex:1; padding:6px; font-size:11px; background:#e9ecef; border:1px solid #ccc; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.addWaypointFromPin('${point.memo || point.category}', ${point.lat}, ${point.lng}); closeActiveInfoWindow();">🚗経由に</button>
-          <button style="flex:1; padding:6px; font-size:11px; background:#e9ecef; border:1px solid #ccc; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualDestInput').value='${point.memo || point.category} (${point.lat.toFixed(4)},${point.lng.toFixed(4)})'; closeActiveInfoWindow();">🏁目的地に</button>
+          <button style="flex:1; padding:6px; font-size:11px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualOriginInput').value='${point.memo || point.category} (${point.lat.toFixed(4)},${point.lng.toFixed(4)})'; closeActiveInfoWindow();">🛫 出発</button>
+          <button style="flex:1; padding:6px; font-size:11px; background:#17a2b8; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.addWaypointFromPin('${point.memo || point.category}', ${point.lat}, ${point.lng}); closeActiveInfoWindow();">🚗 経由</button>
+          <button style="flex:1; padding:6px; font-size:11px; background:#28a745; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualDestInput').value='${point.memo || point.category} (${point.lat.toFixed(4)},${point.lng.toFixed(4)})'; closeActiveInfoWindow();">🏁 目的</button>
         </div>`;
       }
 
@@ -727,13 +744,22 @@
           const existing = spotMemos.find(p => Math.abs(p.point.lat - point.lat) < 0.000001 && Math.abs(p.point.lng - point.lng) < 0.000001); if (existing) { existing.point = point; existing.marker = marker; } else { spotMemos.push({ point, marker }); } saveSpotMemos();
           closeActiveInfoWindow(); tempMarker = null; 
         };
-        if (!isNew) { document.getElementById("deleteBtn").onclick = () => { if(confirm("このピンを削除しますか？")) { deleteSpotMemo(point.lat, point.lng); marker.setMap(null); closeActiveInfoWindow(); } }; }
+        if (!isNew) { 
+          document.getElementById("deleteBtn").onclick = () => { 
+            if(confirm("このピンを削除しますか？")) { 
+              window.deleteSpotMemo(marker); // ★書き換えました
+              closeActiveInfoWindow(); 
+            } 
+          }; 
+        }
       });
     }
 
     window.updateRouteList = function() { 
       const container = document.getElementById("routeList"); container.innerHTML = ""; 
-      const routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; 
+      let routes = [];
+      try { routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; if(!Array.isArray(routes)) routes = []; } catch(e) { routes = []; }
+      
       if(routes.length === 0) { container.innerHTML = "<p style='font-size:12px; color:#666;'>保存されたルートはありません。</p>"; return; }
       routes.forEach((route, index) => { 
         const item = document.createElement("div"); item.className = "routeCard"; 
@@ -751,7 +777,13 @@
     };
     
     window.hideRoute = function(index) { if (displayedPolylines[index]) { displayedPolylines[index].setMap(null); displayedPolylines[index] = null; } };
-    window.deleteRoute = function(index) { const routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; routes.splice(index, 1); localStorage.setItem("walkRoutes_" + gardenId, JSON.stringify(routes)); window.hideRoute(index); window.updateRouteList(); };
+    
+    window.deleteRoute = function(index) { 
+      let routes = [];
+      try { routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; } catch(e){ return; }
+      routes.splice(index, 1); localStorage.setItem("walkRoutes_" + gardenId, JSON.stringify(routes)); 
+      window.hideRoute(index); window.updateRouteList(); 
+    };
   </script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDWoGxmGYPAv-HShkfwXCT00vLATt4tiMc&callback=initMap&libraries=geometry,places"></script>
 </body>
