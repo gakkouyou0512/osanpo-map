@@ -84,7 +84,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.5</div>
+  <div id="versionBadge">v6.6</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -466,7 +466,7 @@
     }
 
     // ------------------------------------
-    // 手動ルート検索（経由地の名前反映）
+    // 手動ルート検索
     // ------------------------------------
     window.searchManualRoute = function() {
       omakaseRenderers.forEach(r => r.setMap(null)); omakaseRenderers = []; 
@@ -480,13 +480,13 @@
       let origin = parseLocationInput(originInputVal); 
       let destination = parseLocationInput(destinationInputVal);
       const waypoints = []; 
-      let waypointNames = []; // ★ 経由地の名前を保存する配列
+      let waypointNames = []; 
       const wpInputs = document.querySelectorAll(".waypoint-input");
       
       for (let input of wpInputs) { 
         if (input.value) { 
           waypoints.push({ location: parseLocationInput(input.value), stopover: true }); 
-          waypointNames.push(input.value.split('(')[0].trim()); // 座標部分を消して名前だけにする
+          waypointNames.push(input.value.split('(')[0].trim()); 
         } 
       }
       
@@ -496,7 +496,6 @@
           let destName = destinationInputVal.split('(')[0].trim();
           
           manualDirectionsRenderer.setDirections(result); 
-          // ★ 経由地の名前リストを渡す
           let planData = generatePlanData(result, destName, "#007bff", "", orgName, waypointNames);
           
           window.tempRoutes[0] = planData.saveData;
@@ -571,7 +570,7 @@
       }
     };
 
-    // ★ 経由地をルート名や共有テキストに反映させる処理
+    // ★ HTML生成と共有テキストの作成（バグ修正済み）
     function generatePlanData(result, destName, colorCode, prefixTitle = "", orgName = "", waypointNames = []) {
       const path = result.routes[0].overview_path;
       let rawPoints = path.map(p => ({lat: p.lat(), lng: p.lng()})); 
@@ -602,7 +601,6 @@
         textWarning = "\n⚠️リスク: " + detectedWarnings.join('、');
       }
 
-      // ★ 保存時のデフォルト名「出発地 - (経由地) - 目的地」
       let routeNameForSave = destName;
       if (orgName) {
         if (waypointNames && waypointNames.length > 0) {
@@ -633,43 +631,64 @@
         `;
       }
 
-      // ★ 共有テキストにも経由地を含める
       let wpText = (waypointNames && waypointNames.length > 0) ? `\n📍経由地: ${waypointNames.join(', ')}` : "";
       let textForShare = `【お散歩計画】\n🛫出発地: ${orgName || "現在地"}${wpText}\n🏁目的地: ${destName}\n📏往復距離: 約${roundDist}km\n👣往復時間: 約${roundTime}分${textWarning}`;
+      
+      // ★ 共有テキストを暗号化（URLエンコード）してバグを防ぐ
+      let encodedShareText = encodeURIComponent(textForShare);
 
       let html = `
         ${titleHtml}
         <div class="plan-detail">📏 距離：<b>往復 約 ${roundDist} km</b></div>
         <div class="plan-detail">👣 予想時間：<b>往復 約 ${roundTime} 分</b></div>
         ${warningHTML}
-        <button class="action-btn" onclick="window.sharePlanText('${textForShare}')" style="background:${colorCode}; width:100%; padding:10px; margin-top:10px; color:#fff; font-weight:bold; border:none; border-radius:6px;">📤 職員に共有する</button>
+        <button class="action-btn" onclick="window.sharePlanText('${encodedShareText}')" style="background:${colorCode}; width:100%; padding:10px; margin-top:10px; color:#fff; font-weight:bold; border:none; border-radius:6px;">📤 職員に共有する</button>
       `;
       return { html: html, saveData: { name: routeNameForSave, duration: roundTime, distance: roundDist, points: rawPoints } };
     }
 
-    // ★ 共有機能の強化（LINE共有や手動コピー画面への対応）
-    window.sharePlanText = function(text) {
-      if (navigator.share && window.location.protocol === 'https:') { 
+    // ==========================================
+    // ★ 共有（シェア）機能の超強化版
+    // ==========================================
+    window.sharePlanText = function(encodedText) {
+      // 暗号化されたテキストを元に戻す
+      const text = decodeURIComponent(encodedText);
+      
+      // スマホの標準シェア機能が使えるかチェック
+      if (navigator.share) { 
         navigator.share({ title: 'お散歩計画', text: text }).catch(e => {
-          console.error(e);
-          fallbackShare(text);
+          // ユーザーが意図的に閉じた場合は何もしない、エラーならバックアップ作動
+          if (e.name !== 'AbortError') {
+             fallbackShare(text);
+          }
         }); 
       } else { 
+        // パソコンや古いブラウザの場合はバックアップ作動
         fallbackShare(text);
       }
     };
 
     function fallbackShare(text) {
-      // 共有機能が使えない場合のバックアップ機能
+      // LINEで送るリンクを作成
       const lineUrl = "https://line.me/R/msg/text/?" + encodeURIComponent(text);
-      if (confirm("LINEでお散歩計画を共有しますか？\n\n※「キャンセル」を押すとテキストを手動でコピーできます。")) {
+      
+      if (confirm("標準の共有機能が使えません。\nLINEを開いてお散歩計画を共有しますか？\n\n※「キャンセル」を押すとテキストをコピーできます。")) {
         window.open(lineUrl, '_blank');
       } else {
-        if (navigator.clipboard && window.location.protocol === 'https:') {
-          navigator.clipboard.writeText(text).then(() => alert("クリップボードにコピーしました！")).catch(e => prompt("以下のテキストをコピーしてください", text));
-        } else {
-          prompt("以下のテキストをコピーして共有してください：", text);
+        // 昔ながらの確実なコピー方法（どんな環境でも動く裏技）
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = 'fixed'; // 画面外に隠す
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          alert("テキストをコピーしました！LINEやメールに貼り付けて共有してください。");
+        } catch (err) {
+          prompt("以下のテキストを全選択してコピーしてください：", text);
         }
+        document.body.removeChild(textArea);
       }
     }
 
@@ -702,9 +721,6 @@
       }
     };
 
-    // ------------------------------------
-    // GPSトラッキング（歩いて記録）
-    // ------------------------------------
     window.startTracking = function() {
       if (watchId) { alert("すでに記録中です！"); return; }
       route = []; trackingPins = []; trackingStartTime = new Date(); 
@@ -796,9 +812,6 @@
       } else { alert("移動データがありませんでした。"); }
     };
 
-    // ------------------------------------
-    // API連携・ユーティリティ
-    // ------------------------------------
     window.searchPlace = function() {
       const query = document.getElementById("placeInput").value; if (!query) return;
       if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
