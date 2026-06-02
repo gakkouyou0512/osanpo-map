@@ -83,7 +83,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.3</div>
+  <div id="versionBadge">v6.3 + ルート保存修正版</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -222,8 +222,10 @@
     const omakaseColors = ["#e63946", "#007bff", "#28a745"]; 
     const defaultIcons = ["http://maps.google.com/mapfiles/ms/icons/red-dot.png", "http://maps.google.com/mapfiles/ms/icons/green-dot.png", "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png", "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"];
     
+    // 追加: trackingPolyline をグローバル変数として定義
     let map, route = [], watchId = null, currentLocationMarker = null, spotMemos = [], currentMode = "view";
     let directionsService, searchMarker = null, tempMarker = null;
+    let trackingPolyline = null; // ★ここを追加
     window.waypointCount = 0;
     
     let manualDirectionsRenderer = null;
@@ -233,7 +235,6 @@
     let trackingStartTime = null; let trackingPins = [];
     window.tempRoutes = []; 
 
-    // ★ グローバル変数として確実に定義
     window.categories = JSON.parse(localStorage.getItem("customCategories_" + gardenId)) || [
       { name: "危険", icon: defaultIcons[0], color: "#dc3545" }, 
       { name: "注意", icon: defaultIcons[2], color: "#ffc107" },
@@ -280,7 +281,6 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
-        /* ★ 人マーク（ペグマン）を画面の右中央に配置して被りを防ぐ */
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER }, 
         mapTypeControl: false, fullscreenControl: false,
         padding: { top: 60 }
@@ -358,12 +358,11 @@
       }, () => { alert("現在地が取得できません"); }, { enableHighAccuracy: true }); 
     };
 
-    // ★ 経由地フィールド追加バグの修正
     window.addWaypointField = function() {
       window.waypointCount++; 
       const id = "waypointInput_" + window.waypointCount; 
       const div = document.createElement("div");
-      div.className = "input-row"; // クラスを整えました
+      div.className = "input-row";
       div.innerHTML = `<input id="${id}" class="waypoint-input" type="text" placeholder="経由地を入力"><button onclick="this.parentElement.remove()" class="danger" style="width:auto; padding:12px; margin:0;">×</button>`;
       document.getElementById("waypointsContainer").appendChild(div);
       setupCleanAutocomplete(id);
@@ -408,7 +407,6 @@
       }
     });
 
-    // ★ ジャンル追加・削除の完全修正
     window.addCustomCategory = function() { 
       const name = prompt("新しいジャンル名を入力してください"); 
       if (name && name.trim() !== "") { 
@@ -448,9 +446,6 @@
       }, () => {}, { enableHighAccuracy: true });
     }
 
-    // ------------------------------------
-    // 手動ルート検索
-    // ------------------------------------
     window.searchManualRoute = function() {
       omakaseRenderers.forEach(r => r.setMap(null)); omakaseRenderers = []; 
       document.getElementById("omakaseCardsArea").innerHTML = "";
@@ -479,9 +474,6 @@
       });
     };
 
-    // ------------------------------------
-    // おまかせ一括検索
-    // ------------------------------------
     window.searchRouteCandidatesAllAtOnce = function() {
       let originInputVal = document.getElementById("autoOriginInput").value;
       if (!originInputVal) { alert("出発地を入力してください。"); return; }
@@ -565,7 +557,6 @@
         }
       });
 
-      // ★ 0件なら表示を完全に消す
       let warningHTML = ""; 
       let textWarning = "特になし";
       if (detectedWarnings.length > 0) {
@@ -592,7 +583,6 @@
       else { navigator.clipboard.writeText(text).then(() => { alert("クリップボードにコピーしました！"); }); }
     };
 
-    // ★ 保存バグ修正
     window.saveSpecificRoute = function(index) {
       try {
         let data = window.tempRoutes[index];
@@ -622,23 +612,40 @@
       }
     };
 
-    // ------------------------------------
-    // GPSトラッキング
-    // ------------------------------------
+    // =========================================================
+    // ★ 修正・改善した「GPSトラッキング（リアルタイム描画と保存）」
+    // =========================================================
     window.startTracking = function() {
       if (watchId) { alert("すでに記録中です！"); return; }
       route = []; trackingPins = []; trackingStartTime = new Date(); 
       document.getElementById("startTrackBtn").style.backgroundColor = "#ff9800"; 
       document.getElementById("startTrackBtn").innerText = "記録中...";
       
+      // ★ トラッキング用の線を初期化
+      if (trackingPolyline) { trackingPolyline.setMap(null); }
+      trackingPolyline = new google.maps.Polyline({
+          path: route, strokeColor: "#0000FF", strokeOpacity: 0.8, strokeWeight: 5, map: map
+      });
+
       watchId = navigator.geolocation.watchPosition(pos => {
+        // ★ 保存しやすいようにプレーンなオブジェクトにする
         const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        if (route.length === 0) { route.push(latLng); map.setCenter(latLng); } 
-        else { 
+        
+        if (route.length === 0) { 
+            route.push(latLng); 
+            map.setCenter(latLng); 
+        } else { 
             const lastPos = route[route.length - 1]; 
-            const distance = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(lastPos.lat, lastPos.lng), new google.maps.LatLng(latLng.lat, latLng.lng)); 
+            const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(lastPos.lat, lastPos.lng), 
+                new google.maps.LatLng(latLng.lat, latLng.lng)
+            ); 
+            // 5メートル以上移動したら記録
             if (distance >= 5) { route.push(latLng); } 
         }
+        
+        // ★ リアルタイムで線を引く
+        trackingPolyline.setPath(route);
         updateCurrentLocationMarker(new google.maps.LatLng(latLng.lat, latLng.lng));
       }, () => { alert("GPSエラー"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     };
@@ -646,34 +653,59 @@
     window.stopTracking = function() {
       if (!watchId) return;
       navigator.geolocation.clearWatch(watchId); watchId = null; 
-      document.getElementById("startTrackBtn").style.backgroundColor = "#007bff"; document.getElementById("startTrackBtn").innerText = "▶ 記録開始";
+      document.getElementById("startTrackBtn").style.backgroundColor = "#007bff"; 
+      document.getElementById("startTrackBtn").innerText = "▶ 記録開始";
       
       if (route.length > 0) { 
         try {
-          const endTime = new Date(); const diffMinutes = Math.max(1, Math.round((endTime - trackingStartTime) / 60000)); 
+          const endTime = new Date(); 
+          const diffMinutes = Math.max(1, Math.round((endTime - trackingStartTime) / 60000)); 
+          
           let totalDistance = 0; 
-          for (let i = 1; i < route.length; i++) { totalDistance += google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(route[i - 1]), new google.maps.LatLng(route[i])); }
+          for (let i = 1; i < route.length; i++) { 
+              totalDistance += google.maps.geometry.spherical.computeDistanceBetween(
+                  new google.maps.LatLng(route[i - 1].lat, route[i - 1].lng), 
+                  new google.maps.LatLng(route[i].lat, route[i].lng)
+              ); 
+          }
           
           let name = prompt("記録したルートの名前を入力してください"); 
-          if (!name || name.trim() === "") return; 
+          if (!name || name.trim() === "") {
+              // キャンセルした場合はトラッキング線を消す
+              if (trackingPolyline) { trackingPolyline.setMap(null); }
+              return; 
+          }
           
           let routes = [];
-          try { routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; if(!Array.isArray(routes)) routes = []; } catch(e) { routes = []; }
+          try { 
+              routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; 
+              if(!Array.isArray(routes)) routes = []; 
+          } catch(e) { routes = []; }
           
-          routes.push({ name: name.trim(), duration: diffMinutes, distance: (totalDistance / 1000).toFixed(2), points: route, pins: trackingPins, timestamp: new Date().toISOString() }); 
+          // ★ ルートを配列に保存
+          routes.push({ 
+              name: name.trim(), 
+              duration: diffMinutes, 
+              distance: (totalDistance / 1000).toFixed(2), 
+              points: route, // プレーンなオブジェクトなので安全に保存可能
+              pins: trackingPins, 
+              timestamp: new Date().toISOString() 
+          }); 
           localStorage.setItem("walkRoutes_" + gardenId, JSON.stringify(routes)); 
           window.updateRouteList();
           
           const listDetails = document.getElementById("routeListDetails");
           if(listDetails) listDetails.open = true;
-          alert("保存しました！"); 
+          
+          // ★ 保存完了後、線をリセットする
+          if (trackingPolyline) { trackingPolyline.setMap(null); trackingPolyline = null;}
+          route = [];
+          
+          alert("保存しました！リストから「表示」を押すと地図に赤線で表示されます。"); 
         } catch(e) { alert("保存に失敗しました。"); }
       } else { alert("移動データがありませんでした。"); }
     };
 
-    // ------------------------------------
-    // API連携・ユーティリティ
-    // ------------------------------------
     window.searchPlace = function() {
       const query = document.getElementById("placeInput").value; if (!query) return;
       if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
@@ -718,7 +750,6 @@
     window.renderMemoList = function() { const selectedCategory = document.getElementById("categoryFilter").value; spotMemos.forEach(({ point, marker }) => { if (selectedCategory === "すべて" || point.category === selectedCategory) { marker.setMap(map); } else { marker.setMap(null); } }); };
     window.changeMapView = function() { const val = document.getElementById("customMapSelector").value; if (val === "roadmap") { map.setMapTypeId("roadmap"); map.setTilt(0); } else if (val === "satellite") { map.setMapTypeId("satellite"); map.setTilt(0); } else if (val === "3d") { map.setMapTypeId("satellite"); map.setTilt(45); if (map.getZoom() < 18) { map.setZoom(18); } } };
 
-    // ★ ピンのクリックイベントを確実にする
     function loadSpotMemos() { 
       spotMemos = []; const saved = JSON.parse(localStorage.getItem("spotMemos_" + gardenId)) || []; 
       saved.forEach(point => { 
@@ -796,11 +827,37 @@
       }); 
     };
     
+    // =========================================================
+    // ★ 修正・改善した「保存ルートの表示」
+    // =========================================================
     window.showRoute = function(index) { 
       const routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; 
-      const route = routes[index]; if (!route) return; 
-      displayedPolylines[index] = new google.maps.Polyline({ path: route.points, map: map, strokeColor: routeColors[index % routeColors.length], strokeOpacity: 0.8, strokeWeight: 4 }); 
-      map.setCenter(route.points[0]); 
+      const routeData = routes[index]; 
+      if (!routeData || !routeData.points || routeData.points.length === 0) {
+          alert("このルートのデータが壊れているか、記録されていません。");
+          return; 
+      }
+      
+      // ★ もしすでに線が表示されていれば一度消す
+      if (displayedPolylines[index]) {
+          displayedPolylines[index].setMap(null);
+      }
+      
+      displayedPolylines[index] = new google.maps.Polyline({ 
+          path: routeData.points, 
+          map: map, 
+          strokeColor: routeColors[index % routeColors.length], 
+          strokeOpacity: 0.8, 
+          strokeWeight: 5 // ★ 線を少し太くして見やすく
+      }); 
+      
+      // ★ ルート全体が見えるように地図の表示範囲を自動調整する
+      const bounds = new google.maps.LatLngBounds();
+      routeData.points.forEach(p => {
+          bounds.extend(new google.maps.LatLng(p.lat, p.lng));
+      });
+      map.fitBounds(bounds);
+      
       document.getElementById('mapControls').style.height = "160px";
     };
     
