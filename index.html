@@ -25,9 +25,10 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    #customMapSelector { position: absolute; top: 10px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    /* ★被りを防ぐため、お知らせの下（top: 70px）に配置 */
+    #customMapSelector { position: absolute; top: 70px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     
-    /* 🎯 的マークを右上の人マークの下に配置 */
+    /* 🎯 的マークを右上の人マークの真下（top: 60px）に配置 */
     #floatingLocationBtn { position: absolute; top: 60px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     .fab-container { position: fixed; bottom: 10px; right: 10px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; padding: 5px; }
@@ -230,14 +231,11 @@
       }
     }
 
-    // アプリがバックグラウンドから復帰した際に再ロックする処理
     document.addEventListener('visibilitychange', async () => {
       if (watchId !== null && document.visibilityState === 'visible') {
         await requestWakeLock();
       }
     });
-
-    // -----------------------------------------------------------
 
     const urlParams = new URLSearchParams(window.location.search);
     const gardenId = urlParams.get('garden') || 'default_garden';
@@ -520,6 +518,7 @@
     window.searchRouteCandidatesAllAtOnce = function() {
       let originInputVal = document.getElementById("autoOriginInput").value;
       if (!originInputVal) { alert("出発地を入力してください。"); return; }
+      let orgName = originInputVal.split('(')[0].trim(); // ★ 出発地を取得
       
       let locInput = parseLocationInput(originInputVal);
       const doSearch = (loc) => {
@@ -554,7 +553,8 @@
                     let renderer = new google.maps.DirectionsRenderer({ map: map, directions: result, suppressMarkers: false, polylineOptions: { strokeColor: omakaseColors[index], strokeWeight: 6, strokeOpacity: 0.8 } });
                     omakaseRenderers.push(renderer);
                     
-                    let planData = generatePlanData(result, place.name, omakaseColors[index], `候補 ${index+1}`);
+                    // ★ ここにも出発地（orgName）を渡す
+                    let planData = generatePlanData(result, place.name, omakaseColors[index], `候補 ${index+1}`, orgName);
                     window.tempRoutes[index + 1] = planData.saveData; 
                     
                     let card = document.createElement("div"); card.className = "planCard"; card.style.borderColor = omakaseColors[index];
@@ -577,7 +577,7 @@
       }
     };
 
-    // ★ 修正：タイトル表示・デフォルト名の変更
+    // ★ タイトル表示・デフォルト名の変更
     function generatePlanData(result, destName, colorCode, prefixTitle = "", orgName = "") {
       const path = result.routes[0].overview_path;
       let rawPoints = path.map(p => ({lat: p.lat(), lng: p.lng()})); 
@@ -608,12 +608,12 @@
         textWarning = "\n⚠️リスク: " + detectedWarnings.join('、');
       }
 
-      // ★保存時のデフォルト名
+      // ★ 保存時のデフォルト名を「〇〇 - △△」にする
       let routeNameForSave = orgName ? `${orgName} - ${destName}` : destName;
 
       let titleHtml = "";
       if (orgName) {
-        // ★手動検索時：「タイトルなしで出発地・目的地のみ表示」
+        // ★ 手動検索・おまかせ検索時：「タイトルなしで出発地・目的地のみ表示」
         titleHtml = `
           <div class="plan-title" style="color: ${colorCode}; border-color: ${colorCode}; padding-bottom:5px; margin-bottom:8px; border-bottom:2px dashed #eee;">
             🛫 出発地：<b>${orgName}</b><br>
@@ -621,7 +621,6 @@
           </div>
         `;
       } else {
-        // おまかせ検索など
         let titleLabel = prefixTitle ? `${prefixTitle}：お散歩計画` : `📝 お散歩計画`;
         titleHtml = `
           <div class="plan-title" style="color: ${colorCode}; border-color: ${colorCode};">${titleLabel}</div>
@@ -638,6 +637,7 @@
         ${warningHTML}
         <button class="action-btn" onclick="window.sharePlanText('${textForShare}')" style="background:${colorCode}; width:100%; padding:10px; margin-top:10px; color:#fff; font-weight:bold; border:none; border-radius:6px;">📤 職員に共有する</button>
       `;
+      // 保存データに設定
       return { html: html, saveData: { name: routeNameForSave, duration: roundTime, distance: roundDist, points: rawPoints } };
     }
 
@@ -646,11 +646,13 @@
       else { navigator.clipboard.writeText(text).then(() => { alert("クリップボードにコピーしました！"); }); }
     };
 
+    // ★ ここで「〇〇 - △△」が初期入力される
     window.saveSpecificRoute = function(index) {
       try {
         let data = window.tempRoutes[index];
         if (!data) { alert("ルートデータが見つかりません。もう一度検索してください。"); return; }
         
+        // プロンプトのデフォルト値に「〇〇 - △△」が入る
         let name = prompt("保存するルートの名前を入力してください", data.name); 
         if (!name || name.trim() === "") { return; }
         
@@ -676,7 +678,7 @@
     };
 
     // ------------------------------------
-    // GPSトラッキング（★スリープ防止対応）
+    // GPSトラッキング（歩いて記録）
     // ------------------------------------
     window.startTracking = function() {
       if (watchId) { alert("すでに記録中です！"); return; }
@@ -684,7 +686,6 @@
       document.getElementById("startTrackBtn").style.backgroundColor = "#ff9800"; 
       document.getElementById("startTrackBtn").innerText = "記録中...";
       
-      // ★ スリープ防止をオンにする
       requestWakeLock();
 
       if (trackingPolyline) { trackingPolyline.setMap(null); }
@@ -718,7 +719,6 @@
       document.getElementById("startTrackBtn").style.backgroundColor = "#007bff"; 
       document.getElementById("startTrackBtn").innerText = "▶ 記録開始";
       
-      // ★ スリープ防止をオフにする
       releaseWakeLock();
 
       if (route.length > 0) { 
@@ -734,7 +734,11 @@
               ); 
           }
           
-          let name = prompt("記録したルートの名前を入力してください"); 
+          // ★ 歩いて記録した時も、毎回考える手間を省くために「日付・時刻」をデフォルト名にする
+          const dateStr = new Date().toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          let defaultWalkName = `${dateStr} のお散歩`;
+          
+          let name = prompt("保存するルートの名前を入力してください", defaultWalkName); 
           if (!name || name.trim() === "") {
               if (trackingPolyline) { trackingPolyline.setMap(null); }
               return; 
