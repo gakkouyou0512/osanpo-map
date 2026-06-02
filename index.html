@@ -25,8 +25,10 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    #customMapSelector { position: absolute; top: 70px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
-    #floatingLocationBtn { position: absolute; top: 115px; left: 10px; width: 40px; height: 40px; background: white; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    #customMapSelector { position: absolute; top: 10px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    
+    /* 🎯 的マークを右上の人マークの下に配置 */
+    #floatingLocationBtn { position: absolute; top: 60px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     .fab-container { position: fixed; bottom: 10px; right: 10px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; padding: 5px; }
     .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; pointer-events: auto; }
@@ -83,7 +85,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.3 + ルート保存修正版</div>
+  <div id="versionBadge">v6.4</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -185,7 +187,7 @@
       <details class="menu-section">
         <summary>🚶‍♂️ 実際に歩いてルートを記録</summary>
         <div class="section-content">
-          <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">スマホのGPSを使って、歩いた道を保存します。</p>
+          <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">スマホのGPSを使って、歩いた道を保存します。<br><span style="color:#e63946; font-size:11px;">※記録中はスリープ（画面消灯）にならないように保護されます。</span></p>
           <div style="display: flex; gap: 10px;">
             <button id="startTrackBtn" onclick="startTracking()" style="background-color: #007bff; margin:0;">▶ 記録開始</button>
             <button id="stopTrackBtn" onclick="stopTracking()" class="danger" style="margin:0;">■ 停止して保存</button>
@@ -205,6 +207,38 @@
   </div>
 
   <script>
+    // ★スリープ防止（Wake Lock API）の設定
+    let wakeLock = null;
+
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          console.log('画面のスリープ防止（Wake Lock）が有効になりました');
+        }
+      } catch (err) {
+        console.log(`Wake Lock error: ${err.name}, ${err.message}`);
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock !== null) {
+        wakeLock.release().then(() => {
+          wakeLock = null;
+          console.log('スリープ防止が解除されました');
+        });
+      }
+    }
+
+    // アプリがバックグラウンドから復帰した際に再ロックする処理
+    document.addEventListener('visibilitychange', async () => {
+      if (watchId !== null && document.visibilityState === 'visible') {
+        await requestWakeLock();
+      }
+    });
+
+    // -----------------------------------------------------------
+
     const urlParams = new URLSearchParams(window.location.search);
     const gardenId = urlParams.get('garden') || 'default_garden';
 
@@ -222,10 +256,9 @@
     const omakaseColors = ["#e63946", "#007bff", "#28a745"]; 
     const defaultIcons = ["http://maps.google.com/mapfiles/ms/icons/red-dot.png", "http://maps.google.com/mapfiles/ms/icons/green-dot.png", "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png", "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"];
     
-    // 追加: trackingPolyline をグローバル変数として定義
     let map, route = [], watchId = null, currentLocationMarker = null, spotMemos = [], currentMode = "view";
     let directionsService, searchMarker = null, tempMarker = null;
-    let trackingPolyline = null; // ★ここを追加
+    let trackingPolyline = null;
     window.waypointCount = 0;
     
     let manualDirectionsRenderer = null;
@@ -281,7 +314,8 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
-        streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER }, 
+        // ★ストリートビュー（人マーク）を右上に配置
+        streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
         mapTypeControl: false, fullscreenControl: false,
         padding: { top: 60 }
       });
@@ -362,7 +396,7 @@
       window.waypointCount++; 
       const id = "waypointInput_" + window.waypointCount; 
       const div = document.createElement("div");
-      div.className = "input-row";
+      div.className = "input-row"; 
       div.innerHTML = `<input id="${id}" class="waypoint-input" type="text" placeholder="経由地を入力"><button onclick="this.parentElement.remove()" class="danger" style="width:auto; padding:12px; margin:0;">×</button>`;
       document.getElementById("waypointsContainer").appendChild(div);
       setupCleanAutocomplete(id);
@@ -446,6 +480,9 @@
       }, () => {}, { enableHighAccuracy: true });
     }
 
+    // ------------------------------------
+    // 手動ルート検索
+    // ------------------------------------
     window.searchManualRoute = function() {
       omakaseRenderers.forEach(r => r.setMap(null)); omakaseRenderers = []; 
       document.getElementById("omakaseCardsArea").innerHTML = "";
@@ -462,9 +499,12 @@
       
       directionsService.route({ origin, destination, waypoints, optimizeWaypoints: true, travelMode: google.maps.TravelMode.WALKING }, (result, status) => {
         if (status === "OK") { 
+          // ★ 出発地・目的地のみを抽出
+          let orgName = originInputVal.split('(')[0].trim();
           let destName = destinationInputVal.split('(')[0].trim();
+          
           manualDirectionsRenderer.setDirections(result); 
-          let planData = generatePlanData(result, destName, "#007bff");
+          let planData = generatePlanData(result, destName, "#007bff", "", orgName);
           
           window.tempRoutes[0] = planData.saveData;
           document.getElementById('manualPlanCard').innerHTML = planData.html + `<button onclick="window.saveSpecificRoute(0)" style="background:#ff9800; margin-top:8px;">★ このルートを保存</button>`;
@@ -474,6 +514,9 @@
       });
     };
 
+    // ------------------------------------
+    // おまかせ一括検索
+    // ------------------------------------
     window.searchRouteCandidatesAllAtOnce = function() {
       let originInputVal = document.getElementById("autoOriginInput").value;
       if (!originInputVal) { alert("出発地を入力してください。"); return; }
@@ -534,7 +577,8 @@
       }
     };
 
-    function generatePlanData(result, destName, colorCode, prefixTitle = "") {
+    // ★ 修正：タイトル表示・デフォルト名の変更
+    function generatePlanData(result, destName, colorCode, prefixTitle = "", orgName = "") {
       const path = result.routes[0].overview_path;
       let rawPoints = path.map(p => ({lat: p.lat(), lng: p.lng()})); 
       
@@ -564,18 +608,37 @@
         textWarning = "\n⚠️リスク: " + detectedWarnings.join('、');
       }
 
-      let titleLabel = prefixTitle ? `${prefixTitle}：お散歩計画` : `📝 お散歩計画`;
-      let textForShare = `【お散歩計画】\n🚩目的地: ${destName}\n📏往復距離: 約${roundDist}km\n👣往復時間: 約${roundTime}分${textWarning}`;
+      // ★保存時のデフォルト名
+      let routeNameForSave = orgName ? `${orgName} - ${destName}` : destName;
+
+      let titleHtml = "";
+      if (orgName) {
+        // ★手動検索時：「タイトルなしで出発地・目的地のみ表示」
+        titleHtml = `
+          <div class="plan-title" style="color: ${colorCode}; border-color: ${colorCode}; padding-bottom:5px; margin-bottom:8px; border-bottom:2px dashed #eee;">
+            🛫 出発地：<b>${orgName}</b><br>
+            🏁 目的地：<b>${destName}</b>
+          </div>
+        `;
+      } else {
+        // おまかせ検索など
+        let titleLabel = prefixTitle ? `${prefixTitle}：お散歩計画` : `📝 お散歩計画`;
+        titleHtml = `
+          <div class="plan-title" style="color: ${colorCode}; border-color: ${colorCode};">${titleLabel}</div>
+          <div class="plan-detail">🏁 目的地：<b>${destName}</b></div>
+        `;
+      }
+
+      let textForShare = `【お散歩計画】\n🛫出発地: ${orgName || "現在地"}\n🏁目的地: ${destName}\n📏往復距離: 約${roundDist}km\n👣往復時間: 約${roundTime}分${textWarning}`;
 
       let html = `
-        <div class="plan-title" style="color: ${colorCode}; border-color: ${colorCode};">${titleLabel}</div>
-        <div class="plan-detail">🚩 目的地：<b>${destName}</b></div>
+        ${titleHtml}
         <div class="plan-detail">📏 距離：<b>往復 約 ${roundDist} km</b></div>
         <div class="plan-detail">👣 予想時間：<b>往復 約 ${roundTime} 分</b></div>
         ${warningHTML}
-        <button class="action-btn" onclick="window.sharePlanText('${textForShare}')" style="background:${colorCode};">📤 職員に共有する</button>
+        <button class="action-btn" onclick="window.sharePlanText('${textForShare}')" style="background:${colorCode}; width:100%; padding:10px; margin-top:10px; color:#fff; font-weight:bold; border:none; border-radius:6px;">📤 職員に共有する</button>
       `;
-      return { html: html, saveData: { name: destName, duration: roundTime, distance: roundDist, points: rawPoints } };
+      return { html: html, saveData: { name: routeNameForSave, duration: roundTime, distance: roundDist, points: rawPoints } };
     }
 
     window.sharePlanText = function(text) {
@@ -612,23 +675,24 @@
       }
     };
 
-    // =========================================================
-    // ★ 修正・改善した「GPSトラッキング（リアルタイム描画と保存）」
-    // =========================================================
+    // ------------------------------------
+    // GPSトラッキング（★スリープ防止対応）
+    // ------------------------------------
     window.startTracking = function() {
       if (watchId) { alert("すでに記録中です！"); return; }
       route = []; trackingPins = []; trackingStartTime = new Date(); 
       document.getElementById("startTrackBtn").style.backgroundColor = "#ff9800"; 
       document.getElementById("startTrackBtn").innerText = "記録中...";
       
-      // ★ トラッキング用の線を初期化
+      // ★ スリープ防止をオンにする
+      requestWakeLock();
+
       if (trackingPolyline) { trackingPolyline.setMap(null); }
       trackingPolyline = new google.maps.Polyline({
           path: route, strokeColor: "#0000FF", strokeOpacity: 0.8, strokeWeight: 5, map: map
       });
 
       watchId = navigator.geolocation.watchPosition(pos => {
-        // ★ 保存しやすいようにプレーンなオブジェクトにする
         const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         
         if (route.length === 0) { 
@@ -640,11 +704,9 @@
                 new google.maps.LatLng(lastPos.lat, lastPos.lng), 
                 new google.maps.LatLng(latLng.lat, latLng.lng)
             ); 
-            // 5メートル以上移動したら記録
             if (distance >= 5) { route.push(latLng); } 
         }
         
-        // ★ リアルタイムで線を引く
         trackingPolyline.setPath(route);
         updateCurrentLocationMarker(new google.maps.LatLng(latLng.lat, latLng.lng));
       }, () => { alert("GPSエラー"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
@@ -656,6 +718,9 @@
       document.getElementById("startTrackBtn").style.backgroundColor = "#007bff"; 
       document.getElementById("startTrackBtn").innerText = "▶ 記録開始";
       
+      // ★ スリープ防止をオフにする
+      releaseWakeLock();
+
       if (route.length > 0) { 
         try {
           const endTime = new Date(); 
@@ -671,7 +736,6 @@
           
           let name = prompt("記録したルートの名前を入力してください"); 
           if (!name || name.trim() === "") {
-              // キャンセルした場合はトラッキング線を消す
               if (trackingPolyline) { trackingPolyline.setMap(null); }
               return; 
           }
@@ -682,12 +746,11 @@
               if(!Array.isArray(routes)) routes = []; 
           } catch(e) { routes = []; }
           
-          // ★ ルートを配列に保存
           routes.push({ 
               name: name.trim(), 
               duration: diffMinutes, 
               distance: (totalDistance / 1000).toFixed(2), 
-              points: route, // プレーンなオブジェクトなので安全に保存可能
+              points: route, 
               pins: trackingPins, 
               timestamp: new Date().toISOString() 
           }); 
@@ -697,7 +760,6 @@
           const listDetails = document.getElementById("routeListDetails");
           if(listDetails) listDetails.open = true;
           
-          // ★ 保存完了後、線をリセットする
           if (trackingPolyline) { trackingPolyline.setMap(null); trackingPolyline = null;}
           route = [];
           
@@ -706,6 +768,9 @@
       } else { alert("移動データがありませんでした。"); }
     };
 
+    // ------------------------------------
+    // API連携・ユーティリティ
+    // ------------------------------------
     window.searchPlace = function() {
       const query = document.getElementById("placeInput").value; if (!query) return;
       if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
@@ -827,9 +892,6 @@
       }); 
     };
     
-    // =========================================================
-    // ★ 修正・改善した「保存ルートの表示」
-    // =========================================================
     window.showRoute = function(index) { 
       const routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; 
       const routeData = routes[index]; 
@@ -838,7 +900,6 @@
           return; 
       }
       
-      // ★ もしすでに線が表示されていれば一度消す
       if (displayedPolylines[index]) {
           displayedPolylines[index].setMap(null);
       }
@@ -848,10 +909,9 @@
           map: map, 
           strokeColor: routeColors[index % routeColors.length], 
           strokeOpacity: 0.8, 
-          strokeWeight: 5 // ★ 線を少し太くして見やすく
+          strokeWeight: 5
       }); 
       
-      // ★ ルート全体が見えるように地図の表示範囲を自動調整する
       const bounds = new google.maps.LatLngBounds();
       routeData.points.forEach(p => {
           bounds.extend(new google.maps.LatLng(p.lat, p.lng));
