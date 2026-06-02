@@ -25,10 +25,8 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    /* ★被りを防ぐため、お知らせの下（top: 70px）に配置 */
     #customMapSelector { position: absolute; top: 70px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     
-    /* 🎯 的マークを右上の人マークの真下（top: 60px）に配置 */
     #floatingLocationBtn { position: absolute; top: 60px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     .fab-container { position: fixed; bottom: 10px; right: 10px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; padding: 5px; }
@@ -86,7 +84,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.4</div>
+  <div id="versionBadge">v6.5</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -208,33 +206,23 @@
   </div>
 
   <script>
-    // ★スリープ防止（Wake Lock API）の設定
+    // スリープ防止（Wake Lock API）
     let wakeLock = null;
-
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
           wakeLock = await navigator.wakeLock.request('screen');
-          console.log('画面のスリープ防止（Wake Lock）が有効になりました');
+          console.log('スリープ防止が有効になりました');
         }
       } catch (err) {
-        console.log(`Wake Lock error: ${err.name}, ${err.message}`);
+        console.log(`Wake Lock error: ${err.message}`);
       }
     }
-
     function releaseWakeLock() {
-      if (wakeLock !== null) {
-        wakeLock.release().then(() => {
-          wakeLock = null;
-          console.log('スリープ防止が解除されました');
-        });
-      }
+      if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; console.log('スリープ防止解除'); }); }
     }
-
     document.addEventListener('visibilitychange', async () => {
-      if (watchId !== null && document.visibilityState === 'visible') {
-        await requestWakeLock();
-      }
+      if (watchId !== null && document.visibilityState === 'visible') { await requestWakeLock(); }
     });
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -312,7 +300,6 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
-        // ★ストリートビュー（人マーク）を右上に配置
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
         mapTypeControl: false, fullscreenControl: false,
         padding: { top: 60 }
@@ -479,7 +466,7 @@
     }
 
     // ------------------------------------
-    // 手動ルート検索
+    // 手動ルート検索（経由地の名前反映）
     // ------------------------------------
     window.searchManualRoute = function() {
       omakaseRenderers.forEach(r => r.setMap(null)); omakaseRenderers = []; 
@@ -492,17 +479,25 @@
       
       let origin = parseLocationInput(originInputVal); 
       let destination = parseLocationInput(destinationInputVal);
-      const waypoints = []; const wpInputs = document.querySelectorAll(".waypoint-input");
-      for (let input of wpInputs) { if (input.value) { waypoints.push({ location: parseLocationInput(input.value), stopover: true }); } }
+      const waypoints = []; 
+      let waypointNames = []; // ★ 経由地の名前を保存する配列
+      const wpInputs = document.querySelectorAll(".waypoint-input");
+      
+      for (let input of wpInputs) { 
+        if (input.value) { 
+          waypoints.push({ location: parseLocationInput(input.value), stopover: true }); 
+          waypointNames.push(input.value.split('(')[0].trim()); // 座標部分を消して名前だけにする
+        } 
+      }
       
       directionsService.route({ origin, destination, waypoints, optimizeWaypoints: true, travelMode: google.maps.TravelMode.WALKING }, (result, status) => {
         if (status === "OK") { 
-          // ★ 出発地・目的地のみを抽出
           let orgName = originInputVal.split('(')[0].trim();
           let destName = destinationInputVal.split('(')[0].trim();
           
           manualDirectionsRenderer.setDirections(result); 
-          let planData = generatePlanData(result, destName, "#007bff", "", orgName);
+          // ★ 経由地の名前リストを渡す
+          let planData = generatePlanData(result, destName, "#007bff", "", orgName, waypointNames);
           
           window.tempRoutes[0] = planData.saveData;
           document.getElementById('manualPlanCard').innerHTML = planData.html + `<button onclick="window.saveSpecificRoute(0)" style="background:#ff9800; margin-top:8px;">★ このルートを保存</button>`;
@@ -518,7 +513,7 @@
     window.searchRouteCandidatesAllAtOnce = function() {
       let originInputVal = document.getElementById("autoOriginInput").value;
       if (!originInputVal) { alert("出発地を入力してください。"); return; }
-      let orgName = originInputVal.split('(')[0].trim(); // ★ 出発地を取得
+      let orgName = originInputVal.split('(')[0].trim();
       
       let locInput = parseLocationInput(originInputVal);
       const doSearch = (loc) => {
@@ -553,8 +548,7 @@
                     let renderer = new google.maps.DirectionsRenderer({ map: map, directions: result, suppressMarkers: false, polylineOptions: { strokeColor: omakaseColors[index], strokeWeight: 6, strokeOpacity: 0.8 } });
                     omakaseRenderers.push(renderer);
                     
-                    // ★ ここにも出発地（orgName）を渡す
-                    let planData = generatePlanData(result, place.name, omakaseColors[index], `候補 ${index+1}`, orgName);
+                    let planData = generatePlanData(result, place.name, omakaseColors[index], `候補 ${index+1}`, orgName, []);
                     window.tempRoutes[index + 1] = planData.saveData; 
                     
                     let card = document.createElement("div"); card.className = "planCard"; card.style.borderColor = omakaseColors[index];
@@ -577,8 +571,8 @@
       }
     };
 
-    // ★ タイトル表示・デフォルト名の変更
-    function generatePlanData(result, destName, colorCode, prefixTitle = "", orgName = "") {
+    // ★ 経由地をルート名や共有テキストに反映させる処理
+    function generatePlanData(result, destName, colorCode, prefixTitle = "", orgName = "", waypointNames = []) {
       const path = result.routes[0].overview_path;
       let rawPoints = path.map(p => ({lat: p.lat(), lng: p.lng()})); 
       
@@ -608,15 +602,26 @@
         textWarning = "\n⚠️リスク: " + detectedWarnings.join('、');
       }
 
-      // ★ 保存時のデフォルト名を「〇〇 - △△」にする
-      let routeNameForSave = orgName ? `${orgName} - ${destName}` : destName;
+      // ★ 保存時のデフォルト名「出発地 - (経由地) - 目的地」
+      let routeNameForSave = destName;
+      if (orgName) {
+        if (waypointNames && waypointNames.length > 0) {
+          routeNameForSave = `${orgName} - ${waypointNames.join(' - ')} - ${destName}`;
+        } else {
+          routeNameForSave = `${orgName} - ${destName}`;
+        }
+      }
 
       let titleHtml = "";
+      let wpHtml = "";
+      if (waypointNames && waypointNames.length > 0) {
+        wpHtml = `<br>🚗 経由地：<b>${waypointNames.join('、')}</b>`;
+      }
+
       if (orgName) {
-        // ★ 手動検索・おまかせ検索時：「タイトルなしで出発地・目的地のみ表示」
         titleHtml = `
           <div class="plan-title" style="color: ${colorCode}; border-color: ${colorCode}; padding-bottom:5px; margin-bottom:8px; border-bottom:2px dashed #eee;">
-            🛫 出発地：<b>${orgName}</b><br>
+            🛫 出発地：<b>${orgName}</b>${wpHtml}<br>
             🏁 目的地：<b>${destName}</b>
           </div>
         `;
@@ -628,7 +633,9 @@
         `;
       }
 
-      let textForShare = `【お散歩計画】\n🛫出発地: ${orgName || "現在地"}\n🏁目的地: ${destName}\n📏往復距離: 約${roundDist}km\n👣往復時間: 約${roundTime}分${textWarning}`;
+      // ★ 共有テキストにも経由地を含める
+      let wpText = (waypointNames && waypointNames.length > 0) ? `\n📍経由地: ${waypointNames.join(', ')}` : "";
+      let textForShare = `【お散歩計画】\n🛫出発地: ${orgName || "現在地"}${wpText}\n🏁目的地: ${destName}\n📏往復距離: 約${roundDist}km\n👣往復時間: 約${roundTime}分${textWarning}`;
 
       let html = `
         ${titleHtml}
@@ -637,22 +644,40 @@
         ${warningHTML}
         <button class="action-btn" onclick="window.sharePlanText('${textForShare}')" style="background:${colorCode}; width:100%; padding:10px; margin-top:10px; color:#fff; font-weight:bold; border:none; border-radius:6px;">📤 職員に共有する</button>
       `;
-      // 保存データに設定
       return { html: html, saveData: { name: routeNameForSave, duration: roundTime, distance: roundDist, points: rawPoints } };
     }
 
+    // ★ 共有機能の強化（LINE共有や手動コピー画面への対応）
     window.sharePlanText = function(text) {
-      if (navigator.share) { navigator.share({ title: 'お散歩計画', text: text }).catch(console.error); } 
-      else { navigator.clipboard.writeText(text).then(() => { alert("クリップボードにコピーしました！"); }); }
+      if (navigator.share && window.location.protocol === 'https:') { 
+        navigator.share({ title: 'お散歩計画', text: text }).catch(e => {
+          console.error(e);
+          fallbackShare(text);
+        }); 
+      } else { 
+        fallbackShare(text);
+      }
     };
 
-    // ★ ここで「〇〇 - △△」が初期入力される
+    function fallbackShare(text) {
+      // 共有機能が使えない場合のバックアップ機能
+      const lineUrl = "https://line.me/R/msg/text/?" + encodeURIComponent(text);
+      if (confirm("LINEでお散歩計画を共有しますか？\n\n※「キャンセル」を押すとテキストを手動でコピーできます。")) {
+        window.open(lineUrl, '_blank');
+      } else {
+        if (navigator.clipboard && window.location.protocol === 'https:') {
+          navigator.clipboard.writeText(text).then(() => alert("クリップボードにコピーしました！")).catch(e => prompt("以下のテキストをコピーしてください", text));
+        } else {
+          prompt("以下のテキストをコピーして共有してください：", text);
+        }
+      }
+    }
+
     window.saveSpecificRoute = function(index) {
       try {
         let data = window.tempRoutes[index];
         if (!data) { alert("ルートデータが見つかりません。もう一度検索してください。"); return; }
         
-        // プロンプトのデフォルト値に「〇〇 - △△」が入る
         let name = prompt("保存するルートの名前を入力してください", data.name); 
         if (!name || name.trim() === "") { return; }
         
@@ -734,7 +759,6 @@
               ); 
           }
           
-          // ★ 歩いて記録した時も、毎回考える手間を省くために「日付・時刻」をデフォルト名にする
           const dateStr = new Date().toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
           let defaultWalkName = `${dateStr} のお散歩`;
           
