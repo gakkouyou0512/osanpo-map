@@ -84,7 +84,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.6</div>
+  <div id="versionBadge">v6.7</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -465,9 +465,6 @@
       }, () => {}, { enableHighAccuracy: true });
     }
 
-    // ------------------------------------
-    // 手動ルート検索
-    // ------------------------------------
     window.searchManualRoute = function() {
       omakaseRenderers.forEach(r => r.setMap(null)); omakaseRenderers = []; 
       document.getElementById("omakaseCardsArea").innerHTML = "";
@@ -506,9 +503,6 @@
       });
     };
 
-    // ------------------------------------
-    // おまかせ一括検索
-    // ------------------------------------
     window.searchRouteCandidatesAllAtOnce = function() {
       let originInputVal = document.getElementById("autoOriginInput").value;
       if (!originInputVal) { alert("出発地を入力してください。"); return; }
@@ -570,7 +564,6 @@
       }
     };
 
-    // ★ HTML生成と共有テキストの作成（バグ修正済み）
     function generatePlanData(result, destName, colorCode, prefixTitle = "", orgName = "", waypointNames = []) {
       const path = result.routes[0].overview_path;
       let rawPoints = path.map(p => ({lat: p.lat(), lng: p.lng()})); 
@@ -634,7 +627,6 @@
       let wpText = (waypointNames && waypointNames.length > 0) ? `\n📍経由地: ${waypointNames.join(', ')}` : "";
       let textForShare = `【お散歩計画】\n🛫出発地: ${orgName || "現在地"}${wpText}\n🏁目的地: ${destName}\n📏往復距離: 約${roundDist}km\n👣往復時間: 約${roundTime}分${textWarning}`;
       
-      // ★ 共有テキストを暗号化（URLエンコード）してバグを防ぐ
       let encodedShareText = encodeURIComponent(textForShare);
 
       let html = `
@@ -647,38 +639,27 @@
       return { html: html, saveData: { name: routeNameForSave, duration: roundTime, distance: roundDist, points: rawPoints } };
     }
 
-    // ==========================================
-    // ★ 共有（シェア）機能の超強化版
-    // ==========================================
     window.sharePlanText = function(encodedText) {
-      // 暗号化されたテキストを元に戻す
       const text = decodeURIComponent(encodedText);
-      
-      // スマホの標準シェア機能が使えるかチェック
       if (navigator.share) { 
         navigator.share({ title: 'お散歩計画', text: text }).catch(e => {
-          // ユーザーが意図的に閉じた場合は何もしない、エラーならバックアップ作動
           if (e.name !== 'AbortError') {
              fallbackShare(text);
           }
         }); 
       } else { 
-        // パソコンや古いブラウザの場合はバックアップ作動
         fallbackShare(text);
       }
     };
 
     function fallbackShare(text) {
-      // LINEで送るリンクを作成
       const lineUrl = "https://line.me/R/msg/text/?" + encodeURIComponent(text);
-      
       if (confirm("標準の共有機能が使えません。\nLINEを開いてお散歩計画を共有しますか？\n\n※「キャンセル」を押すとテキストをコピーできます。")) {
         window.open(lineUrl, '_blank');
       } else {
-        // 昔ながらの確実なコピー方法（どんな環境でも動く裏技）
         const textArea = document.createElement("textarea");
         textArea.value = text;
-        textArea.style.position = 'fixed'; // 画面外に隠す
+        textArea.style.position = 'fixed'; 
         textArea.style.left = '-9999px';
         document.body.appendChild(textArea);
         textArea.select();
@@ -754,6 +735,9 @@
       }, () => { alert("GPSエラー"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     };
 
+    // ==========================================
+    // ★ 記録停止＆ルート保存の完全修正版
+    // ==========================================
     window.stopTracking = function() {
       if (!watchId) return;
       navigator.geolocation.clearWatch(watchId); watchId = null; 
@@ -775,13 +759,21 @@
               ); 
           }
           
-          const dateStr = new Date().toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-          let defaultWalkName = `${dateStr} のお散歩`;
+          // ★修正1: Safariでも絶対にエラーにならない時刻取得
+          const d = new Date();
+          const defaultWalkName = `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}:${('0'+d.getMinutes()).slice(-2)} のお散歩`;
           
+          // ★修正2: 誤爆を防ぐため、本当に消していいか一度確認する
+          if (!confirm("記録を終了しました。\n歩いたルートを保存しますか？\n（「キャンセル」を押すと保存せずに消去します）")) {
+              if (trackingPolyline) { trackingPolyline.setMap(null); trackingPolyline = null; }
+              route = [];
+              return; 
+          }
+          
+          // ★修正3: 名前が空欄やキャンセルの場合は、勝手に消さずにデフォルト名を採用する
           let name = prompt("保存するルートの名前を入力してください", defaultWalkName); 
           if (!name || name.trim() === "") {
-              if (trackingPolyline) { trackingPolyline.setMap(null); }
-              return; 
+              name = defaultWalkName; 
           }
           
           let routes = [];
@@ -807,9 +799,14 @@
           if (trackingPolyline) { trackingPolyline.setMap(null); trackingPolyline = null;}
           route = [];
           
-          alert("保存しました！リストから「表示」を押すと地図に赤線で表示されます。"); 
-        } catch(e) { alert("保存に失敗しました。"); }
-      } else { alert("移動データがありませんでした。"); }
+          alert(`「${name}」として保存しました！\nリストから「表示」を押すと地図に赤線で表示されます。`); 
+        } catch(e) { 
+          console.error(e);
+          alert("保存処理中にエラーが発生しました。"); 
+        }
+      } else { 
+        alert("移動データがありませんでした。（GPSがうまく取得できなかった可能性があります）"); 
+      }
     };
 
     window.searchPlace = function() {
