@@ -84,7 +84,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.7</div>
+  <div id="versionBadge">v6.8</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -206,7 +206,6 @@
   </div>
 
   <script>
-    // スリープ防止（Wake Lock API）
     let wakeLock = null;
     async function requestWakeLock() {
       try {
@@ -735,9 +734,9 @@
       }, () => { alert("GPSエラー"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     };
 
-    // ==========================================
-    // ★ 記録停止＆ルート保存の完全修正版
-    // ==========================================
+    // ==========================================================
+    // ★ v6.8 記録停止＆ルート保存（確認なしで名前入力へ直行する修正）
+    // ==========================================================
     window.stopTracking = function() {
       if (!watchId) return;
       navigator.geolocation.clearWatch(watchId); watchId = null; 
@@ -759,21 +758,13 @@
               ); 
           }
           
-          // ★修正1: Safariでも絶対にエラーにならない時刻取得
           const d = new Date();
           const defaultWalkName = `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}:${('0'+d.getMinutes()).slice(-2)} のお散歩`;
           
-          // ★修正2: 誤爆を防ぐため、本当に消していいか一度確認する
-          if (!confirm("記録を終了しました。\n歩いたルートを保存しますか？\n（「キャンセル」を押すと保存せずに消去します）")) {
-              if (trackingPolyline) { trackingPolyline.setMap(null); trackingPolyline = null; }
-              route = [];
-              return; 
-          }
-          
-          // ★修正3: 名前が空欄やキャンセルの場合は、勝手に消さずにデフォルト名を採用する
+          // 「保存しますか？」の確認ダイアログ（confirm）を挟まず、直接名前入力のポップアップを出す
           let name = prompt("保存するルートの名前を入力してください", defaultWalkName); 
           if (!name || name.trim() === "") {
-              name = defaultWalkName; 
+              name = defaultWalkName; // キャンセルや空欄でも消去せず、デフォルトの名前で強制保存
           }
           
           let routes = [];
