@@ -25,9 +25,9 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    /* ご指定の通り位置を調整 */
-    #customMapSelector { position: absolute; top: 80px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
-    #floatingLocationBtn { position: absolute; top: 120px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    /* 修正: マップ切替を 60px、的マークを 100px に厳密配置 */
+    #customMapSelector { position: absolute; top: 60px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    #floatingLocationBtn { position: absolute; top: 100px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
@@ -80,7 +80,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.18</div>
+  <div id="versionBadge">v6.19</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -314,6 +314,7 @@
     let manualDirectionsRenderer = null;
     let omakaseRenderers = [];
     let displayedPolylines = []; 
+    window.routeMarkers = []; // 修正: 表示したルートの「スタート・ゴール印」保持用
     let activeInfoWindow = null;
     let trackingStartTime = null; let trackingPins = [];
     window.tempRoutes = []; 
@@ -358,9 +359,15 @@
         streetViewControl: true, 
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, fullscreenControl: false,
-        padding: { top: 170 } // 人マーク(ペグマン)を120pxの的マークより下に押し下げる
+        padding: { top: 50, bottom: 180 } 
       });
       
+      // 修正: 右上の的マーク(100px)の下(145px)に人マーク(ペグマン)が来るように透明な押し下げブロックを設置
+      const spacer = document.createElement('div');
+      spacer.style.height = '145px'; 
+      spacer.style.width = '10px';
+      map.controls[google.maps.ControlPosition.RIGHT_TOP].push(spacer);
+
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
       
@@ -445,9 +452,12 @@
       if(searchMarker) { searchMarker.setMap(null); searchMarker = null; }
       if(tempMarker) { tempMarker.setMap(null); tempMarker = null; }
       
-      // 表示中の保存ルートもすべて消す
       displayedPolylines.forEach(p => { if (p) p.setMap(null); });
       displayedPolylines = [];
+      
+      // 修正: スタート・ゴール印マーカーも一括クリア
+      window.routeMarkers.forEach(m => { if (m) m.setMap(null); });
+      window.routeMarkers = [];
       
       document.getElementById("omakaseCardsArea").innerHTML = "";
       document.getElementById("manualPlanArea").style.display = "none";
@@ -657,7 +667,7 @@
       else {
          const geocoder = new google.maps.Geocoder();
          geocoder.geocode({ address: originInputVal }, (results, status) => {
-           if (status === "OK") { doSearch(results[0].geometry.location); } else { alert("出発地が特定できません。"); }
+           if (results && results[0]) { doSearch(results[0].geometry.location); }
          });
       }
     };
@@ -1003,7 +1013,7 @@
         closeActiveInfoWindow();
         window.pinToDelete = null;
       }
-      document.getElementById('pinDelModal').style.display = 'none';
+      document.getElementById('pinDelModal').style.none = 'none';
     };
 
     window.updateRouteList = function() { 
@@ -1026,9 +1036,32 @@
       
       if (displayedPolylines[index]) displayedPolylines[index].setMap(null);
       
+      // 既存のスタート・ゴール印をクリア
+      window.routeMarkers.forEach(m => { if (m) m.setMap(null); });
+      window.routeMarkers = [];
+      
       displayedPolylines[index] = new google.maps.Polyline({ 
           path: routeData.points, map: map, strokeColor: routeColors[index % routeColors.length], strokeOpacity: 0.8, strokeWeight: 5, clickable: false, zIndex: 1
       }); 
+      
+      // 修正: ルート表示時に出発（スタート）と到着（ゴール）の丸印（マーカー）を立てる
+      const startPos = routeData.points[0];
+      const startMarker = new google.maps.Marker({
+          position: startPos, map: map,
+          label: { text: "出", color: "#fff", fontWeight: "bold" },
+          icon: { path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: "#007bff", fillOpacity: 1, strokeColor: "#ffffff", strokeWeight: 2 },
+          zIndex: 110
+      });
+      window.routeMarkers.push(startMarker);
+
+      const endPos = routeData.points[routeData.points.length - 1];
+      const endMarker = new google.maps.Marker({
+          position: endPos, map: map,
+          label: { text: "着", color: "#fff", fontWeight: "bold" },
+          icon: { path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: "#dc3545", fillOpacity: 1, strokeColor: "#ffffff", strokeWeight: 2 },
+          zIndex: 110
+      });
+      window.routeMarkers.push(endMarker);
       
       const bounds = new google.maps.LatLngBounds();
       routeData.points.forEach(p => bounds.extend(new google.maps.LatLng(p.lat, p.lng)));
@@ -1037,7 +1070,12 @@
       document.getElementById('mapControls').style.height = "160px";
     };
     
-    window.hideRoute = function(index) { if (displayedPolylines[index]) { displayedPolylines[index].setMap(null); displayedPolylines[index] = null; } };
+    // 修正: 非表示にした際もスタゴマーカーを消去
+    window.hideRoute = function(index) { 
+      if (displayedPolylines[index]) { displayedPolylines[index].setMap(null); displayedPolylines[index] = null; } 
+      window.routeMarkers.forEach(m => { if (m) m.setMap(null); });
+      window.routeMarkers = [];
+    };
     
     window.deleteRoute = function(index) { 
       let routes = [];
