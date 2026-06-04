@@ -15,17 +15,17 @@
     
     #versionBadge { position: fixed; bottom: 170px; right: 5px; color: #999; font-size: 10px; font-weight: bold; z-index: 9999; pointer-events: none; }
     
+    /* 修正: paddingを減らし、font-sizeを少し小さくして縦幅を細く */
     #topAlert {
       position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
       width: 90%; max-width: 380px;
       background-color: #fff3cd; color: #856404;
       border: 2px solid #ffeeba; border-radius: 20px;
-      padding: 10px 15px; font-size: 14px; font-weight: bold;
+      padding: 6px 15px; font-size: 13px; font-weight: bold;
       z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    /* 修正: 的マークと地図選択を同じ高さ(80px)に揃える */
     #customMapSelector { position: absolute; top: 80px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     
     #floatingLocationBtn { position: absolute; top: 80px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
@@ -80,7 +80,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.11</div>
+  <div id="versionBadge">v6.12</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -177,11 +177,14 @@
       <details class="menu-section" open>
         <summary>🚶‍♂️ 実際に歩いてルートを記録</summary>
         <div class="section-content">
-          <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">スマホのGPSを使って、歩いた道を保存します。<br><span style="color:#e63946; font-size:11px;">※記録中はスリープ（画面消灯）にならないように保護されます。</span></p>
-          <div style="display: flex; gap: 10px;">
-            <button id="toggleTrackBtn" onclick="window.toggleTracking()" style="background-color: #007bff; margin:0; flex: 1;">▶ 記録開始</button>
-            <button id="quickPinBtn" onclick="window.showQuickPinSelector()" style="background-color: #ff9800; margin:0; flex: 1; display: none;">📍 現在地にピン</button>
+          <div id="trackingEditControls" style="display: none;">
+            <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">スマホのGPSを使って、歩いた道を保存します。<br><span style="color:#e63946; font-size:11px;">※記録中はスリープ（画面消灯）にならないように保護されます。</span></p>
+            <div style="display: flex; gap: 10px;">
+              <button id="toggleTrackBtn" onclick="window.toggleTracking()" style="background-color: #007bff; margin:0; flex: 1;">▶ 記録開始</button>
+              <button id="quickPinBtn" onclick="window.showQuickPinSelector()" style="background-color: #ff9800; margin:0; flex: 1;">📍 現在地にピン</button>
+            </div>
           </div>
+          <div id="trackingViewMessage" style="font-size:12px; color:#d32f2f; font-weight:bold;">※ルートの記録は『📌 編集モード』で可能です。</div>
         </div>
       </details>
 
@@ -277,8 +280,8 @@
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
         mapTypeControl: false, fullscreenControl: false,
-        // 修正: 的マーク(80px)と被らないように、人マーク(ペグマン)をさらに下に押し下げる
-        padding: { top: 140 }
+        // 修正: paddingTopをさらに増やして人マーク(ペグマン)を下へ
+        padding: { top: 170 }
       });
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
@@ -392,20 +395,17 @@
     modeToggle.addEventListener("change", () => {
       const editControls = document.getElementById("genreEditControls");
       const editMessage = document.getElementById("genreEditMessage");
-      const quickPinBtn = document.getElementById("quickPinBtn"); // 修正: ピンボタンを取得
+      const trackingEdit = document.getElementById("trackingEditControls");
+      const trackingMsg = document.getElementById("trackingViewMessage");
       
       if (modeToggle.checked) { 
-        // 修正: テキストを「編集モード」に変更
         currentMode = "edit"; modeLabel.textContent = "📌 編集モード"; 
         editControls.style.display = "flex"; editMessage.style.display = "none";
-        // 修正: 編集モードの時だけピンボタンを表示する
-        if(quickPinBtn) quickPinBtn.style.display = "block";
+        trackingEdit.style.display = "block"; trackingMsg.style.display = "none";
       } else { 
-        // 修正: テキストを「閲覧モード」に変更
         currentMode = "view"; modeLabel.textContent = "🔍 閲覧モード"; 
         editControls.style.display = "none"; editMessage.style.display = "block";
-        // 修正: 閲覧モードの時はピンボタンを隠す
-        if(quickPinBtn) quickPinBtn.style.display = "none";
+        trackingEdit.style.display = "none"; trackingMsg.style.display = "block";
         if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } 
       }
     });
