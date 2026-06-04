@@ -15,7 +15,6 @@
     
     #versionBadge { position: fixed; bottom: 170px; right: 5px; color: #999; font-size: 10px; font-weight: bold; z-index: 9999; pointer-events: none; }
     
-    /* 修正: paddingを減らし、font-sizeを少し小さくして縦幅を細く */
     #topAlert {
       position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
       width: 90%; max-width: 380px;
@@ -26,9 +25,10 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    #customMapSelector { position: absolute; top: 80px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    /* 修正: マップ選択と的マークを同じ高さに下げ、人マークとの間隔を確保 */
+    #customMapSelector { position: absolute; top: 110px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     
-    #floatingLocationBtn { position: absolute; top: 80px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    #floatingLocationBtn { position: absolute; top: 110px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
@@ -80,7 +80,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.12</div>
+  <div id="versionBadge">v6.13</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -116,7 +116,7 @@
       <details class="menu-section">
         <summary>💡 おまかせルート作成</summary>
         <div class="section-content">
-          <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">現在地と時間から、おすすめの目的地（公園・広場・神社等）を提案します。<br><span style="color:#007bff; font-weight:bold;">（※時間は子どもの足の速さで計算）</span></p>
+          <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">出発地と時間から、おすすめの目的地（公園・広場・神社等）を提案します。<br><span style="color:#007bff; font-weight:bold;">（※時間は子どもの足の速さで計算）</span></p>
           <div class="input-row">
             <input id="autoOriginInput" type="text" placeholder="出発地を入力">
             <button class="set-inline-btn" onclick="setRouteInputFromCurrent('autoOriginInput')">🎯現在地</button>
@@ -128,13 +128,13 @@
               <option value="45">往復 約45分（遠出！）</option>
             </select>
           </div>
-          <button onclick="searchRouteCandidatesAllAtOnce()" style="background-color: #28a745;">一括ルート検索</button>
+          <button onclick="searchRouteCandidatesAllAtOnce()" style="background-color: #28a745;">おまかせルートを作成</button>
           <div id="omakaseCardsArea" style="margin-top: 15px;"></div>
         </div>
       </details>
 
       <details class="menu-section">
-        <summary>🗺️ 出発・目的地を指定しルート検索</summary>
+        <summary>🗺️ 出発・経由・目的地でルート検索</summary>
         <div class="section-content">
           <p style="font-size:12px; color:#007bff; font-weight:bold; margin-bottom:10px; margin-top:0;">（※時間は子どもの足の速さで計算）</p>
           <div class="input-row">
@@ -174,17 +174,16 @@
         </div>
       </details>
 
-      <details class="menu-section" open>
-        <summary>🚶‍♂️ 実際に歩いてルートを記録</summary>
+      <details class="menu-section" id="recordRouteSection" style="display: none;" open>
+        <summary>🚶‍♂️ 歩いたルートを保存</summary>
         <div class="section-content">
-          <div id="trackingEditControls" style="display: none;">
-            <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">スマホのGPSを使って、歩いた道を保存します。<br><span style="color:#e63946; font-size:11px;">※記録中はスリープ（画面消灯）にならないように保護されます。</span></p>
+          <div id="trackingEditControls">
+            <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">スマホのGPSを使って、歩いた道を保存します。<br><span style="color:#e63946; font-size:11px;">※記録中はスリープ（画面消灯）にならないようになります。</span></p>
             <div style="display: flex; gap: 10px;">
               <button id="toggleTrackBtn" onclick="window.toggleTracking()" style="background-color: #007bff; margin:0; flex: 1;">▶ 記録開始</button>
               <button id="quickPinBtn" onclick="window.showQuickPinSelector()" style="background-color: #ff9800; margin:0; flex: 1;">📍 現在地にピン</button>
             </div>
           </div>
-          <div id="trackingViewMessage" style="font-size:12px; color:#d32f2f; font-weight:bold;">※ルートの記録は『📌 編集モード』で可能です。</div>
         </div>
       </details>
 
@@ -280,8 +279,8 @@
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
         mapTypeControl: false, fullscreenControl: false,
-        // 修正: paddingTopをさらに増やして人マーク(ペグマン)を下へ
-        padding: { top: 170 }
+        // 修正: 的マーク(高さ150pxまで占有)のすぐ下に人マークが来るようパディングを160に設定
+        padding: { top: 160 }
       });
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
@@ -395,17 +394,18 @@
     modeToggle.addEventListener("change", () => {
       const editControls = document.getElementById("genreEditControls");
       const editMessage = document.getElementById("genreEditMessage");
-      const trackingEdit = document.getElementById("trackingEditControls");
-      const trackingMsg = document.getElementById("trackingViewMessage");
+      const recordSection = document.getElementById("recordRouteSection");
       
       if (modeToggle.checked) { 
         currentMode = "edit"; modeLabel.textContent = "📌 編集モード"; 
         editControls.style.display = "flex"; editMessage.style.display = "none";
-        trackingEdit.style.display = "block"; trackingMsg.style.display = "none";
+        // 修正: 編集モードの時だけルート保存タブを表示
+        if(recordSection) recordSection.style.display = "block";
       } else { 
         currentMode = "view"; modeLabel.textContent = "🔍 閲覧モード"; 
         editControls.style.display = "none"; editMessage.style.display = "block";
-        trackingEdit.style.display = "none"; trackingMsg.style.display = "block";
+        // 修正: 閲覧モードではルート保存タブごと隠す
+        if(recordSection) recordSection.style.display = "none";
         if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } 
       }
     });
@@ -713,6 +713,10 @@
 
     window.startTracking = function() {
       if (watchId) { alert("すでに記録中です！"); return; }
+      
+      // 修正: 記録開始時に注意アラートを出す
+      alert("【注意】\nスマホをスリープ状態にしたり、別のアプリを開いたりすると、ルートがうまく保存されません。\n歩く時はこの画面を開いたままにしてください！");
+      
       route = []; trackingPins = []; trackingStartTime = new Date(); 
       
       const btn = document.getElementById("toggleTrackBtn");
