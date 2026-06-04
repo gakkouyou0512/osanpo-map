@@ -8,6 +8,14 @@
   <meta http-equiv="Expires" content="0">
   <title>お散歩マップ</title>
   <style>
+    /* =========================================
+       ▼ 各種ボタンの位置（pxで自由に変更可能） ▼
+       ========================================= */
+    #customMapSelector { position: absolute; top: 60px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    
+    #floatingLocationBtn { position: absolute; top: 100px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    /* ========================================= */
+
     html, body { height: 100%; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; color: #333; overflow: hidden; background: #f4f4f4; }
     
     #mapWrapper { position: absolute; top: 0; bottom: 0; width: 100%; }
@@ -24,10 +32,6 @@
       z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
-    
-    /* 修正: マップ切替を 60px、的マークを 100px に厳密配置 */
-    #customMapSelector { position: absolute; top: 60px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
-    #floatingLocationBtn { position: absolute; top: 100px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
@@ -80,7 +84,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.19</div>
+  <div id="versionBadge">v6.20</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -175,7 +179,7 @@
       </details>
 
       <details class="menu-section" id="recordRouteSection" style="display: none;" open>
-        <summary>🚶‍♂️ 歩いたルートを保存</summary>
+        <summary>🚶‍♂️ 歩くルートを保存</summary>
         <div class="section-content">
           <div id="trackingEditControls">
             <p style="font-size:12px; color:#dc3545; font-weight:bold; margin-bottom:10px; margin-top:0;">⚠️ 画面を消す・別アプリを開くと記録が止まります。必ず画面を開いたまま歩いてください。</p>
@@ -314,13 +318,16 @@
     let manualDirectionsRenderer = null;
     let omakaseRenderers = [];
     let displayedPolylines = []; 
-    window.routeMarkers = []; // 修正: 表示したルートの「スタート・ゴール印」保持用
+    window.routeMarkers = []; // スタート・ゴール印保持用
     let activeInfoWindow = null;
     let trackingStartTime = null; let trackingPins = [];
     window.tempRoutes = []; 
     window.tempTrackData = {}; 
     window.pinToDelete = null; 
     window.targetLocationForPin = null; 
+    
+    // 自動追従のフラグ
+    window.isUserDraggingMap = false;
 
     window.categories = JSON.parse(localStorage.getItem("customCategories_" + gardenId)) || [
       { name: "危険", icon: defaultIcons[0], color: "#dc3545" }, 
@@ -359,14 +366,17 @@
         streetViewControl: true, 
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, fullscreenControl: false,
-        padding: { top: 50, bottom: 180 } 
+        padding: { bottom: 180 } 
       });
       
-      // 修正: 右上の的マーク(100px)の下(145px)に人マーク(ペグマン)が来るように透明な押し下げブロックを設置
+      // ユーザーが手動でマップを動かしたか検知（自動追従を解除するため）
+      map.addListener('dragstart', () => { window.isUserDraggingMap = true; });
+
+      // 人マーク(ペグマン)を150pxの位置に押し下げる透明ブロックを挿入
       const spacer = document.createElement('div');
-      spacer.style.height = '145px'; 
+      spacer.style.height = '150px'; 
       spacer.style.width = '10px';
-      map.controls[google.maps.ControlPosition.RIGHT_TOP].push(spacer);
+      map.controls[google.maps.ControlPosition.RIGHT_TOP].insertAt(0, spacer);
 
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
@@ -409,20 +419,29 @@
     }
 
     window.setRouteInputFromCurrent = function(fieldId) { 
-      if (!navigator.geolocation) { alert("GPSが使えません"); return; } 
+      const btn = document.getElementById("floatingLocationBtn");
+      btn.innerText = "⏳";
+      if (!navigator.geolocation) { alert("GPSが使えません"); btn.innerText = "🎯"; return; } 
       navigator.geolocation.getCurrentPosition(pos => { 
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         updateCurrentLocationMarker(latLng); map.setCenter(latLng);
         document.getElementById(fieldId).value = `現在地 (${pos.coords.latitude.toFixed(4)},${pos.coords.longitude.toFixed(4)})`; 
-      }, () => { alert("現在地が取得できません"); }); 
+        btn.innerText = "🎯";
+      }, () => { alert("現在地が取得できません"); btn.innerText = "🎯"; }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }); 
     };
 
     window.showCurrentLocation = function() { 
-      if (!navigator.geolocation) { alert("現在地が取得できません"); return; } 
+      const btn = document.getElementById("floatingLocationBtn");
+      btn.innerText = "⏳";
+      if (!navigator.geolocation) { alert("現在地が取得できません"); btn.innerText = "🎯"; return; } 
       navigator.geolocation.getCurrentPosition(pos => { 
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-        updateCurrentLocationMarker(latLng); map.setCenter(latLng); 
-      }, () => { alert("現在地が取得できません"); }, { enableHighAccuracy: true }); 
+        updateCurrentLocationMarker(latLng); 
+        map.panTo(latLng); 
+        if(map.getZoom() < 16) map.setZoom(16);
+        window.isUserDraggingMap = false; // 現在地ボタンで自動追従を再開
+        btn.innerText = "🎯";
+      }, () => { alert("現在地が取得できません"); btn.innerText = "🎯"; }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }); 
     };
 
     window.addWaypointField = function() {
@@ -455,7 +474,6 @@
       displayedPolylines.forEach(p => { if (p) p.setMap(null); });
       displayedPolylines = [];
       
-      // 修正: スタート・ゴール印マーカーも一括クリア
       window.routeMarkers.forEach(m => { if (m) m.setMap(null); });
       window.routeMarkers = [];
       
@@ -816,6 +834,7 @@
       document.getElementById('trackingWarningModal').style.display = 'flex';
       
       route = []; trackingPins = []; trackingStartTime = new Date(); 
+      window.isUserDraggingMap = false; // 記録開始時は自動追従オン
       
       const btn = document.getElementById("toggleTrackBtn");
       btn.style.backgroundColor = "#dc3545"; 
@@ -844,8 +863,15 @@
         }
         
         trackingPolyline.setPath(route);
-        updateCurrentLocationMarker(new google.maps.LatLng(latLng.lat, latLng.lng));
-      }, () => { console.log("GPSエラー"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+        let newLatLng = new google.maps.LatLng(latLng.lat, latLng.lng);
+        updateCurrentLocationMarker(newLatLng);
+        
+        // ユーザーが手動で画面を動かしていなければ、現在地を自動で追尾する
+        if (!window.isUserDraggingMap) {
+            map.panTo(newLatLng);
+        }
+        
+      }, () => { console.log("GPSエラー"); }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
     };
 
     window.stopTracking = function() {
@@ -1013,7 +1039,7 @@
         closeActiveInfoWindow();
         window.pinToDelete = null;
       }
-      document.getElementById('pinDelModal').style.none = 'none';
+      document.getElementById('pinDelModal').style.display = 'none';
     };
 
     window.updateRouteList = function() { 
@@ -1036,7 +1062,6 @@
       
       if (displayedPolylines[index]) displayedPolylines[index].setMap(null);
       
-      // 既存のスタート・ゴール印をクリア
       window.routeMarkers.forEach(m => { if (m) m.setMap(null); });
       window.routeMarkers = [];
       
@@ -1044,11 +1069,10 @@
           path: routeData.points, map: map, strokeColor: routeColors[index % routeColors.length], strokeOpacity: 0.8, strokeWeight: 5, clickable: false, zIndex: 1
       }); 
       
-      // 修正: ルート表示時に出発（スタート）と到着（ゴール）の丸印（マーカー）を立てる
       const startPos = routeData.points[0];
       const startMarker = new google.maps.Marker({
           position: startPos, map: map,
-          label: { text: "出", color: "#fff", fontWeight: "bold" },
+          label: { text: "S", color: "#fff", fontWeight: "bold" },
           icon: { path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: "#007bff", fillOpacity: 1, strokeColor: "#ffffff", strokeWeight: 2 },
           zIndex: 110
       });
@@ -1057,7 +1081,7 @@
       const endPos = routeData.points[routeData.points.length - 1];
       const endMarker = new google.maps.Marker({
           position: endPos, map: map,
-          label: { text: "着", color: "#fff", fontWeight: "bold" },
+          label: { text: "G", color: "#fff", fontWeight: "bold" },
           icon: { path: google.maps.SymbolPath.CIRCLE, scale: 14, fillColor: "#dc3545", fillOpacity: 1, strokeColor: "#ffffff", strokeWeight: 2 },
           zIndex: 110
       });
@@ -1070,7 +1094,6 @@
       document.getElementById('mapControls').style.height = "160px";
     };
     
-    // 修正: 非表示にした際もスタゴマーカーを消去
     window.hideRoute = function(index) { 
       if (displayedPolylines[index]) { displayedPolylines[index].setMap(null); displayedPolylines[index] = null; } 
       window.routeMarkers.forEach(m => { if (m) m.setMap(null); });
