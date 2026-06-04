@@ -14,6 +14,14 @@
     #customMapSelector { position: absolute; top: 60px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     
     #floatingLocationBtn { position: absolute; top: 100px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    
+    /* 修正: Googleマップの頑固な仕様を無視して、人マークをCSSで強制的に配置する */
+    .gm-svpc {
+      position: absolute !important;
+      top: 150px !important;
+      right: 10px !important;
+      margin: 0 !important;
+    }
     /* ========================================= */
 
     html, body { height: 100%; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; color: #333; overflow: hidden; background: #f4f4f4; }
@@ -84,7 +92,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.21</div>
+  <div id="versionBadge">v6.22</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -112,7 +120,7 @@
 
       <div class="menu-section-plain" style="padding-top: 10px;">
         <div class="input-row" style="margin-bottom: 0;">
-          <input id="placeInput" type="text" placeholder="場所を検索（例：西山公園）" onfocus="this.select()">
+          <input id="placeInput" type="text" placeholder="場所を検索（例：西山公園）" onfocus="this.select()" onclick="this.select()">
           <button onclick="searchPlace()" style="width:auto; margin:0; padding:12px;">検索</button>
         </div>
       </div>
@@ -122,7 +130,7 @@
         <div class="section-content">
           <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">出発地と時間から、おすすめの目的地（公園・広場・神社等）を提案します。<br><span style="color:#007bff; font-weight:bold;">（※時間は子どもの足の速さで計算）</span></p>
           <div class="input-row">
-            <input id="autoOriginInput" type="text" placeholder="出発地を入力" onfocus="this.select()">
+            <input id="autoOriginInput" type="text" placeholder="出発地を入力" onfocus="this.select()" onclick="this.select()">
             <button class="set-inline-btn" onclick="setRouteInputFromCurrent('autoOriginInput')">🎯現在地</button>
           </div>
           <div class="input-row">
@@ -142,14 +150,14 @@
         <div class="section-content">
           <p style="font-size:12px; color:#007bff; font-weight:bold; margin-bottom:10px; margin-top:0;">（※時間は子どもの足の速さで計算）</p>
           <div class="input-row">
-            <input id="manualOriginInput" type="text" placeholder="出発地（例：保育園）" onfocus="this.select()">
+            <input id="manualOriginInput" type="text" placeholder="出発地（例：保育園）" onfocus="this.select()" onclick="this.select()">
             <button class="set-inline-btn" onclick="setRouteInputFromCurrent('manualOriginInput')">🎯現在地</button>
           </div>
           
           <div id="waypointsContainer"></div>
           
           <div class="input-row">
-            <input id="manualDestInput" type="text" placeholder="目的地" onfocus="this.select()">
+            <input id="manualDestInput" type="text" placeholder="目的地" onfocus="this.select()" onclick="this.select()">
             <button class="set-inline-btn" onclick="setRouteInputFromCurrent('manualDestInput')">🎯現在地</button>
           </div>
           
@@ -246,7 +254,7 @@
   <div id="catAddModal" class="custom-modal-overlay">
     <div class="custom-modal">
       <h3 style="margin-top:0; font-size:16px;">新しいジャンルを追加</h3>
-      <input type="text" id="catAddInput" placeholder="ジャンル名" onfocus="this.select()" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+      <input type="text" id="catAddInput" placeholder="ジャンル名" onfocus="this.select()" onclick="this.select()" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
       <div style="display:flex; gap:10px;">
         <button onclick="window.confirmAddCategory()" style="background:#4CAF50; flex:1; margin:0;">追加</button>
         <button onclick="document.getElementById('catAddModal').style.display='none'" style="background:#6c757d; flex:1; margin:0;">キャンセル</button>
@@ -365,9 +373,10 @@
         streetViewControl: true, 
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, fullscreenControl: false,
-        // 修正: 確実に人マークを150pxまで下げるためのPadding設定
-        padding: { top: 150, bottom: 180 } 
+        padding: { top: 50, bottom: 180 } 
       });
+      
+      // 修正: 以前の透明ブロックのコードを完全に削除し、CSSによる強制指定に切り替えました。
       
       map.addListener('dragstart', () => { window.isUserDraggingMap = true; });
 
@@ -415,7 +424,6 @@
       const btn = document.getElementById("floatingLocationBtn");
       btn.innerText = "⏳";
       if (!navigator.geolocation) { alert("GPS機能が使えません。設定を確認してください。"); btn.innerText = "🎯"; return; } 
-      // 修正: 取得条件を緩くしてフリーズを防ぐ
       navigator.geolocation.getCurrentPosition(pos => { 
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         updateCurrentLocationMarker(latLng); map.setCenter(latLng);
@@ -428,7 +436,6 @@
       const btn = document.getElementById("floatingLocationBtn");
       btn.innerText = "⏳";
       if (!navigator.geolocation) { alert("GPS機能が使えません。設定を確認してください。"); btn.innerText = "🎯"; return; } 
-      // 修正: 取得条件を緩くしてフリーズを防ぐ
       navigator.geolocation.getCurrentPosition(pos => { 
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         updateCurrentLocationMarker(latLng); 
@@ -444,7 +451,7 @@
       const id = "waypointInput_" + window.waypointCount; 
       const div = document.createElement("div");
       div.className = "input-row"; 
-      div.innerHTML = `<input id="${id}" class="waypoint-input" type="text" placeholder="経由地を入力"><button onclick="this.parentElement.remove()" class="danger" style="width:auto; padding:12px; margin:0;">×</button>`;
+      div.innerHTML = `<input id="${id}" class="waypoint-input" type="text" placeholder="経由地を入力" onfocus="this.select()" onclick="this.select()"><button onclick="this.parentElement.remove()" class="danger" style="width:auto; padding:12px; margin:0;">×</button>`;
       document.getElementById("waypointsContainer").appendChild(div);
       setupCleanAutocomplete(id);
     };
@@ -549,7 +556,6 @@
 
     window.showQuickPinSelector = function() {
       if (!navigator.geolocation) { alert("GPSが使えません"); return; }
-      // 修正: 取得条件を緩くしてフリーズを防ぐ
       navigator.geolocation.getCurrentPosition(pos => {
         window.targetLocationForPin = {lat: pos.coords.latitude, lng: pos.coords.longitude, name: ""};
         renderPinSelectorAndShow();
@@ -843,7 +849,6 @@
           path: route, strokeColor: "#0000FF", strokeOpacity: 0.8, strokeWeight: 5, map: map, clickable: false, zIndex: 1
       });
 
-      // 修正: GPSの取得条件を緩めてフリーズを防ぐ
       watchId = navigator.geolocation.watchPosition(pos => {
         const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         
