@@ -25,10 +25,10 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    /* 修正: マップ選択と的マークを同じ高さに下げ、人マークとの間隔を確保 */
-    #customMapSelector { position: absolute; top: 110px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    /* 修正: マップ選択と的マークを上部(70px)に引き上げ */
+    #customMapSelector { position: absolute; top: 70px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     
-    #floatingLocationBtn { position: absolute; top: 110px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    #floatingLocationBtn { position: absolute; top: 70px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
@@ -75,12 +75,12 @@
     .routeCard-actions { display: flex; gap: 8px; border-top: 1px dashed #eee; padding-top: 10px; }
     .routeCard-actions button { margin: 0; padding: 8px; font-size: 13px; border-radius: 6px; }
     
-    #pinSelectorOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
-    #pinSelectorModal { background: #fff; padding: 20px; border-radius: 12px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .custom-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
+    .custom-modal { background: #fff; padding: 20px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.13</div>
+  <div id="versionBadge">v6.14</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -198,11 +198,28 @@
     </div>
   </div>
 
-  <div id="pinSelectorOverlay">
-    <div id="pinSelectorModal">
+  <div id="pinSelectorOverlay" class="custom-modal-overlay">
+    <div class="custom-modal">
       <h3 style="margin-top:0; font-size:18px; color:#333;">どのピンを置きますか？</h3>
       <div id="pinSelectorButtons" style="display:flex; flex-direction:column; gap:10px;"></div>
       <button onclick="document.getElementById('pinSelectorOverlay').style.display='none'" style="margin-top:15px; background:#6c757d;">キャンセル</button>
+    </div>
+  </div>
+
+  <div id="trackingWarningModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+      <h3 style="margin-top:0; font-size:16px; color:#dc3545;">⚠️ 記録時の注意</h3>
+      <p style="font-size:14px; text-align:left;">スリープやブラウザを移動したり別アプリになると、ルートがうまく保存されません。歩く時はこの画面を開いたままにしてください。</p>
+      <button onclick="document.getElementById('trackingWarningModal').style.display='none'" style="background:#007bff; width:100%; margin-bottom:0;">OK</button>
+    </div>
+  </div>
+
+  <div id="routeSaveModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+      <h3 style="margin-top:0; font-size:16px;">ルートの保存</h3>
+      <p style="font-size:12px; color:#666; margin-top:0;">ルートの名前</p>
+      <input type="text" id="routeSaveNameInput" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+      <button onclick="window.confirmRouteSave()" style="background:#4CAF50; width:100%; margin-bottom:0;">保存する</button>
     </div>
   </div>
 
@@ -250,6 +267,7 @@
     let activeInfoWindow = null;
     let trackingStartTime = null; let trackingPins = [];
     window.tempRoutes = []; 
+    window.tempTrackData = {}; // 記録保存時の一時データ保持用
 
     window.categories = JSON.parse(localStorage.getItem("customCategories_" + gardenId)) || [
       { name: "危険", icon: defaultIcons[0], color: "#dc3545" }, 
@@ -279,8 +297,8 @@
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
         mapTypeControl: false, fullscreenControl: false,
-        // 修正: 的マーク(高さ150pxまで占有)のすぐ下に人マークが来るようパディングを160に設定
-        padding: { top: 160 }
+        // 修正: 人マーク(ペグマン)をさらに下に押し下げるためパディングを大幅に増加
+        padding: { top: 220 }
       });
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
@@ -399,12 +417,10 @@
       if (modeToggle.checked) { 
         currentMode = "edit"; modeLabel.textContent = "📌 編集モード"; 
         editControls.style.display = "flex"; editMessage.style.display = "none";
-        // 修正: 編集モードの時だけルート保存タブを表示
         if(recordSection) recordSection.style.display = "block";
       } else { 
         currentMode = "view"; modeLabel.textContent = "🔍 閲覧モード"; 
         editControls.style.display = "none"; editMessage.style.display = "block";
-        // 修正: 閲覧モードではルート保存タブごと隠す
         if(recordSection) recordSection.style.display = "none";
         if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } 
       }
@@ -712,10 +728,10 @@
     };
 
     window.startTracking = function() {
-      if (watchId) { alert("すでに記録中です！"); return; }
+      if (watchId) { return; }
       
-      // 修正: 記録開始時に注意アラートを出す
-      alert("【注意】\nスマホをスリープ状態にしたり、別のアプリを開いたりすると、ルートがうまく保存されません。\n歩く時はこの画面を開いたままにしてください！");
+      // 修正: iPhone(Safari)対応のカスタム注意アラートを表示
+      document.getElementById('trackingWarningModal').style.display = 'flex';
       
       route = []; trackingPins = []; trackingStartTime = new Date(); 
       
@@ -747,7 +763,7 @@
         
         trackingPolyline.setPath(route);
         updateCurrentLocationMarker(new google.maps.LatLng(latLng.lat, latLng.lng));
-      }, () => { alert("GPSエラー"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      }, () => { console.log("GPSエラー"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     };
 
     window.stopTracking = function() {
@@ -776,42 +792,55 @@
           const d = trackingStartTime || new Date();
           const defaultWalkName = `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}:${('0'+d.getMinutes()).slice(-2)}出発 のお散歩`;
           
-          let name = prompt("ルートの名前（日時は自由に変更できます）", defaultWalkName); 
-          if (!name || name.trim() === "") {
-              name = defaultWalkName; 
-          }
+          // 修正: データを一時保存し、iPhone対応のカスタム入力画面を表示する
+          window.tempTrackData = {
+              diffMinutes: diffMinutes,
+              totalDistance: totalDistance,
+              defaultName: defaultWalkName
+          };
           
-          let routes = [];
-          try { 
-              routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; 
-              if(!Array.isArray(routes)) routes = []; 
-          } catch(e) { routes = []; }
+          document.getElementById('routeSaveNameInput').value = defaultWalkName;
+          document.getElementById('routeSaveModal').style.display = 'flex';
           
-          routes.push({ 
-              name: name.trim(), 
-              duration: diffMinutes, 
-              distance: (totalDistance / 1000).toFixed(2), 
-              points: route, 
-              pins: trackingPins, 
-              timestamp: new Date().toISOString() 
-          }); 
-          localStorage.setItem("walkRoutes_" + gardenId, JSON.stringify(routes)); 
-          window.updateRouteList();
-          
-          const listDetails = document.getElementById("routeListDetails");
-          if(listDetails) listDetails.open = true;
-          
-          if (trackingPolyline) { trackingPolyline.setMap(null); trackingPolyline = null;}
-          route = [];
-          
-          alert(`「${name}」として保存しました！\nリストから「表示」を押すと地図に赤線で表示されます。`); 
         } catch(e) { 
           console.error(e);
-          alert("保存処理中にエラーが発生しました。"); 
+          alert("保存準備中にエラーが発生しました。"); 
         }
       } else { 
         alert("移動データがありませんでした。（GPSがうまく取得できなかった可能性があります）"); 
       }
+    };
+    
+    // 修正: カスタム入力画面で「保存する」を押したときの処理
+    window.confirmRouteSave = function() {
+        let name = document.getElementById('routeSaveNameInput').value.trim();
+        if (!name) name = window.tempTrackData.defaultName;
+
+        let routes = [];
+        try { 
+            routes = JSON.parse(localStorage.getItem("walkRoutes_" + gardenId)) || []; 
+            if(!Array.isArray(routes)) routes = []; 
+        } catch(e) { routes = []; }
+        
+        routes.push({ 
+            name: name, 
+            duration: window.tempTrackData.diffMinutes, 
+            distance: (window.tempTrackData.totalDistance / 1000).toFixed(2), 
+            points: route, 
+            pins: trackingPins, 
+            timestamp: new Date().toISOString() 
+        }); 
+        localStorage.setItem("walkRoutes_" + gardenId, JSON.stringify(routes)); 
+        window.updateRouteList();
+        
+        const listDetails = document.getElementById("routeListDetails");
+        if(listDetails) listDetails.open = true;
+        
+        if (trackingPolyline) { trackingPolyline.setMap(null); trackingPolyline = null;}
+        route = [];
+        
+        document.getElementById('routeSaveModal').style.display = 'none';
+        alert(`「${name}」として保存しました！\nリストから「表示」を押すと地図に赤線で表示されます。`); 
     };
 
     window.searchPlace = function() {
