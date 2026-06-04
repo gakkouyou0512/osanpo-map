@@ -25,9 +25,9 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    /* 指定の高さに変更 */
-    #customMapSelector { position: absolute; top: 100px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
-    #floatingLocationBtn { position: absolute; top: 150px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    /* ご指定の通り位置を調整 */
+    #customMapSelector { position: absolute; top: 80px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    #floatingLocationBtn { position: absolute; top: 80px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
@@ -65,8 +65,10 @@
     .planCard { background: #fff; border: 2px solid #007bff; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
     .plan-title { font-size: 16px; font-weight: bold; color: #007bff; margin-bottom: 8px; border-bottom: 2px dashed #eee; padding-bottom: 5px; }
     .plan-detail { font-size: 14px; margin-bottom: 4px; line-height: 1.5; color: #333; }
-    .plan-warning { color: #dc3545; font-weight: bold; background: #ffebeb; padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 13px; }
-    .plan-warning ul { margin: 5px 0 0 0; padding-left: 20px; }
+    
+    /* 経由ピンの汎用スタイル */
+    .route-pin-info { font-weight: bold; padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 13px; }
+    .route-pin-info ul { margin: 5px 0 0 0; padding-left: 20px; font-weight: normal; }
 
     .routeCard { background: #fff; border: 1px solid #e0e0e0; padding: 14px; margin-bottom: 10px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .routeCard-title { font-size: 16px; font-weight: bold; color: #222; margin-bottom: 6px; }
@@ -79,7 +81,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.16</div>
+  <div id="versionBadge">v6.17</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -107,7 +109,7 @@
 
       <div class="menu-section-plain" style="padding-top: 10px;">
         <div class="input-row" style="margin-bottom: 0;">
-          <input id="placeInput" type="text" placeholder="場所を検索（例：西山公園）">
+          <input id="placeInput" type="text" placeholder="場所を検索（例：西山公園）" onfocus="this.select()">
           <button onclick="searchPlace()" style="width:auto; margin:0; padding:12px;">検索</button>
         </div>
       </div>
@@ -117,7 +119,7 @@
         <div class="section-content">
           <p style="font-size:12px; color:#555; margin-bottom:10px; margin-top:0;">出発地と時間から、おすすめの目的地（公園・広場・神社等）を提案します。<br><span style="color:#007bff; font-weight:bold;">（※時間は子どもの足の速さで計算）</span></p>
           <div class="input-row">
-            <input id="autoOriginInput" type="text" placeholder="出発地を入力">
+            <input id="autoOriginInput" type="text" placeholder="出発地を入力" onfocus="this.select()">
             <button class="set-inline-btn" onclick="setRouteInputFromCurrent('autoOriginInput')">🎯現在地</button>
           </div>
           <div class="input-row">
@@ -137,14 +139,14 @@
         <div class="section-content">
           <p style="font-size:12px; color:#007bff; font-weight:bold; margin-bottom:10px; margin-top:0;">（※時間は子どもの足の速さで計算）</p>
           <div class="input-row">
-            <input id="manualOriginInput" type="text" placeholder="出発地（例：保育園）">
+            <input id="manualOriginInput" type="text" placeholder="出発地（例：保育園）" onfocus="this.select()">
             <button class="set-inline-btn" onclick="setRouteInputFromCurrent('manualOriginInput')">🎯現在地</button>
           </div>
           
           <div id="waypointsContainer"></div>
           
           <div class="input-row">
-            <input id="manualDestInput" type="text" placeholder="目的地">
+            <input id="manualDestInput" type="text" placeholder="目的地" onfocus="this.select()">
             <button class="set-inline-btn" onclick="setRouteInputFromCurrent('manualDestInput')">🎯現在地</button>
           </div>
           
@@ -230,7 +232,7 @@
     <div class="custom-modal">
       <h3 style="margin-top:0; font-size:16px;">ルートの保存</h3>
       <p style="font-size:12px; color:#666; margin-top:0;">ルートの名前</p>
-      <input type="text" id="routeSaveNameInput" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+      <input type="text" id="routeSaveNameInput" onfocus="this.select()" onclick="this.select()" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
       <div style="display:flex; gap:10px;">
         <button onclick="window.confirmRouteSave()" style="background:#4CAF50; flex:1; margin:0;">保存</button>
         <button onclick="document.getElementById('routeSaveModal').style.display='none'" style="background:#6c757d; flex:1; margin:0;">キャンセル</button>
@@ -241,7 +243,7 @@
   <div id="catAddModal" class="custom-modal-overlay">
     <div class="custom-modal">
       <h3 style="margin-top:0; font-size:16px;">新しいジャンルを追加</h3>
-      <input type="text" id="catAddInput" placeholder="ジャンル名" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+      <input type="text" id="catAddInput" placeholder="ジャンル名" onfocus="this.select()" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
       <div style="display:flex; gap:10px;">
         <button onclick="window.confirmAddCategory()" style="background:#4CAF50; flex:1; margin:0;">追加</button>
         <button onclick="document.getElementById('catAddModal').style.display='none'" style="background:#6c757d; flex:1; margin:0;">キャンセル</button>
@@ -354,15 +356,14 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
-        // streetViewControlOptionsを指定せず、デフォルトの右下に配置させる
         mapTypeControl: false, fullscreenControl: false,
-        padding: { bottom: 180 } // 下の操作パネルを避けるためのパディング
+        // パディングTOPを50pxにして人マークを上に固定、下メニュー分を避ける
+        padding: { top: 50, bottom: 180 } 
       });
       
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
       
-      // クリック無視設定とz-indexの低下を適用
       manualDirectionsRenderer = new google.maps.DirectionsRenderer({
           polylineOptions: { clickable: false, zIndex: 1 }
       }); 
@@ -630,7 +631,6 @@
               validPlaces.forEach((place, index) => {
                 directionsService.route({ origin: loc, destination: place.geometry.location, travelMode: google.maps.TravelMode.WALKING }, (result, rStatus) => {
                   if (rStatus === "OK") {
-                    // クリック無視設定を追加
                     let renderer = new google.maps.DirectionsRenderer({ map: map, directions: result, suppressMarkers: false, polylineOptions: { strokeColor: omakaseColors[index], strokeWeight: 6, strokeOpacity: 0.8, clickable: false, zIndex: 1 } });
                     omakaseRenderers.push(renderer);
                     
@@ -668,24 +668,38 @@
       let roundDist = ((totalDist * 2) / 1000).toFixed(2);
       let roundTime = Math.round((totalTime * 2) / 60);
 
-      let detectedWarnings = [];
+      // 修正: 危険や注意以外の、すべてのピンを抽出・整理する処理
+      let detectedPins = {};
       spotMemos.forEach(memo => {
-        if (memo.point.category === "危険" || memo.point.category === "注意") {
-          let isNear = false;
-          for (let i = 0; i < path.length; i++) {
-            let dist = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(memo.point.lat, memo.point.lng), path[i]);
-            if (dist < 50) { isNear = true; break; }
-          }
-          if (isNear) detectedWarnings.push(`${memo.point.category}: ${memo.point.memo || '名称なし'}`);
+        let isNear = false;
+        for (let i = 0; i < path.length; i++) {
+          let dist = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(memo.point.lat, memo.point.lng), path[i]);
+          if (dist < 50) { isNear = true; break; }
+        }
+        if (isNear) {
+          if (!detectedPins[memo.point.category]) detectedPins[memo.point.category] = [];
+          detectedPins[memo.point.category].push(memo.point.memo || '名称なし');
         }
       });
 
       let warningHTML = ""; 
-      let textWarning = "特になし";
-      if (detectedWarnings.length > 0) {
-        warningHTML = `<div class="plan-warning">⚠️ 経由する危険箇所：${detectedWarnings.length}件<ul>` + detectedWarnings.map(w => `<li>${w}</li>`).join('') + `</ul></div>`;
-        textWarning = "\n⚠️リスク: " + detectedWarnings.join('、');
+      let textWarningArr = [];
+      for (let cat in detectedPins) {
+        let catObj = window.categories.find(c => c.name === cat);
+        let catColor = catObj ? catObj.color : "#333";
+        // 背景色をカテゴリによって分ける
+        let bgColors = {"危険": "#ffebeb", "注意": "#fff8e1", "おすすめ": "#e8f5e9"};
+        let bgColor = bgColors[cat] || "#f8f9fa";
+        
+        warningHTML += `<div class="route-pin-info" style="color: ${catColor}; background: ${bgColor}; border: 1px solid ${catColor};">`;
+        warningHTML += `経由する${cat}：${detectedPins[cat].length}件<ul>`;
+        detectedPins[cat].forEach(p => {
+           warningHTML += `<li>${p}</li>`;
+        });
+        warningHTML += `</ul></div>`;
+        textWarningArr.push(`\n📍経由する${cat}: ` + detectedPins[cat].join('、'));
       }
+      let textWarning = textWarningArr.length > 0 ? textWarningArr.join('') : "\n📍経由ピン: なし";
 
       let routeNameForSave = destName;
       if (orgName) {
@@ -797,7 +811,6 @@
       requestWakeLock();
 
       if (trackingPolyline) { trackingPolyline.setMap(null); }
-      // クリック無視とz-index設定
       trackingPolyline = new google.maps.Polyline({
           path: route, strokeColor: "#0000FF", strokeOpacity: 0.8, strokeWeight: 5, map: map, clickable: false, zIndex: 1
       });
@@ -954,7 +967,7 @@
         <div style="margin-bottom: 10px; display: flex; gap: 5px; align-items: center;">
           <select id="editCategory" style="flex: 1; padding:8px; font-size:16px; border-radius:6px; border:1px solid #ccc; background:#f8f9fa;">${catOptions}</select>
         </div>
-        <input type="text" id="editMemo" value="${point.memo || ""}" placeholder="メモを入力" style="width:100%; padding:12px; margin-bottom:10px; font-size:18px; font-weight:bold; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+        <input type="text" id="editMemo" value="${point.memo || ""}" placeholder="メモを入力" onfocus="this.select()" onclick="this.select()" style="width:100%; padding:12px; margin-bottom:10px; font-size:18px; font-weight:bold; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
         <button id="saveBtn" style="width:100%; padding:12px; margin-bottom:8px; font-size:16px; font-weight:bold; color:#fff; background-color:#4CAF50; border:none; border-radius:6px; cursor:pointer;">保存する</button>
         ${!isNew ? `<button id="deleteBtn" class="danger" style="width:100%; padding:12px; margin-bottom:0; font-size:16px; font-weight:bold; color:#fff; background-color:#dc3545; border:none; border-radius:6px; cursor:pointer;">削除</button>` : ""}`;
         
@@ -1010,7 +1023,6 @@
       
       if (displayedPolylines[index]) displayedPolylines[index].setMap(null);
       
-      // クリック無視とz-index設定
       displayedPolylines[index] = new google.maps.Polyline({ 
           path: routeData.points, map: map, strokeColor: routeColors[index % routeColors.length], strokeOpacity: 0.8, strokeWeight: 5, clickable: false, zIndex: 1
       }); 
