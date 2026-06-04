@@ -25,9 +25,9 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    /* 修正: マップ切替と的マークを 50px に指定 */
-    #customMapSelector { position: absolute; top: 50px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
-    #floatingLocationBtn { position: absolute; top: 50px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    /* 指定の高さに変更 */
+    #customMapSelector { position: absolute; top: 100px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    #floatingLocationBtn { position: absolute; top: 150px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
@@ -79,7 +79,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.15</div>
+  <div id="versionBadge">v6.16</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -342,10 +342,8 @@
       return value;
     }
     
-    // 修正: 検索結果やタップ時のポップアップ。2つのボタン（ルートに設定 / ピンを置く）に集約
     function getMapPopupHtml(name, lat, lng) {
       let pinBtn = currentMode === "edit" ? `<button style="flex:1; padding:10px; font-size:12px; background:#ff9800; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.showQuickPinSelectorForLocation(${lat}, ${lng}, '${name}'); closeActiveInfoWindow();">📍 ピンを置く</button>` : "";
-      
       return `<div style="text-align:center;"><strong>🗺️ ${name}</strong><br><div style="display:flex; gap:5px; margin-top:10px;">
         <button style="flex:1; padding:10px; font-size:12px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.showRouteRoleSelector(${lat}, ${lng}, '${name}'); closeActiveInfoWindow();">🗺️ ルートの場所に設定</button>
         ${pinBtn}
@@ -356,20 +354,18 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
-        streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
+        // streetViewControlOptionsを指定せず、デフォルトの右下に配置させる
         mapTypeControl: false, fullscreenControl: false,
-        padding: { top: 60 } // お知らせバナー分の余白
+        padding: { bottom: 180 } // 下の操作パネルを避けるためのパディング
       });
       
-      // 修正: 透明なブロックをRIGHT_TOPに挿入して、人マーク（ペグマン）を強制的に下にずらす裏技
-      const spacer = document.createElement('div');
-      spacer.style.height = '100px'; 
-      spacer.style.width = '10px';
-      map.controls[google.maps.ControlPosition.RIGHT_TOP].push(spacer);
-
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
-      manualDirectionsRenderer = new google.maps.DirectionsRenderer(); 
+      
+      // クリック無視設定とz-indexの低下を適用
+      manualDirectionsRenderer = new google.maps.DirectionsRenderer({
+          polylineOptions: { clickable: false, zIndex: 1 }
+      }); 
       manualDirectionsRenderer.setMap(map);
 
       setupCleanAutocomplete("manualOriginInput"); setupCleanAutocomplete("manualDestInput"); 
@@ -472,7 +468,6 @@
       }
     });
 
-    // 修正: どこに設定するかの選択機能
     window.tempRouteTarget = null;
     window.showRouteRoleSelector = function(lat, lng, name) {
       window.tempRouteTarget = { lat, lng, name };
@@ -489,7 +484,6 @@
         window.addWaypointFromPin(window.tempRouteTarget.name, window.tempRouteTarget.lat, window.tempRouteTarget.lng);
       }
       document.getElementById('routeRoleModal').style.display = 'none';
-      alert(`「${window.tempRouteTarget.name}」を設定しました。`);
     };
 
     window.showAddCategoryModal = function() {
@@ -557,7 +551,7 @@
       const point = { lat: lat, lng: lng, memo: memoName || "", image: "", category: categoryName };
       updateCurrentLocationMarker(new google.maps.LatLng(lat, lng)); map.setCenter({lat, lng});
       const categoryObj = window.categories.find(c => c.name === categoryName);
-      const marker = new google.maps.Marker({ position: point, map: map, icon: categoryObj ? categoryObj.icon : defaultIcons[0] });
+      const marker = new google.maps.Marker({ position: point, map: map, icon: categoryObj ? categoryObj.icon : defaultIcons[0], zIndex: 100 });
       const infoWindow = new google.maps.InfoWindow();
       marker.addListener("click", () => { closeActiveInfoWindow(); activeInfoWindow = infoWindow; showInputForm(point, infoWindow, marker, false); });
       spotMemos.push({ point, marker }); saveSpotMemos(); if (watchId) { trackingPins.push(point); }
@@ -636,7 +630,8 @@
               validPlaces.forEach((place, index) => {
                 directionsService.route({ origin: loc, destination: place.geometry.location, travelMode: google.maps.TravelMode.WALKING }, (result, rStatus) => {
                   if (rStatus === "OK") {
-                    let renderer = new google.maps.DirectionsRenderer({ map: map, directions: result, suppressMarkers: false, polylineOptions: { strokeColor: omakaseColors[index], strokeWeight: 6, strokeOpacity: 0.8 } });
+                    // クリック無視設定を追加
+                    let renderer = new google.maps.DirectionsRenderer({ map: map, directions: result, suppressMarkers: false, polylineOptions: { strokeColor: omakaseColors[index], strokeWeight: 6, strokeOpacity: 0.8, clickable: false, zIndex: 1 } });
                     omakaseRenderers.push(renderer);
                     
                     let planData = generatePlanData(result, place.name, omakaseColors[index], `候補 ${index+1}`, orgName, []);
@@ -802,8 +797,9 @@
       requestWakeLock();
 
       if (trackingPolyline) { trackingPolyline.setMap(null); }
+      // クリック無視とz-index設定
       trackingPolyline = new google.maps.Polyline({
-          path: route, strokeColor: "#0000FF", strokeOpacity: 0.8, strokeWeight: 5, map: map
+          path: route, strokeColor: "#0000FF", strokeOpacity: 0.8, strokeWeight: 5, map: map, clickable: false, zIndex: 1
       });
 
       watchId = navigator.geolocation.watchPosition(pos => {
@@ -937,7 +933,7 @@
       spotMemos = []; const saved = JSON.parse(localStorage.getItem("spotMemos_" + gardenId)) || []; 
       saved.forEach(point => { 
         const category = window.categories.find(c => c.name === point.category); 
-        const marker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map, icon: category ? category.icon : defaultIcons[0] }); 
+        const marker = new google.maps.Marker({ position: { lat: point.lat, lng: point.lng }, map: map, icon: category ? category.icon : defaultIcons[0], zIndex: 100 }); 
         marker.addListener("click", () => { 
             closeActiveInfoWindow(); 
             activeInfoWindow = new google.maps.InfoWindow(); 
@@ -1014,8 +1010,9 @@
       
       if (displayedPolylines[index]) displayedPolylines[index].setMap(null);
       
+      // クリック無視とz-index設定
       displayedPolylines[index] = new google.maps.Polyline({ 
-          path: routeData.points, map: map, strokeColor: routeColors[index % routeColors.length], strokeOpacity: 0.8, strokeWeight: 5
+          path: routeData.points, map: map, strokeColor: routeColors[index % routeColors.length], strokeOpacity: 0.8, strokeWeight: 5, clickable: false, zIndex: 1
       }); 
       
       const bounds = new google.maps.LatLngBounds();
