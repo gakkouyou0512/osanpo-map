@@ -25,9 +25,9 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    #customMapSelector { position: absolute; top: 70px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    #customMapSelector { position: absolute; top: 90px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
     
-    #floatingLocationBtn { position: absolute; top: 60px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    #floatingLocationBtn { position: absolute; top: 90px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     .fab-container { position: fixed; bottom: 10px; right: 10px; z-index: 9999; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; padding: 5px; }
     .fab-main { width: 60px; height: 60px; background-color: #ff6b6b; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; color: white; font-size: 30px; cursor: pointer; transition: transform 0.3s, background-color 0.3s; display: flex; align-items: center; justify-content: center; padding: 0; pointer-events: auto; }
@@ -84,7 +84,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.8</div>
+  <div id="versionBadge">v6.9</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -211,14 +211,11 @@
       try {
         if ('wakeLock' in navigator) {
           wakeLock = await navigator.wakeLock.request('screen');
-          console.log('スリープ防止が有効になりました');
         }
-      } catch (err) {
-        console.log(`Wake Lock error: ${err.message}`);
-      }
+      } catch (err) {}
     }
     function releaseWakeLock() {
-      if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; console.log('スリープ防止解除'); }); }
+      if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
     }
     document.addEventListener('visibilitychange', async () => {
       if (watchId !== null && document.visibilityState === 'visible') { await requestWakeLock(); }
@@ -299,9 +296,10 @@
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 35.946, lng: 136.184 }, zoom: 15, mapTypeId: "roadmap", gestureHandling: "greedy",
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
-        streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
+        // ★ 人マーク（ストリートビュー）をお知らせと被らないように中央右に移動
+        streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER }, 
         mapTypeControl: false, fullscreenControl: false,
-        padding: { top: 60 }
+        padding: { top: 90 }
       });
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
@@ -734,9 +732,6 @@
       }, () => { alert("GPSエラー"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     };
 
-    // ==========================================================
-    // ★ v6.8 記録停止＆ルート保存（確認なしで名前入力へ直行する修正）
-    // ==========================================================
     window.stopTracking = function() {
       if (!watchId) return;
       navigator.geolocation.clearWatch(watchId); watchId = null; 
@@ -758,13 +753,14 @@
               ); 
           }
           
-          const d = new Date();
+          // ★ スタートの時間をベースにテンプレートの日時を作成
+          const d = trackingStartTime || new Date();
           const defaultWalkName = `${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}:${('0'+d.getMinutes()).slice(-2)} のお散歩`;
           
-          // 「保存しますか？」の確認ダイアログ（confirm）を挟まず、直接名前入力のポップアップを出す
+          // ★ 自由に編集できる状態でポップアップを表示
           let name = prompt("保存するルートの名前を入力してください", defaultWalkName); 
           if (!name || name.trim() === "") {
-              name = defaultWalkName; // キャンセルや空欄でも消去せず、デフォルトの名前で強制保存
+              name = defaultWalkName; 
           }
           
           let routes = [];
