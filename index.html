@@ -84,7 +84,7 @@
   </style>
 </head>
 <body>
-  <div id="versionBadge">v6.20</div>
+  <div id="versionBadge">v6.21</div>
   <div id="topAlert" onclick="fetchRealtimeInfo()">🔄 情報取得中...</div>
 
   <div id="mapWrapper">
@@ -318,7 +318,7 @@
     let manualDirectionsRenderer = null;
     let omakaseRenderers = [];
     let displayedPolylines = []; 
-    window.routeMarkers = []; // スタート・ゴール印保持用
+    window.routeMarkers = []; 
     let activeInfoWindow = null;
     let trackingStartTime = null; let trackingPins = [];
     window.tempRoutes = []; 
@@ -326,7 +326,6 @@
     window.pinToDelete = null; 
     window.targetLocationForPin = null; 
     
-    // 自動追従のフラグ
     window.isUserDraggingMap = false;
 
     window.categories = JSON.parse(localStorage.getItem("customCategories_" + gardenId)) || [
@@ -366,17 +365,11 @@
         streetViewControl: true, 
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
         mapTypeControl: false, fullscreenControl: false,
-        padding: { bottom: 180 } 
+        // 修正: 確実に人マークを150pxまで下げるためのPadding設定
+        padding: { top: 150, bottom: 180 } 
       });
       
-      // ユーザーが手動でマップを動かしたか検知（自動追従を解除するため）
       map.addListener('dragstart', () => { window.isUserDraggingMap = true; });
-
-      // 人マーク(ペグマン)を150pxの位置に押し下げる透明ブロックを挿入
-      const spacer = document.createElement('div');
-      spacer.style.height = '150px'; 
-      spacer.style.width = '10px';
-      map.controls[google.maps.ControlPosition.RIGHT_TOP].insertAt(0, spacer);
 
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
@@ -421,27 +414,29 @@
     window.setRouteInputFromCurrent = function(fieldId) { 
       const btn = document.getElementById("floatingLocationBtn");
       btn.innerText = "⏳";
-      if (!navigator.geolocation) { alert("GPSが使えません"); btn.innerText = "🎯"; return; } 
+      if (!navigator.geolocation) { alert("GPS機能が使えません。設定を確認してください。"); btn.innerText = "🎯"; return; } 
+      // 修正: 取得条件を緩くしてフリーズを防ぐ
       navigator.geolocation.getCurrentPosition(pos => { 
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         updateCurrentLocationMarker(latLng); map.setCenter(latLng);
         document.getElementById(fieldId).value = `現在地 (${pos.coords.latitude.toFixed(4)},${pos.coords.longitude.toFixed(4)})`; 
         btn.innerText = "🎯";
-      }, () => { alert("現在地が取得できません"); btn.innerText = "🎯"; }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }); 
+      }, () => { alert("現在地が取得できません。電波の良い場所でお試しください。"); btn.innerText = "🎯"; }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }); 
     };
 
     window.showCurrentLocation = function() { 
       const btn = document.getElementById("floatingLocationBtn");
       btn.innerText = "⏳";
-      if (!navigator.geolocation) { alert("現在地が取得できません"); btn.innerText = "🎯"; return; } 
+      if (!navigator.geolocation) { alert("GPS機能が使えません。設定を確認してください。"); btn.innerText = "🎯"; return; } 
+      // 修正: 取得条件を緩くしてフリーズを防ぐ
       navigator.geolocation.getCurrentPosition(pos => { 
         let latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
         updateCurrentLocationMarker(latLng); 
         map.panTo(latLng); 
         if(map.getZoom() < 16) map.setZoom(16);
-        window.isUserDraggingMap = false; // 現在地ボタンで自動追従を再開
+        window.isUserDraggingMap = false;
         btn.innerText = "🎯";
-      }, () => { alert("現在地が取得できません"); btn.innerText = "🎯"; }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }); 
+      }, () => { alert("現在地が取得できません。電波の良い場所でお試しください。"); btn.innerText = "🎯"; }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }); 
     };
 
     window.addWaypointField = function() {
@@ -554,10 +549,11 @@
 
     window.showQuickPinSelector = function() {
       if (!navigator.geolocation) { alert("GPSが使えません"); return; }
+      // 修正: 取得条件を緩くしてフリーズを防ぐ
       navigator.geolocation.getCurrentPosition(pos => {
         window.targetLocationForPin = {lat: pos.coords.latitude, lng: pos.coords.longitude, name: ""};
         renderPinSelectorAndShow();
-      }, () => { alert("現在地が取得できません"); }, { enableHighAccuracy: true });
+      }, () => { alert("現在地が取得できません。電波の良い場所でお試しください。"); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
     };
 
     window.showQuickPinSelectorForLocation = function(lat, lng, defaultName) {
@@ -834,7 +830,7 @@
       document.getElementById('trackingWarningModal').style.display = 'flex';
       
       route = []; trackingPins = []; trackingStartTime = new Date(); 
-      window.isUserDraggingMap = false; // 記録開始時は自動追従オン
+      window.isUserDraggingMap = false; 
       
       const btn = document.getElementById("toggleTrackBtn");
       btn.style.backgroundColor = "#dc3545"; 
@@ -847,6 +843,7 @@
           path: route, strokeColor: "#0000FF", strokeOpacity: 0.8, strokeWeight: 5, map: map, clickable: false, zIndex: 1
       });
 
+      // 修正: GPSの取得条件を緩めてフリーズを防ぐ
       watchId = navigator.geolocation.watchPosition(pos => {
         const latLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         
@@ -866,12 +863,11 @@
         let newLatLng = new google.maps.LatLng(latLng.lat, latLng.lng);
         updateCurrentLocationMarker(newLatLng);
         
-        // ユーザーが手動で画面を動かしていなければ、現在地を自動で追尾する
         if (!window.isUserDraggingMap) {
             map.panTo(newLatLng);
         }
         
-      }, () => { console.log("GPSエラー"); }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+      }, () => { console.log("GPSエラー"); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
     };
 
     window.stopTracking = function() {
