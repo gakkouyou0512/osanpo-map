@@ -25,11 +25,9 @@
       display: flex; justify-content: center; align-items: center; white-space: nowrap; overflow: hidden; cursor: pointer;
     }
     
-    /* 修正: マップ切替を10px下げて 80px に */
-    #customMapSelector { position: absolute; top: 80px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
-    
-    /* 修正: 的マークをさらに下げて 130px に */
-    #floatingLocationBtn { position: absolute; top: 130px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
+    /* 修正: マップ切替と的マークを 50px に指定 */
+    #customMapSelector { position: absolute; top: 50px; left: 10px; z-index: 998; width: fit-content; padding: 6px 10px; font-size: 13px; border-radius: 8px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; font-weight: bold; background: #fff; }
+    #floatingLocationBtn { position: absolute; top: 50px; right: 10px; left: auto; width: 40px; height: 40px; background: white; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 20px; text-align: center; line-height: 40px; cursor: pointer; z-index: 998; }
 
     #mapControls { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow-y: auto; z-index: 999; padding: 0; box-sizing: border-box; overscroll-behavior-y: contain; }
     #mapControls.dragging { transition: none !important; }
@@ -179,7 +177,7 @@
         <summary>🚶‍♂️ 歩いたルートを保存</summary>
         <div class="section-content">
           <div id="trackingEditControls">
-            <p style="font-size:12px; color:#dc3545; font-weight:bold; margin-bottom:10px; margin-top:0;">⚠️ 画面を消したり、別のアプリを開くと記録が止まります。歩行中はこの画面を開いたままにしてください。</p>
+            <p style="font-size:12px; color:#dc3545; font-weight:bold; margin-bottom:10px; margin-top:0;">⚠️ 画面を消す・別アプリを開くと記録が止まります。必ず画面を開いたまま歩いてください。</p>
             <div style="display: flex; gap: 10px;">
               <button id="toggleTrackBtn" onclick="window.toggleTracking()" style="background-color: #007bff; margin:0; flex: 1;">▶ 記録開始</button>
               <button id="quickPinBtn" onclick="window.showQuickPinSelector()" style="background-color: #ff9800; margin:0; flex: 1;">📍 現在地にピン</button>
@@ -207,10 +205,23 @@
     </div>
   </div>
 
+  <div id="routeRoleModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+      <h3 style="margin-top:0; font-size:16px;">ルートのどこに設定しますか？</h3>
+      <p id="routeRoleTargetName" style="font-size:14px; font-weight:bold; color:#007bff; margin-bottom:15px;"></p>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button onclick="window.setRouteRole('origin')" style="background:#007bff; margin:0;">🛫 出発地にする</button>
+        <button onclick="window.setRouteRole('waypoint')" style="background:#17a2b8; margin:0;">🚗 経由地にする</button>
+        <button onclick="window.setRouteRole('dest')" style="background:#28a745; margin:0;">🏁 目的地にする</button>
+        <button onclick="document.getElementById('routeRoleModal').style.display='none'" style="background:#6c757d; margin-top:10px;">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
   <div id="trackingWarningModal" class="custom-modal-overlay">
     <div class="custom-modal">
       <h3 style="margin-top:0; font-size:16px; color:#dc3545;">⚠️ 記録時の注意</h3>
-      <p style="font-size:14px; text-align:left;">画面を消したり、別のアプリを開くと記録が止まります。歩行中はこの画面を開いたままにしてください。</p>
+      <p style="font-size:14px; text-align:left;">画面を消す・別アプリを開くと記録が止まります。必ず画面を開いたまま歩いてください。</p>
       <button onclick="document.getElementById('trackingWarningModal').style.display='none'" style="background:#007bff; width:100%; margin-bottom:0;">OK</button>
     </div>
   </div>
@@ -306,8 +317,8 @@
     let trackingStartTime = null; let trackingPins = [];
     window.tempRoutes = []; 
     window.tempTrackData = {}; 
-    window.pinToDelete = null; // ピン削除用
-    window.targetLocationForPin = null; // 検索結果からのピン用
+    window.pinToDelete = null; 
+    window.targetLocationForPin = null; 
 
     window.categories = JSON.parse(localStorage.getItem("customCategories_" + gardenId)) || [
       { name: "危険", icon: defaultIcons[0], color: "#dc3545" }, 
@@ -331,13 +342,12 @@
       return value;
     }
     
-    // 修正: 検索結果やタップ時の共通ポップアップHTML生成関数
+    // 修正: 検索結果やタップ時のポップアップ。2つのボタン（ルートに設定 / ピンを置く）に集約
     function getMapPopupHtml(name, lat, lng) {
-      let pinBtn = currentMode === "edit" ? `<button style="flex:1; padding:6px; font-size:11px; background:#ff9800; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.showQuickPinSelectorForLocation(${lat}, ${lng}, '${name}'); closeActiveInfoWindow();">📍 ピン</button>` : "";
-      return `<div style="text-align:center;"><strong>🗺️ ${name}</strong><br><div style="display:flex; gap:5px; margin-top:8px; flex-wrap:wrap;">
-        <button style="flex:1; padding:6px; font-size:11px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualOriginInput').value='${name} (${lat.toFixed(4)},${lng.toFixed(4)})'; closeActiveInfoWindow();">🛫 出発</button>
-        <button style="flex:1; padding:6px; font-size:11px; background:#17a2b8; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.addWaypointFromPin('${name}', ${lat}, ${lng}); closeActiveInfoWindow();">🚗 経由</button>
-        <button style="flex:1; padding:6px; font-size:11px; background:#28a745; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualDestInput').value='${name} (${lat.toFixed(4)},${lng.toFixed(4)})'; closeActiveInfoWindow();">🏁 目的</button>
+      let pinBtn = currentMode === "edit" ? `<button style="flex:1; padding:10px; font-size:12px; background:#ff9800; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.showQuickPinSelectorForLocation(${lat}, ${lng}, '${name}'); closeActiveInfoWindow();">📍 ピンを置く</button>` : "";
+      
+      return `<div style="text-align:center;"><strong>🗺️ ${name}</strong><br><div style="display:flex; gap:5px; margin-top:10px;">
+        <button style="flex:1; padding:10px; font-size:12px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.showRouteRoleSelector(${lat}, ${lng}, '${name}'); closeActiveInfoWindow();">🗺️ ルートの場所に設定</button>
         ${pinBtn}
       </div></div>`;
     }
@@ -348,9 +358,15 @@
         disableDefaultUI: true, zoomControl: false, streetViewControl: true, 
         streetViewControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP }, 
         mapTypeControl: false, fullscreenControl: false,
-        // 修正: 的と被らないよう、人マークをさらに下（260px）に押し下げる
-        padding: { top: 260 }
+        padding: { top: 60 } // お知らせバナー分の余白
       });
+      
+      // 修正: 透明なブロックをRIGHT_TOPに挿入して、人マーク（ペグマン）を強制的に下にずらす裏技
+      const spacer = document.createElement('div');
+      spacer.style.height = '100px'; 
+      spacer.style.width = '10px';
+      map.controls[google.maps.ControlPosition.RIGHT_TOP].push(spacer);
+
       placesService = new google.maps.places.PlacesService(map);
       directionsService = new google.maps.DirectionsService(); 
       manualDirectionsRenderer = new google.maps.DirectionsRenderer(); 
@@ -367,13 +383,10 @@
           placesService.getDetails({ placeId: e.placeId, fields: ['name', 'geometry'] }, (place, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
               const latLng = place.geometry.location;
-              const point = { lat: latLng.lat(), lng: latLng.lng(), memo: place.name, image: "", category: window.categories[0].name };
-              if (tempMarker) tempMarker.setMap(null);
-              tempMarker = new google.maps.Marker({ position: latLng, map: map });
-              const infoWindow = new google.maps.InfoWindow();
-              closeActiveInfoWindow(); activeInfoWindow = infoWindow;
-              infoWindow.addListener("closeclick", () => { if (tempMarker) { tempMarker.setMap(null); tempMarker = null; } activeInfoWindow = null; });
-              showInputForm(point, infoWindow, tempMarker, true);
+              closeActiveInfoWindow();
+              const html = getMapPopupHtml(place.name, latLng.lat(), latLng.lng());
+              const info = new google.maps.InfoWindow({ content: html });
+              info.setPosition(latLng); info.open(map); activeInfoWindow = info;
             }
           });
           return;
@@ -386,7 +399,7 @@
       });
     }
 
-    function updateCurrentLocationMarker(latLng) {
+    updateCurrentLocationMarker = function(latLng) {
       if (currentLocationMarker) { currentLocationMarker.setPosition(latLng); } 
       else { currentLocationMarker = new google.maps.Marker({ position: latLng, map: map, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 9, fillColor: '#007bff', fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 3 }, title: "現在地", zIndex: 999 }); }
     }
@@ -459,7 +472,26 @@
       }
     });
 
-    // 修正: カテゴリ追加をカスタムモーダル化
+    // 修正: どこに設定するかの選択機能
+    window.tempRouteTarget = null;
+    window.showRouteRoleSelector = function(lat, lng, name) {
+      window.tempRouteTarget = { lat, lng, name };
+      document.getElementById('routeRoleTargetName').innerText = name;
+      document.getElementById('routeRoleModal').style.display = 'flex';
+    };
+    window.setRouteRole = function(role) {
+      const locString = `${window.tempRouteTarget.name} (${window.tempRouteTarget.lat.toFixed(4)},${window.tempRouteTarget.lng.toFixed(4)})`;
+      if (role === 'origin') {
+        document.getElementById('manualOriginInput').value = locString;
+      } else if (role === 'dest') {
+        document.getElementById('manualDestInput').value = locString;
+      } else if (role === 'waypoint') {
+        window.addWaypointFromPin(window.tempRouteTarget.name, window.tempRouteTarget.lat, window.tempRouteTarget.lng);
+      }
+      document.getElementById('routeRoleModal').style.display = 'none';
+      alert(`「${window.tempRouteTarget.name}」を設定しました。`);
+    };
+
     window.showAddCategoryModal = function() {
       document.getElementById('catAddInput').value = '';
       document.getElementById('catAddModal').style.display = 'flex';
@@ -477,7 +509,6 @@
       document.getElementById('catAddModal').style.display = 'none';
     };
     
-    // 修正: カテゴリ削除をカスタムモーダル化
     window.showDeleteCategoryModal = function() {
       const select = document.getElementById("categoryFilter");
       const categoryName = select.value;
@@ -522,7 +553,6 @@
       document.getElementById("pinSelectorOverlay").style.display = "flex";
     }
 
-    // 指定座標にピンを立てる共通関数
     window.addPinToMap = function(lat, lng, categoryName, memoName) {
       const point = { lat: lat, lng: lng, memo: memoName || "", image: "", category: categoryName };
       updateCurrentLocationMarker(new google.maps.LatLng(lat, lng)); map.setCenter({lat, lng});
@@ -734,14 +764,11 @@
         try {
           document.execCommand('copy');
           alert("テキストをコピーしました！LINEやメールに貼り付けて共有してください。");
-        } catch (err) {
-          // iPhoneバグ回避のためここは最低限にする
-        }
+        } catch (err) {}
         document.body.removeChild(textArea);
       }
     }
 
-    // 修正: おまかせ・手動ルートの保存もカスタムモーダルを使用
     window.saveSpecificRoute = function(index) {
       let data = window.tempRoutes[index];
       if (!data) return;
@@ -841,7 +868,6 @@
       }
     };
     
-    // 修正: カスタム入力画面で「保存する」を押したときの共通処理
     window.confirmRouteSave = function() {
         let name = document.getElementById('routeSaveNameInput').value.trim();
         let routes = [];
@@ -927,15 +953,6 @@
     function showInputForm(point, infoWindow, marker, isNew = false) {
       const container = document.createElement("div");
       const catOptions = window.categories.map(c => `<option value="${c.name}" ${c.name === point.category ? "selected" : ""}>${c.name}</option>`).join("");
-      
-      let routeSetHtml = "";
-      if (!isNew && currentMode !== "edit") {
-        routeSetHtml = `<div style="display:flex; gap:5px; margin-top:8px; padding-top:8px; border-top:1px dashed #ccc;">
-          <button style="flex:1; padding:6px; font-size:11px; background:#007bff; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualOriginInput').value='${point.memo || point.category} (${point.lat.toFixed(4)},${point.lng.toFixed(4)})'; closeActiveInfoWindow();">🛫 出発</button>
-          <button style="flex:1; padding:6px; font-size:11px; background:#17a2b8; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="window.addWaypointFromPin('${point.memo || point.category}', ${point.lat}, ${point.lng}); closeActiveInfoWindow();">🚗 経由</button>
-          <button style="flex:1; padding:6px; font-size:11px; background:#28a745; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('manualDestInput').value='${point.memo || point.category} (${point.lat.toFixed(4)},${point.lng.toFixed(4)})'; closeActiveInfoWindow();">🏁 目的</button>
-        </div>`;
-      }
 
       container.innerHTML = `
         <div style="margin-bottom: 10px; display: flex; gap: 5px; align-items: center;">
@@ -943,8 +960,7 @@
         </div>
         <input type="text" id="editMemo" value="${point.memo || ""}" placeholder="メモを入力" style="width:100%; padding:12px; margin-bottom:10px; font-size:18px; font-weight:bold; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
         <button id="saveBtn" style="width:100%; padding:12px; margin-bottom:8px; font-size:16px; font-weight:bold; color:#fff; background-color:#4CAF50; border:none; border-radius:6px; cursor:pointer;">保存する</button>
-        ${!isNew ? `<button id="deleteBtn" class="danger" style="width:100%; padding:12px; margin-bottom:0; font-size:16px; font-weight:bold; color:#fff; background-color:#dc3545; border:none; border-radius:6px; cursor:pointer;">削除</button>` : ""}
-        ${routeSetHtml}`;
+        ${!isNew ? `<button id="deleteBtn" class="danger" style="width:100%; padding:12px; margin-bottom:0; font-size:16px; font-weight:bold; color:#fff; background-color:#dc3545; border:none; border-radius:6px; cursor:pointer;">削除</button>` : ""}`;
         
       infoWindow.setContent(container); infoWindow.open(map, marker);
       google.maps.event.addListenerOnce(infoWindow, "domready", () => {
@@ -959,7 +975,6 @@
           closeActiveInfoWindow(); tempMarker = null; 
         };
         if (!isNew) { 
-          // 修正: ピン削除もカスタムモーダルを使用
           document.getElementById("deleteBtn").onclick = () => { 
             window.pinToDelete = marker;
             document.getElementById('pinDelModal').style.display = 'flex';
@@ -968,7 +983,6 @@
       });
     }
 
-    // ピン削除の実行処理
     window.confirmDeletePin = function() {
       if (window.pinToDelete) {
         spotMemos = spotMemos.filter(m => m.marker !== window.pinToDelete);
